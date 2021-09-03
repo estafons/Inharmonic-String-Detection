@@ -13,8 +13,8 @@ class Partial():
 
 class ToolBox():
     """here all tools developed are stored. designed this way so 
-    it can be expanded and incorporated other methods to detect 
-    partials compute beta coefficient etc"""
+    it can be expanded and incorporate other methods for partial detection 
+    or computing beta coefficient etc. For example usage/alterations see bellow"""
 
     def __init__(self, partial_tracking_func, inharmonicity_compute_func, partial_func_args, inharmonic_func_args):
         self.partial_func = partial_tracking_func
@@ -24,8 +24,9 @@ class ToolBox():
     
 class NoteInstance():
     """move to other level of package"""
-    def __init__(self, fundamental, audio ,ToolBoxObj:ToolBox ,sampling_rate):
+    def __init__(self, fundamental, onset, audio ,ToolBoxObj:ToolBox ,sampling_rate):
         self.fundamental = fundamental
+        self.onset = onset
         self.audio = audio
         self.sampling_rate = sampling_rate
         self.fft=np.fft.fft(self.audio,n=2**18)
@@ -35,7 +36,8 @@ class NoteInstance():
         ToolBoxObj.inharmonic_func(self, ToolBoxObj.inharmonic_func_args)
 
 def compute_partials(note_instance, partial_func_args):
-    """compute up to no_of_partials partials for self. Freq_deviate is the length of window arround k*f0 that the partials are tracked with highest peak"""
+    """compute up to no_of_partials partials for note instance. 
+    Freq_deviate is the length of window arround k*f0 that the partials are tracked with highest peak."""
     no_of_partials = partial_func_args[0]
     freq_diviate = partial_func_args[1]
     diviate = round(freq_diviate/(note_instance.sampling_rate/note_instance.fft.size))
