@@ -6,6 +6,8 @@ from scipy.optimize import least_squares
 import librosa
 import os
 
+import constants
+
 class Partial():
     def __init__(self, frequency, order):
         self.frequency = frequency
@@ -28,12 +30,19 @@ class NoteInstance():
         self.fundamental = fundamental
         self.onset = onset
         self.audio = audio
-        self.sampling_rate = sampling_rate
-        self.fft=np.fft.fft(self.audio,n=2**18)
-        self.frequencies=np.fft.fftfreq(2**18,1/self.sampling_rate)
+        self.sampling_rate = constants.sampling_rate
+        self.fft=np.fft.fft(self.audio,n = constants.size_of_fft)
+        self.frequencies=np.fft.fftfreq(constants.size_of_fft,1/self.sampling_rate)
+        #self.recompute_fundamental() # delete if not needed
         self.partials = []
         ToolBoxObj.partial_func(self, ToolBoxObj.partial_func_args) # if a different partial tracking is incorporated keep second function arguement, else return beta from second function and change entirely
         ToolBoxObj.inharmonic_func(self, ToolBoxObj.inharmonic_func_args)
+
+    def recompute_fundamental(self): # delete if not needed
+        filtered = zero_out(self.fft, self.fundamental, 10)
+        peaks, _  =scipy.signal.find_peaks(np.abs(filtered),distance=100000) # better way to write this?
+        max_peak = self.frequencies[peaks[0]]
+        self.fundamental = max_peak
 
 def compute_partials(note_instance, partial_func_args):
     """compute up to no_of_partials partials for note instance. 
@@ -42,7 +51,7 @@ def compute_partials(note_instance, partial_func_args):
     freq_diviate = partial_func_args[1]
     diviate = round(freq_diviate/(note_instance.sampling_rate/note_instance.fft.size))
     for i in range(2,no_of_partials):
-        filtered = zero_out(note_instance.fft, i*note_instance.fundamental, freq_diviate)
+        filtered = zero_out(note_instance.fft, i*note_instance.fundamental, diviate)
         peaks, _  =scipy.signal.find_peaks(np.abs(filtered),distance=100000) # better way to write this?
         max_peak = note_instance.frequencies[peaks[0]]
         note_instance.partials.append(Partial(max_peak, i))
@@ -82,8 +91,8 @@ def zero_out(fft, center_freq, window_length):
     """return amplitude values of fft arround a given frequency when outside window amplitude is zeroed out"""
     sz = fft.size
     x = np.zeros(sz,dtype=np.complex64)
-    temp = (fft)
-    dom_freq_bin = int(round(center_freq*sz/44100))
+    temp = fft
+    dom_freq_bin = int(round(center_freq*sz/constants.sampling_rate))
     window_length = int(window_length)
     for i in range(dom_freq_bin-window_length,dom_freq_bin+window_length):
         x[i] = temp[i]**2
@@ -121,7 +130,7 @@ def wrapper_func(fundamental, audio, sampling_rate):
 def main():
     name = os.path.join('C:\\','Users','stefa','Documents','guit_workspace','crop50',
                         '00_BN2-131-B_comp_outputstring1n8.wav')
-    audio, sampling_rate = librosa.load(name, 44100)
+    audio, sampling_rate = librosa.load(name, constants.sampling_rate)
     fundamental = 146.83
     wrapper_func(fundamental, audio, sampling_rate)
 

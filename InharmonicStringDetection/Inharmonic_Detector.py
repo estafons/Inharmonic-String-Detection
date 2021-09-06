@@ -15,21 +15,30 @@ class InharmonicDetector():
 
 def DetectString(NoteObj : NoteInstance, StringBetasObj : StringBetas, betafunc):
     """ betafunc is the function to simulate beta. As input takes the combination and the beta array."""
-    combs = determine_combinations(constants.tuning, constants.no_of_frets, NoteObj.fundamental)
-    betas = [(abs(betafunc(comb, StringBetasObj) - NoteObj.beta), comb) for comb in combs]
-    NoteObj.string = min(betas, key = lambda a: a[0])[1][0] # returns comb where 0 arguement is string
-        
+    combs = determine_combinations(NoteObj.fundamental)
+    if NoteObj.beta < 10**(-7):
+        NoteObj.string = -1
+    else:
+        betas = [(abs(betafunc(comb, StringBetasObj) - NoteObj.beta), comb) for comb in combs]
+        NoteObj.string = min(betas, key = lambda a: a[0])[1][0] # returns comb where 0 arguement is string
 
 def hz_to_midi(fundamental):
     return round(12*math.log(fundamental/440,2)+69)
 
-def determine_combinations(tuning, no_of_frets, fundamental):
+def midi_to_hz(midi):
+    return 440*2**((midi-69)/12)
+
+def determine_combinations(fundamental):
     res = []
     midi_note = hz_to_midi(fundamental)
-    fretboard = [range(x, x + no_of_frets) for x in tuning]
-    for index, x in enumerate fretboard:
+    fretboard = [range(x, x + constants.no_of_frets) for x in constants.tuning]
+    for index, x in enumerate(fretboard):
         if midi_note in list(x):
-            res.append((index, midi_note-tuning[index])) # index is string, second is fret
+            res.append((index, midi_note-constants.tuning[index])) # index is string, second is fret
+    try:
+        assert(res == []), "No combinations found"
+    except AssertionError:
+        pass
     return res
 
 def betafunc(comb, StringBetasObj : StringBetas):
