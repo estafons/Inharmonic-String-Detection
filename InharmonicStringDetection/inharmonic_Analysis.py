@@ -43,6 +43,7 @@ class NoteInstance():
         peaks, _  =scipy.signal.find_peaks(np.abs(filtered),distance=100000) # better way to write this?
         max_peak = self.frequencies[peaks[0]]
         self.fundamental = max_peak
+        return max_peak
 
 def compute_partials(note_instance, partial_func_args):
     """compute up to no_of_partials partials for note instance. 
@@ -123,7 +124,7 @@ def example_inharmonicity_computation(note_instance, inharmonic_func_args):
 def wrapper_func(fundamental, audio, sampling_rate):
     
     ToolBoxObj = ToolBox(compute_partials, compute_inharmonicity, [14, fundamental/2], [])
-    note_instance = NoteInstance(fundamental, audio, ToolBoxObj, sampling_rate)
+    note_instance = NoteInstance(fundamental, 0, audio, ToolBoxObj, sampling_rate)
     print(note_instance.beta, [x.frequency for x in note_instance.partials])
 
 

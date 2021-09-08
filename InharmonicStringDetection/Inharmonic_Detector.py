@@ -1,12 +1,11 @@
 
 import math
 
+from GuitarTrain import *
 import constants
 from inharmonic_Analysis import NoteInstance
 
-class StringBetas():
-    def __init__(self, barray):
-        self.betas_array = barray #0->string 1->fret
+    
 
 class InharmonicDetector():
     def __init__(self, NoteObj : NoteInstance, StringBetasObj : StringBetas):

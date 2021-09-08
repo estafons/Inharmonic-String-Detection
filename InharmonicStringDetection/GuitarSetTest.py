@@ -1,5 +1,5 @@
 import jams
-from pathlib import PurePath, Path
+from pathlib import Path
 import matplotlib.pyplot as plt
 import itertools
 
@@ -23,7 +23,9 @@ class ConfusionMatrix():
     def add_to_matrix(self, tab_as_list, annotations : Annotations):
         for tab_instance, annos_instance in zip(tab_as_list, annotations.tablature.tablature):
             self.matrix[annos_instance.string][tab_instance.string] += 1
-
+    
+    def get_accuracy(self):
+        return np.trace(self.matrix)/np.sum(self.matrix)
     def plot_confusion_matrix(self,
                             normalize=False,
                             title='Confusion matrix',
@@ -126,11 +128,9 @@ def testGuitarSet():
         InhConfusionMatrixObj.add_to_matrix(track_instance.tablature.tablature, annotations)
         tab, g = genetic.genetic(track_instance.tablature)
         GenConfusionMatrixObj.add_to_matrix(tab, annotations)
-    plot_confusion_matrix(InhConfusionMatrixObj.matrix, InhConfusionMatrixObj.x_classes, 
-                            InhConfusionMatrixObj.y_classes, normalize= True, 
-                                title = 'Inharmonic Confusion Matrix')
-    plot_confusion_matrix(GenConfusionMatrixObj.matrix, GenConfusionMatrixObj.x_classes, 
-                            GenConfusionMatrixObj.y_classes, normalize= True, 
-                                title = 'Genetic Confusion Matrix')
+    InhConfusionMatrixObj.plot_confusion_matrix(normalize= True, 
+                                title = 'Inharmonic Confusion Matrix' +str(round(InhConfusionMatrixObj.get_accuracy(),3)))
+    GenConfusionMatrixObj.plot_confusion_matrix(normalize= True, 
+                               title = 'Genetic Confusion Matrix'+str(round(GenConfusionMatrixObj.get_accuracy(),3)))
 
 testGuitarSet()
