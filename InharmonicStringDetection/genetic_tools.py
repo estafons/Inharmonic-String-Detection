@@ -30,7 +30,7 @@ def get_random_tablature(tablature : Tablature):
     """make a copy of the tablature under inspection and generate new random tablatures"""
     new_tab = deepcopy(tablature)
     for tab_instance, new_tab_instance in zip(tablature.tablature, new_tab.tablature):
-        if tab_instance.string == -1:
+        if tab_instance.string == 6:
             string, fret = random.choice(determine_combinations(tab_instance.fundamental))
             new_tab_instance.string, new_tab_instance.fret = string, fret
         elif constants.INIT_MUTATION_RATE > random.random():
@@ -62,7 +62,7 @@ def evaluate_similarity(genetic_tablature : Tablature, inharmonic_tablature : Ta
     cnt = 0
     inconclusive = 0
     for genetic_instance, inharmonic_instance in zip(genetic_tablature, inharmonic_tablature):
-        if inharmonic_instance.string == -1:
+        if inharmonic_instance.string == 6:
             inconclusive += 1
         elif genetic_instance.string == inharmonic_instance.string:
             cnt += similarity_cnt_func(cnt_args)

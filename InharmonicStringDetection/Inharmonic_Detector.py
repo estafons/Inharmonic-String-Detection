@@ -17,7 +17,7 @@ def DetectString(NoteObj : NoteInstance, StringBetasObj : StringBetas, betafunc)
     """ betafunc is the function to simulate beta. As input takes the combination and the beta array."""
     combs = determine_combinations(NoteObj.fundamental)
     if NoteObj.beta < 10**(-7):
-        NoteObj.string = -1
+        NoteObj.string = 6
     else:
         betas = [(abs(betafunc(comb, StringBetasObj) - NoteObj.beta), comb) for comb in combs]
         NoteObj.string = min(betas, key = lambda a: a[0])[1][0] # returns comb where 0 arguement is string
@@ -45,7 +45,7 @@ def betafunc(comb, StringBetasObj : StringBetas):
     beta = StringBetasObj.betas_array[comb[0]][0] * 2**(comb[1]/6)
     return beta
 
-#----------------lambda beta func example for exp model
+#----------------beta func example for exp model
 def expfunc(comb, StringBetasObj : StringBetas):
     fret1, fret2 = 0, 12
     b2, b1 = StringBetasObj.betas_array[fret2], StringBetasObj.betas_array[fret1]

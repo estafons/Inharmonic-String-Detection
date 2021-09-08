@@ -32,7 +32,8 @@ class TrackInstance():
 class TabInstance():
     def __init__(self, tup, note_audio):
         self.onset, self.fundamental, self.string = tup
-        self.fret = Inharmonic_Detector.hz_to_midi(self.fundamental) - constants.tuning[self.string]
+        if self.string in list(range(0,5)):
+            self.fret = Inharmonic_Detector.hz_to_midi(self.fundamental) - constants.tuning[self.string]
         self.note_audio = note_audio
 
 class Annotations():

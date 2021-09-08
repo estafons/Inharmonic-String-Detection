@@ -1,3 +1,10 @@
+
+DATASET = 'mix'
+TRACK_PATH = "C:\\Users/stefa/Documents/guit_workspace/single_notes/"
+RESULT_PATH = "C:\\Users/stefa/Documents/guit_workspace/single_notes/results/"
+ANNOS_PATH = "C:\\Users/stefa/Documents/guit_workspace/single_notes/"
+DATASET_NAMES = "C:\\Users/stefa/Documents/guit_workspace/single_notes/"
+LISTOFTRACKSFILE = "names.txt"
 tuning = [40, 45, 50, 55, 59, 64] # tuning of guitar   
 no_of_frets = 20 # number of frets of guitar accounted
 beta_dict = {0: 0.00012423557794641988, 1: 9.720145237288956*10**(-5), 2: 5.3187112359074767*10**(-5),
@@ -6,7 +13,7 @@ barray = [[0 if x != 0 else beta_dict[i] for x in range(0,17)] for i in range(0,
 sampling_rate = 44100
 size_of_fft = 2**18
 crop_win = 0.06 #size of in miliseconds of croped note instances
-
+NO_OF_PARTIALS = 14
 #genetic arguements
 INITIAL_POP = 40000
 INIT_MUTATION_RATE = 0.3 # mutation rate per note on initial population
