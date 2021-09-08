@@ -9,7 +9,7 @@ The main goal of the thesis is to introduce a modular approach towards guitar ta
 The goal of this project is to simultaneously present the results and conclusions drawn from my thesis, as well as provide some basic adjustable methods for later experiments in the field, especially concerning guitar string detection and inharmonicity computation. 
 
 ## Necessary Libraries
-See requirements.txt
+**See requirements.txt** Python version == 3.9.6
 More info on vital libraries for this project
 **JAMS** "A JSON Annotated Music Specification for Reproducible MIR Research." (https://jams.readthedocs.io/en/)
 **DEEP** "DEAP is a novel evolutionary computation framework for rapid prototyping and testing of ideas." (https://github.com/DEAP/deap)
