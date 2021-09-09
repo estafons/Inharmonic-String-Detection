@@ -3,11 +3,14 @@ tuning = [40, 45, 50, 55, 59, 64] # tuning of guitar
 no_of_frets = 20 # number of frets of guitar accounted
 beta_dict = {0: 1.84196264*10**(-4), 1: 1.13998209*10**(-4), 2: 5.61036666*10**(-5),
                                  3: 3.53238139*10**(-5), 4: 6.07431574*10**(-5), 5: 3.12346527*10**(-5)} # beta dictionary for the open fret based on the GuitarTrain script
+beta_dict = {0: 1.79747163*10**(-4), 1: 1.23713369*10**(-4), 2: 5.92775513*10**(-5),
+                                 3: 3.82823463*10**(-5), 4: 7.63428658*10**(-5), 5: 2.94933906*10**(-5)}
+
 barray = [[0 if x != 0 else beta_dict[i] for x in range(0,17)] for i in range(0,6)] # array of betas as trained
 sampling_rate = 44100
 size_of_fft = 2**18
 crop_win = 0.06 #size of in miliseconds of croped note instances
-NO_OF_PARTIALS = 14
+NO_OF_PARTIALS = 18
 
 #genetic algorithm arguements
 INITIAL_POP = 40000
@@ -34,7 +37,7 @@ TRAIN_FRETS = [0]
 
 
 # Paths and miscelaneous
-DATASET = 'mix'
+DATASET = 'mix' # mic for microphone mix for pickup
 TRACK_PATH = "C:\\Users/stefa/Documents/guit_workspace/single_notes/" # Path where tracks are stored
 TRAINING_PATH = "C:\\Users/stefa/Documents/guit_workspace/crops/" # Path were training data are stored
 RESULT_PATH = "C:\\Users/stefa/Documents/guit_workspace/single_notes/results/" # Path were results should be stored

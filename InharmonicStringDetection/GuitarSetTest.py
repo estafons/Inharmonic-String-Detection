@@ -116,6 +116,7 @@ def predictTabThesis(track_instance : TrackInstance, annotation : Annotations):
 def testGuitarSet():
     """ function that runs tests on the jams files mentioned in the given file 
     and plots the confusion matrixes for both the genetic and inharmonic results."""
+    print(constants.NO_OF_PARTIALS)
     InhConfusionMatrixObj = ConfusionMatrix((6,7), inconclusive = True)
     GenConfusionMatrixObj = ConfusionMatrix((6,6), inconclusive = False)
     with open(Path(constants.DATASET_NAMES + constants.LISTOFTRACKSFILE)) as n:
@@ -129,8 +130,8 @@ def testGuitarSet():
         tab, g = genetic.genetic(track_instance.tablature)
         GenConfusionMatrixObj.add_to_matrix(tab, annotations)
     InhConfusionMatrixObj.plot_confusion_matrix(normalize= True, 
-                                title = 'Inharmonic Confusion Matrix' +str(round(InhConfusionMatrixObj.get_accuracy(),3)))
+                                title = str(constants.NO_OF_PARTIALS) + 'Inharmonic Confusion Matrix' +str(round(InhConfusionMatrixObj.get_accuracy(),3)))
     GenConfusionMatrixObj.plot_confusion_matrix(normalize= True, 
-                               title = 'Genetic Confusion Matrix'+str(round(GenConfusionMatrixObj.get_accuracy(),3)))
+                              title = 'Genetic Confusion Matrix'+str(round(GenConfusionMatrixObj.get_accuracy(),3)))
 
 testGuitarSet()

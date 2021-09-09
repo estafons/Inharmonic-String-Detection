@@ -55,3 +55,4 @@ def GuitarSetTrainWrapper():
     strBetaObj.list_to_medians()
     print(strBetaObj.betas_array)
     return strBetaObj
+GuitarSetTrainWrapper()
