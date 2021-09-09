@@ -35,8 +35,8 @@ TRAIN_FRETS = [0]
 
 # Paths and miscelaneous
 DATASET = 'mix'
-TRACK_PATH = "data/single_notes/" # Path where tracks are stored
-TRAINING_PATH = "data/crops/" # Path were training data are stored
+TRACK_PATH = "data/audio/" # Path where tracks are stored
+TRAINING_PATH = "data/train/" # Path were training data are stored
 RESULT_PATH = "results/" # Path were results should be stored
 ANNOS_PATH = "data/annos/" # Path were annotations are stored
 LISTOFTRACKSFILE = "names.txt" # txt file that contains the list of names of the tracks to be tested (GuitarSet)

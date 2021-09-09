@@ -1,8 +1,5 @@
-Download from Guitarset dataset (link) 
-annotations.zip 
-and extract it to ./data/annos
+Download from Guitarset dataset (https://zenodo.org/record/3371780) 
+1) ```annotations.zip``` and extract all .jams to data/annos.
+2) ```audio_mono-mic.zip```, ``` audio_mono-pickup_mix.zip``` and extract all .wavs to data/audio.
 
-and audio_mono-mic.zip,  audio_mono-pickup_mix.zip and extract them to data/audio.
-
-and unz
 
