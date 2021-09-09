@@ -1,5 +1,6 @@
 Create this directory tree to store your data and results:
 
+```
 .
 ├── constants.py
 ├── data
@@ -7,7 +8,7 @@ Create this directory tree to store your data and results:
 │   ├── audio
 │   └── train
 └── results
-
+```
 
 Download from GuitarSet dataset (https://zenodo.org/record/3371780):
 1) ```annotations.zip``` and extract all .jams to data/annos.
