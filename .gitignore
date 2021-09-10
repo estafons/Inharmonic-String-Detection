@@ -1,5 +1,5 @@
 tests.py
-constants.ini
 *.jams
 *.pyc
 desktop.ini
+.vscode

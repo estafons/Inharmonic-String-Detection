@@ -1,10 +1,9 @@
 import configparser
 from pathlib import Path
-config_path = Path("C:\\Users/stefa/Documents//Inharmonic String Detection/InharmonicStringDetection/constants.ini")
 class Constants():
-    def __init__(self, config_name = config_path):
+    def __init__(self, config_name):
         config = configparser.ConfigParser()
-        config.read(config_path)
+        config.read(config_name)
         #PATHS
         self.TRACK_PATH = config.get('GUITARSET_PATHS', 'TRACK_PATH')
         self.TRAINING_PATH = config.get('GUITARSET_PATHS', 'TRAINING_PATH')

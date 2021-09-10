@@ -2,7 +2,14 @@ import jams
 from pathlib import Path
 import matplotlib.pyplot as plt
 import itertools
+import numpy as np
 import configparser
+import os, sys
+import argparse
+
+BASE_PATH = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+cur_path = Path(BASE_PATH + '/src/InharmonicStringDetection')
+sys.path.append(str(cur_path))
 
 from track_class import *
 from Inharmonic_Detector import *
@@ -10,10 +17,18 @@ from inharmonic_Analysis import *
 from constants_parser import Constants
 import genetic
 
-#input from user
-config_path = Path("C:\\Users/stefa/Documents//Inharmonic String Detection/InharmonicStringDetection/constants.ini")
+parser = argparse.ArgumentParser()
+parser.add_argument('config_path', type=str)
+args = parser.parse_args()
 
-constants = Constants()
+#input from user
+#config_path = Path("C:\\Users/stefa/Documents//Inharmonic String Detection/InharmonicStringDetection/constants.ini")
+try:
+    constants = Constants(args.config_path)
+except:
+    raise RuntimeError(('could not open ' + str(args.config_path) + ', does not exist or given' +
+                 'in wrong format try again as C:\\Users/user/Documents/path_to_config.ini'))
+                 
 beta_dict = {0: 1.84196264*10**(-4), 1: 1.13998209*10**(-4), 2: 5.61036666*10**(-5),
                                  3: 3.53238139*10**(-5), 4: 6.07431574*10**(-5), 5: 3.12346527*10**(-5)} # beta dictionary for the open fret based on the GuitarTrain script
 beta_dict = {0: 1.79747163*10**(-4), 1: 1.23713369*10**(-4), 2: 5.92775513*10**(-5),

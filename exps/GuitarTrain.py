@@ -4,6 +4,10 @@ from pathlib import Path
 import glob
 import librosa
 
+BASE_PATH = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+cur_path = Path(BASE_PATH + '/src/InharmonicStringDetection')
+sys.path.append(str(cur_path))
+
 from inharmonic_Analysis import *
 from Inharmonic_Detector import StringBetas
 from constants_parser import Constants
