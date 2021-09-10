@@ -28,7 +28,7 @@ try:
 except:
     raise RuntimeError(('could not open ' + str(args.config_path) + ', does not exist or given' +
                  'in wrong format try again as C:\\Users/user/Documents/path_to_config.ini'))
-                 
+
 beta_dict = {0: 1.84196264*10**(-4), 1: 1.13998209*10**(-4), 2: 5.61036666*10**(-5),
                                  3: 3.53238139*10**(-5), 4: 6.07431574*10**(-5), 5: 3.12346527*10**(-5)} # beta dictionary for the open fret based on the GuitarTrain script
 beta_dict = {0: 1.79747163*10**(-4), 1: 1.23713369*10**(-4), 2: 5.92775513*10**(-5),
@@ -147,7 +147,7 @@ def testGuitarSet(constants : Constants):
     GenConfusionMatrixObj = ConfusionMatrix((6,6), inconclusive = False)
     with open(constants.DATASET_NAMES_PATH + constants.LISTOFTRACKSFILE) as n:
         lines = n.readlines()
-    for name in lines[:3]:
+    for name in lines:
         print(name)
         name = name.replace('\n', '')
         track_name = name[:-5] + '_' + constants.DATASET +'.wav'
@@ -162,4 +162,4 @@ def testGuitarSet(constants : Constants):
     #                          title = 'Genetic Confusion Matrix'+str(round(GenConfusionMatrixObj.get_accuracy(),3)))
 
 
-testGuitarSet(constants)
+#testGuitarSet(constants)

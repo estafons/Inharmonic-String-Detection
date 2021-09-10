@@ -3,3 +3,5 @@ tests.py
 *.pyc
 desktop.ini
 .vscode
+OutputToMIDI.py
+*.mid

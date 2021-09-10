@@ -36,7 +36,6 @@ def genetic(inharmonic_tablature : Tablature, constants : Constants):
     toolbox.register("map", map) # windows workarround. Cant use multiprocessing at the moment
     #create initial population
     pop = toolbox.population()
-    #pop.append(toolbox.cor_individual())
     fitnesses = list(toolbox.map(toolbox.evaluate, pop))
     for ind, fit in zip(pop, fitnesses):
         ind.fitness.values = fit
