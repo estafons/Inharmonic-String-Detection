@@ -1,8 +1,7 @@
 tests.py
-constants.ini
-*.wav
 *.jams
 *.pyc
+.vscode
 OutputToMIDI.py
 *.mid
-.vscode/
+desktop.ini
