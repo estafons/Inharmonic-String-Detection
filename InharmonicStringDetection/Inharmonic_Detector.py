@@ -1,10 +1,13 @@
 
 import math
 
-from GuitarTrain import *
-import constants
+from constants_parser import Constants
 from inharmonic_Analysis import NoteInstance
 
+class StringBetas():
+    def __init__(self, barray, constants : Constants):
+        self.betas_array = barray #0->string 1->fret
+        self.betas_list_array = [[[] for x in range(0,constants.no_of_frets)] for i in range(0,len(constants.tuning))]
     
 
 class InharmonicDetector():
@@ -12,9 +15,9 @@ class InharmonicDetector():
         self.StringBetasObj = StringBetasObj
 
 
-def DetectString(NoteObj : NoteInstance, StringBetasObj : StringBetas, betafunc):
+def DetectString(NoteObj : NoteInstance, StringBetasObj : StringBetas, betafunc, constants : Constants):
     """ betafunc is the function to simulate beta. As input takes the combination and the beta array."""
-    combs = determine_combinations(NoteObj.fundamental)
+    combs = determine_combinations(NoteObj.fundamental, constants)
     if NoteObj.beta < 10**(-7):
         NoteObj.string = 6
     else:
@@ -27,7 +30,7 @@ def hz_to_midi(fundamental):
 def midi_to_hz(midi):
     return 440*2**((midi-69)/12)
 
-def determine_combinations(fundamental):
+def determine_combinations(fundamental, constants):
     res = []
     midi_note = hz_to_midi(fundamental)
     fretboard = [range(x, x + constants.no_of_frets) for x in constants.tuning]

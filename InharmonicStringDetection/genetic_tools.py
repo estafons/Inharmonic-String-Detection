@@ -1,3 +1,4 @@
+from constants_parser import Constants
 from random import choice
 from copy import deepcopy
 import random
@@ -6,7 +7,7 @@ import math
 
 from Inharmonic_Detector import determine_combinations
 from track_class import *
-from constants import *
+import constants_parser
 
 def pairwise(iterable):
     "s -> (s0,s1), (s1,s2), (s2, s3), ..."
@@ -21,33 +22,33 @@ def pairwisen(iterable, n):
             next(x[i], None)
     return zip(*x)
 
-def get_random_position(string, fret):
+def get_random_position(string, fret, constants : Constants):
     """returns a random possible position that corresponds to a given fundamental"""
     possible_positions = [(s, f) for s in range(0,6) for f in range(0, constants.no_of_frets) if ((constants.tuning[s] + f) == (constants.tuning[string] + fret))]
     return choice(possible_positions)
 
-def get_random_tablature(tablature : Tablature):
+def get_random_tablature(tablature : Tablature, constants : Constants):
     """make a copy of the tablature under inspection and generate new random tablatures"""
     new_tab = deepcopy(tablature)
     for tab_instance, new_tab_instance in zip(tablature.tablature, new_tab.tablature):
         if tab_instance.string == 6:
-            string, fret = random.choice(determine_combinations(tab_instance.fundamental))
+            string, fret = random.choice(determine_combinations(tab_instance.fundamental, constants))
             new_tab_instance.string, new_tab_instance.fret = string, fret
         elif constants.INIT_MUTATION_RATE > random.random():
-            string, fret = get_random_position(tab_instance.string, tab_instance.fret)
+            string, fret = get_random_position(tab_instance.string, tab_instance.fret, constants)
             new_tab_instance.string, new_tab_instance.fret = string, fret
     return new_tab
 
-def mutate(tablature : Tablature):
+def mutate(tablature : Tablature, constants : Constants):
     for tab_instance in tablature:
         if constants.MUTPN < random.random():
-            string, fret = get_random_position(tab_instance.string, tab_instance.fret)
+            string, fret = get_random_position(tab_instance.string, tab_instance.fret, constants)
             tab_instance.string = string
             tab_instance.fret = fret
     return tablature
 
-def evaluate(genetic_tablature : Tablature, inharmonic_tablature : Tablature):
-    weight = constants.CONSTRAINTS_COF*evaluate_constraints(genetic_tablature) - constants.SIMILARITY_COF*evaluate_similarity(genetic_tablature, inharmonic_tablature)
+def evaluate(genetic_tablature : Tablature, inharmonic_tablature : Tablature, constants : Constants):
+    weight = constants.CONSTRAINTS_COF*evaluate_constraints(genetic_tablature, constants) - constants.SIMILARITY_COF*evaluate_similarity(genetic_tablature, inharmonic_tablature, constants)
     return weight, 0
 
 
@@ -55,7 +56,7 @@ def evaluate(genetic_tablature : Tablature, inharmonic_tablature : Tablature):
 def similarity_cnt_basic(arg = []):
     return 1
 
-def evaluate_similarity(genetic_tablature : Tablature, inharmonic_tablature : Tablature, similarity_cnt_func = similarity_cnt_basic, cnt_args = []):
+def evaluate_similarity(genetic_tablature : Tablature, inharmonic_tablature : Tablature, constants : Constants, similarity_cnt_func = similarity_cnt_basic, cnt_args = []):
     """evaluate similarity with inharmonic based predictions. Basic functionality counts +1
      for every hit. Function can be changed if required. For example can take into 
      consideration certainty values from inharmonic analysis (cnt+= inharmonic_instance.certainty)."""
@@ -69,10 +70,10 @@ def evaluate_similarity(genetic_tablature : Tablature, inharmonic_tablature : Ta
     return cnt/(len(genetic_tablature) - inconclusive)
 
 
-def evaluate_constraints(genetic_tablature):
+def evaluate_constraints(genetic_tablature, constants : Constants):
 
     open_f = open_function(genetic_tablature)
-    avg = avg_function(genetic_tablature)
+    avg = avg_function(genetic_tablature, constants)
     string_f = string_function(genetic_tablature)
     fret_f = fret_function(genetic_tablature)
     depress = depress_function(genetic_tablature)
@@ -107,7 +108,7 @@ def open_function(tablature : Tablature):
             open -= 1
     return open
 
-def getIndex_limits(tup):
+def getIndex_limits(tup, constants : Constants):
     """returns indexes that are within the time_limit set on constants file"""
     note_inspected = round((len(tup)-1)/2)
     up_index = len(tup) - 1
@@ -126,7 +127,7 @@ def getIndex_limits(tup):
             continue
     return down_index, up_index
 
-def avg_function(tablature : Tablature):
+def avg_function(tablature : Tablature, constants : Constants):
     """computes difference between average position (fret,string) and current position 
     for a given time_limit and length notewise. 
     For example if time_limit is 100ms and avg_length 3 it computes 
@@ -134,10 +135,8 @@ def avg_function(tablature : Tablature):
     cnt = 0
     for t in pairwisen(tablature, constants.avg_length):
         note_inspected = round(len(t)/2)
-        down_index, up_index = getIndex_limits(t)
+        down_index, up_index = getIndex_limits(t, constants)
         mean_fret = sum([x.fret for x in t[down_index:up_index]])/(up_index-down_index + 1)
         mean_string = sum([x.string for x in t[down_index:up_index]])/(up_index-down_index + 1)
         cnt += math.sqrt((mean_fret-t[note_inspected].fret)**2+(mean_string-t[note_inspected].string)**2)
     return cnt
-
-tab = Tablature([(0.1, 110, 0),(0.1, 110, 1),(0.1, 110, 1), (0.1, 110, 1),(0.1, 110, 1),(0.1, 110, 1),(0.1, 110, 1),(0.1, 110, 1),(0.1, 110, 1),(0.1, 110, 1),(0.1, 110, 1),(0.1, 110, 1)], [], True)

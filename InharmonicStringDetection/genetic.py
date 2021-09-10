@@ -1,11 +1,12 @@
 from deap import base, creator, tools
 from genetic_tools import *
+from constants_parser import Constants
 
 def delete_extra_info(tablature : Tablature):
     for tab_instance in tablature.tablature:
         tab_instance.note_audio = []
 
-def genetic(inharmonic_tablature : Tablature):
+def genetic(inharmonic_tablature : Tablature, constants : Constants):
     NGEN = constants.NGEN
     CXPB = constants.CXPB
     MUTPB = constants.MUTPB
@@ -20,11 +21,11 @@ def genetic(inharmonic_tablature : Tablature):
     toolbox = base.Toolbox()
 
 
-    toolbox.register("random_tab", get_random_tablature, inharmonic_tablature)
+    toolbox.register("random_tab", get_random_tablature, inharmonic_tablature, constants)
     toolbox.register("individual", tools.initIterate, creator.Individual,
                         toolbox.random_tab)
 
-    toolbox.register("evaluate", evaluate, inharmonic_tablature = inharmonic_tablature)
+    toolbox.register("evaluate", evaluate, inharmonic_tablature = inharmonic_tablature, constants = constants)
 
     toolbox.register("population", tools.initRepeat, list, toolbox.individual, constants.INITIAL_POP)
     toolbox.register("mate", tools.cxTwoPoint)
@@ -56,7 +57,7 @@ def genetic(inharmonic_tablature : Tablature):
         for mutant in offspring:
             if random.random() < MUTPB:
 
-                toolbox.mutate(mutant)
+                toolbox.mutate(mutant, constants)
                 del mutant.fitness.values
 
         # Evaluate the individuals with an invalid fitness

@@ -5,24 +5,20 @@ import glob
 import librosa
 
 from inharmonic_Analysis import *
-import constants
+from Inharmonic_Detector import StringBetas
+from constants_parser import Constants
 
-class StringBetas():
-    def __init__(self, barray):
-        self.betas_array = barray #0->string 1->fret
-        self.betas_list_array = [[[] for x in range(0,constants.no_of_frets)] for i in range(0,len(constants.tuning))]
-        
-    
+class GuitarSetStringBetas(StringBetas):
     def add_to_list(self, note_instance):
         self.betas_list_array[note_instance.string][note_instance.fret].append(note_instance.beta)
         #self.betas_list_array.remove(0)
     
-    def input_instance(self, instance_audio, midi_note, string):
+    def input_instance(self, instance_audio, midi_note, string, constants : Constants):
         fundamental = librosa.midi_to_hz(midi_note)
         ToolBoxObj = ToolBox(compute_partials, compute_inharmonicity, [constants.NO_OF_PARTIALS, fundamental/2], [])
-        note_instance = NoteInstance(fundamental, 0, instance_audio, ToolBoxObj, constants.sampling_rate)
+        note_instance = NoteInstance(fundamental, 0, instance_audio, ToolBoxObj, constants.sampling_rate, constants)
         fundamental = note_instance.recompute_fundamental()
-        note_instance = NoteInstance(fundamental, 0, instance_audio, ToolBoxObj, constants.sampling_rate) # compute again with recomputed fundamental
+        note_instance = NoteInstance(fundamental, 0, instance_audio, ToolBoxObj, constants.sampling_rate, constants) # compute again with recomputed fundamental
         ToolBoxObj = ToolBox(compute_partials, compute_inharmonicity, [constants.NO_OF_PARTIALS, fundamental/2], [])
         note_instance.string = string
         note_instance.fret = midi_note - constants.tuning[note_instance.string]
@@ -33,7 +29,7 @@ class StringBetas():
             for j, l in enumerate(r):
                 self.betas_array[i][j] = np.median(l)
 
-def train_GuitarSet(strBetaObj, train_frets = [0]):
+def train_GuitarSet(strBetaObj, constants, train_frets = [0]):
     '''train on selected instances from guitarset saved in specified folder. Fundamental 
     frequency is recomputed (since it is not available otherwise) by computing the expected
      fundamental based on midi note and finding the highest peak in a +-10 hz frame'''
@@ -48,11 +44,10 @@ def train_GuitarSet(strBetaObj, train_frets = [0]):
                 strBetaObj.add_to_list(note_instance)
     
 
-def GuitarSetTrainWrapper():
+def GuitarSetTrainWrapper(constants):
 
-    strBetaObj = StringBetas(np.zeros((len(constants.tuning), constants.no_of_frets)))
+    strBetaObj = GuitarSetStringBetas(np.zeros((len(constants.tuning), constants.no_of_frets)), constants)
     train_GuitarSet(strBetaObj, train_frets = constants.TRAIN_FRETS)
     strBetaObj.list_to_medians()
     print(strBetaObj.betas_array)
     return strBetaObj
-GuitarSetTrainWrapper()

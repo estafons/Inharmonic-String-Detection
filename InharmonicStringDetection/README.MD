@@ -42,7 +42,7 @@ The NoteInstance class represents a single note and holds the necessary info to 
 #### Example Usage
 ```python
 ToolBoxObj = ToolBox(compute_partials, compute_inharmonicity, [14, fundamental/2], [])
-note_instance = NoteInstance(fundamental, audio, ToolBoxObj, sampling_rate)
+note_instance = NoteInstance(fundamental, audio, ToolBoxObj, sampling_rate, constants)
 print(note_instance.beta, [x.frequency for x in note_instance.partials])
 ```
 where *compute_partials* and *compute_inharmonicity* are the methods described in the thesis and are given in the same script, and the following arguements are the neccesary input for each function
@@ -67,7 +67,7 @@ def expfunc(comb, StringBetasObj : StringBetas): #Exponential Model
 #### Example Usage
 ```python
 ToolBoxObj = ToolBox(compute_partials, compute_inharmonicity, [14, tab_instance.fundamental/2], [])
-note_instance = NoteInstance(tab_instance.fundamental, tab_instance.onset, tab_instance.note_audio, ToolBoxObj, track_instance.sampling_rate)
+note_instance = NoteInstance(tab_instance.fundamental, tab_instance.onset, tab_instance.note_audio, ToolBoxObj, track_instance.sampling_rate, constants)
 Inharmonic_Detector.DetectString(note_instance, StrBetaObj, Inharmonic_Detector.betafunc)
 ```
 
