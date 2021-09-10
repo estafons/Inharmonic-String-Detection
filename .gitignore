@@ -3,3 +3,6 @@ constants.ini
 *.wav
 *.jams
 *.pyc
+OutputToMIDI.py
+*.mid
+.vscode/
