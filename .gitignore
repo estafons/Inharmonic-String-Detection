@@ -1,14 +1,7 @@
 tests.py
 *.jams
 *.pyc
-<<<<<<< HEAD
-desktop.ini
 .vscode
 OutputToMIDI.py
 *.mid
 desktop.ini
-=======
-OutputToMIDI.py
-*.mid
-.vscode/
->>>>>>> gb
