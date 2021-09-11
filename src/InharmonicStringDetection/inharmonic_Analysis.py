@@ -6,7 +6,7 @@ from scipy.optimize import least_squares
 import librosa
 import os
 
-import constants
+from constants_parser import Constants
 
 class Partial():
     def __init__(self, frequency, order):
@@ -26,7 +26,7 @@ class ToolBox():
     
 class NoteInstance():
     """move to other level of package"""
-    def __init__(self, fundamental, onset, audio ,ToolBoxObj:ToolBox ,sampling_rate):
+    def __init__(self, fundamental, onset, audio ,ToolBoxObj:ToolBox ,sampling_rate, constants : Constants):
         self.fundamental = fundamental
         self.onset = onset
         self.audio = audio
@@ -38,8 +38,8 @@ class NoteInstance():
         ToolBoxObj.partial_func(self, ToolBoxObj.partial_func_args) # if a different partial tracking is incorporated keep second function arguement, else return beta from second function and change entirely
         ToolBoxObj.inharmonic_func(self, ToolBoxObj.inharmonic_func_args)
 
-    def recompute_fundamental(self): # delete if not needed
-        filtered = zero_out(self.fft, self.fundamental, 10)
+    def recompute_fundamental(self, constants : Constants): # delete if not needed
+        filtered = zero_out(self.fft, self.fundamental, 10, constants)
         peaks, _  =scipy.signal.find_peaks(np.abs(filtered),distance=100000) # better way to write this?
         max_peak = self.frequencies[peaks[0]]
         self.fundamental = max_peak
@@ -50,9 +50,10 @@ def compute_partials(note_instance, partial_func_args):
     Freq_deviate is the length of window arround k*f0 that the partials are tracked with highest peak."""
     no_of_partials = partial_func_args[0]
     freq_diviate = partial_func_args[1]
+    constants = partial_func_args[2]
     diviate = round(freq_diviate/(note_instance.sampling_rate/note_instance.fft.size))
     for i in range(2,no_of_partials):
-        filtered = zero_out(note_instance.fft, i*note_instance.fundamental, diviate)
+        filtered = zero_out(note_instance.fft, i*note_instance.fundamental, diviate, constants)
         peaks, _  =scipy.signal.find_peaks(np.abs(filtered),distance=100000) # better way to write this?
         max_peak = note_instance.frequencies[peaks[0]]
         note_instance.partials.append(Partial(max_peak, i))
@@ -88,7 +89,7 @@ def compute_least(u,y):
     res = least_squares(fun, x0, jac=jac,bounds=(0,np.inf), args=(u, y),loss = 'soft_l1', verbose=0)
     return res.x    
 
-def zero_out(fft, center_freq, window_length):
+def zero_out(fft, center_freq, window_length, constants : Constants):
     """return amplitude values of fft arround a given frequency when outside window amplitude is zeroed out"""
     sz = fft.size
     x = np.zeros(sz,dtype=np.complex64)
@@ -114,27 +115,15 @@ def example_compute_partial(note_instance, partial_func_args):
         note_instance.partials.append(Partial(x, i))
 # example changing beta computation and probably bypassing previous partial computation
 def example_inharmonicity_computation(note_instance, inharmonic_func_args):
-    arg0 = partial_func_args[0]
-    arg1 = partial_func_args[1]
+    arg0 = inharmonic_func_args[0]
+    arg1 = inharmonic_func_args[1]
     # do more stuff...
     note_instance.beta = arg0
 
 #-----------end of ToolBox Example---------------
 
-def wrapper_func(fundamental, audio, sampling_rate):
+def wrapper_func(fundamental, audio, sampling_rate, constants : Constants):
     
-    ToolBoxObj = ToolBox(compute_partials, compute_inharmonicity, [14, fundamental/2], [])
-    note_instance = NoteInstance(fundamental, 0, audio, ToolBoxObj, sampling_rate)
+    ToolBoxObj = ToolBox(compute_partials, compute_inharmonicity, [14, fundamental/2, constants], [])
+    note_instance = NoteInstance(fundamental, 0, audio, ToolBoxObj, sampling_rate, constants)
     print(note_instance.beta, [x.frequency for x in note_instance.partials])
-
-
-def main():
-    name = os.path.join('C:\\','Users','stefa','Documents','guit_workspace','crop50',
-                        '00_BN2-131-B_comp_outputstring1n8.wav')
-    audio, sampling_rate = librosa.load(name, constants.sampling_rate)
-    fundamental = 146.83
-    wrapper_func(fundamental, audio, sampling_rate)
-
-if __name__ == '__main__':
-    main()
-    

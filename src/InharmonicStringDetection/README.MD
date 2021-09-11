@@ -13,7 +13,7 @@ The goal of this project is to simultaneously present the results and conclusion
 More info on vital libraries for this project
 **JAMS** "A JSON Annotated Music Specification for Reproducible MIR Research." (https://jams.readthedocs.io/en/)
 **DEEP** "DEAP is a novel evolutionary computation framework for rapid prototyping and testing of ideas." (https://github.com/DEAP/deap)
-**GuitarSet Dataset** "GuitarSet: a dataset for guitar transcription" (https://github.com/marl/GuitarSet)
+**GuitarSet dataset** "GuitarSet: a dataset for guitar transcription" (https://github.com/marl/GuitarSet)
 
 
 
@@ -42,7 +42,7 @@ The NoteInstance class represents a single note and holds the necessary info to 
 #### Example Usage
 ```python
 ToolBoxObj = ToolBox(compute_partials, compute_inharmonicity, [14, fundamental/2], [])
-note_instance = NoteInstance(fundamental, audio, ToolBoxObj, sampling_rate)
+note_instance = NoteInstance(fundamental, audio, ToolBoxObj, sampling_rate, constants)
 print(note_instance.beta, [x.frequency for x in note_instance.partials])
 ```
 where *compute_partials* and *compute_inharmonicity* are the methods described in the thesis and are given in the same script, and the following arguements are the neccesary input for each function
@@ -67,7 +67,7 @@ def expfunc(comb, StringBetasObj : StringBetas): #Exponential Model
 #### Example Usage
 ```python
 ToolBoxObj = ToolBox(compute_partials, compute_inharmonicity, [14, tab_instance.fundamental/2], [])
-note_instance = NoteInstance(tab_instance.fundamental, tab_instance.onset, tab_instance.note_audio, ToolBoxObj, track_instance.sampling_rate)
+note_instance = NoteInstance(tab_instance.fundamental, tab_instance.onset, tab_instance.note_audio, ToolBoxObj, track_instance.sampling_rate, constants)
 Inharmonic_Detector.DetectString(note_instance, StrBetaObj, Inharmonic_Detector.betafunc)
 ```
 
@@ -75,4 +75,4 @@ Inharmonic_Detector.DetectString(note_instance, StrBetaObj, Inharmonic_Detector.
 Download the GuitarSet dataset (https://github.com/marl/GuitarSet). Specify the folders on the configuration file (currently **constants.py**) where annotations and input audio is stored. The track names from the subset from guitarset that was considered monophonic (more than 60ms between onsets), is stored as a txt file and uploaded (names.txt). Specify the location where the names.txt file is located or another subset of your choice. Then run the function *TestGuitarSet* from script **GuitarSetTest.py** and aconfusion matrix will be saved at the location as specified in the **constants.py** file.
 
 ### Training for GuitarSet
-Methods for training on the guitarset dataset on isolated note instances are store in **GuitarTrain.py** script. A folder structure as midi_note->string->good is expected where cropped note instances are stored for the specified midi_note and string number (strings are numbered 0,1,2,3,4,5 as E,A,G,D,B,e). Running the GuitarSetTrainWrapper method will print the betas computed and return a StringBetas object where they are stored. Also the user can specify the frets she wishes to train on on the constants.py file at constant ***TRAIN_FRETS***
+Methods for training on the guitarset dataset on isolated note instances are store in **GuitarTrain.py** script. A folder structure as midi_note->string->good is expected where cropped note instances are stored for the specified midi_note and string number (strings are numbered 0,1,2,3,4,5 as E,A,G,D,B,e). Running the GuitarSetTrainWrapper method will print the betas computed and return a StringBetas object where they are stored. Also the user can specify the frets she wishes to train on on the constants.py file at constant ***train_frets***
