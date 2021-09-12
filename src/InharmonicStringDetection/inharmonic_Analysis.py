@@ -26,20 +26,21 @@ class ToolBox():
     
 class NoteInstance():
     """move to other level of package"""
-    def __init__(self, fundamental, onset, audio ,ToolBoxObj:ToolBox ,sampling_rate, constants : Constants):
+    def __init__(self, fundamental, onset, audio ,ToolBoxObj:ToolBox ,sampling_rate, constants : Constants, midi_flag = False):
         self.fundamental = fundamental
         self.onset = onset
         self.audio = audio
         self.sampling_rate = constants.sampling_rate
         self.fft=np.fft.fft(self.audio,n = constants.size_of_fft)
         self.frequencies=np.fft.fftfreq(constants.size_of_fft,1/self.sampling_rate)
-        #self.recompute_fundamental() # delete if not needed
         self.partials = []
+        if midi_flag:
+            self.recompute_fundamental(constants, fundamental/2)
         ToolBoxObj.partial_func(self, ToolBoxObj.partial_func_args) # if a different partial tracking is incorporated keep second function arguement, else return beta from second function and change entirely
         ToolBoxObj.inharmonic_func(self, ToolBoxObj.inharmonic_func_args)
-
-    def recompute_fundamental(self, constants : Constants): # delete if not needed
-        filtered = zero_out(self.fft, self.fundamental, 10, constants)
+        
+    def recompute_fundamental(self, constants : Constants, window = 10): # delete if not needed
+        filtered = zero_out(self.fft, self.fundamental, window, constants)
         peaks, _  =scipy.signal.find_peaks(np.abs(filtered),distance=100000) # better way to write this?
         max_peak = self.frequencies[peaks[0]]
         self.fundamental = max_peak

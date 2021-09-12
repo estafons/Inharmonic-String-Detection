@@ -28,67 +28,6 @@ except:
     raise RuntimeError(('could not open ' + str(args.config_path) + ', does not exist or given' +
                  'in wrong format try again as C:\\Users/user/Documents/path_to_config.ini'))
 
-beta_dict = {0: 1.84196264*10**(-4), 1: 1.13998209*10**(-4), 2: 5.61036666*10**(-5),
-                                 3: 3.53238139*10**(-5), 4: 6.07431574*10**(-5), 5: 3.12346527*10**(-5)} # beta dictionary for the open fret based on the GuitarTrain script
-beta_dict = {0: 1.79747163*10**(-4), 1: 1.23713369*10**(-4), 2: 5.92775513*10**(-5),
-                                 3: 3.82823463*10**(-5), 4: 7.63428658*10**(-5), 5: 2.94933906*10**(-5)}
-
-barray = [[0 if x != 0 else beta_dict[i] for x in range(0,17)] for i in range(0,6)] # array of betas as trained
-StrBetaObj = Inharmonic_Detector.StringBetas(barray = barray, constants = constants)
-
-class ConfusionMatrix():
-    def __init__(self, size, inconclusive):
-        self.matrix = np.zeros(size)
-        self.x_classes = ['E', 'A', 'D', 'G', 'B', 'e']
-        if inconclusive:
-            self.y_classes = ['E', 'A', 'D', 'G', 'B', 'e', 'inconclusive']
-        else:
-             self.y_classes = ['E', 'A', 'D', 'G', 'B', 'e']
-    
-    def add_to_matrix(self, tab_as_list, annotations : Annotations):
-        for tab_instance, annos_instance in zip(tab_as_list, annotations.tablature.tablature):
-            self.matrix[annos_instance.string][tab_instance.string] += 1
-    
-    def get_accuracy(self):
-        return np.trace(self.matrix)/np.sum(self.matrix)
-    def plot_confusion_matrix(self, constants,
-                            normalize=False,
-                            title='Confusion matrix',
-                            cmap=plt.cm.Blues):
-            """
-            This function prints and plots the confusion matrix.
-            Normalization can be applied by setting `normalize=True`.
-            """
-            plt.clf()
-            if normalize:
-                self.matrix = self.matrix.astype('float') / self.matrix.sum(axis=1)[:, np.newaxis]
-                np.nan_to_num(self.matrix,False)
-                print("Normalized confusion matrix")
-            else:
-                print('Confusion matrix, without normalization')
-            plt.imshow(self.matrix, interpolation='nearest', cmap=cmap)
-            plt.title(title)
-            plt.colorbar()
-            
-            tick_marks_y = np.arange(len(self.y_classes))
-            tick_marks_x = np.arange(len(self.x_classes))
-            plt.xticks(tick_marks_x,self.x_classes , rotation=45)
-            plt.yticks(tick_marks_y, self.y_classes)
-
-            fmt = '.2f' if normalize else '.2f'
-            thresh = self.matrix.max() / 2.
-            for i, j in itertools.product(range(self.matrix.shape[0]), range(self.matrix.shape[1])):
-                plt.text(j, i, format(self.matrix[i, j], fmt),
-                            horizontalalignment="center",
-                            color="white" if self.matrix[i, j] > thresh else "black")
-
-            plt.ylabel('True label')
-            plt.xlabel('Predicted label')
-            plt.tight_layout()
-            #plt.show()
-            plt.savefig(Path(constants.result_path + title.replace(" ", "") +'.png'))
-            return plt
-
 
 def read_tablature_from_GuitarSet(jam_name, constants):
     """function to read a jam file and return the annotations needed"""

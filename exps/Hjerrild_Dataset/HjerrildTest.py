@@ -21,7 +21,7 @@ cur_path = Path(BASE_PATH + '/exps')
 sys.path.append(str(cur_path))
 
 from track_class import *
-from GuitarSetTest import ConfusionMatrix
+from helper import ConfusionMatrix
 from HjerrildTrain import TrainWrapper
 from inharmonic_Analysis import *
 import Inharmonic_Detector
@@ -39,11 +39,6 @@ except:
                  'in wrong format try again as C:\\Users/user/Documents/path_to_config.ini'))
 
 
-beta_dict = {0: 2.18897131*10**(-4), 1: 1.19981649*10**(-4), 2: 8.81963819*10**(-5),
-                                 3: 1.88506890*10**(-4), 4: 6.78444622*10**(-5), 5: 2.08872709*10**(-5)}
-
-barray = [[0 if x != 0 else beta_dict[i] for x in range(0,17)] for i in range(0,6)] # array of betas as trained
-StrBetaObj = Inharmonic_Detector.StringBetas(barray = barray, constants = constants)
 StrBetaObj = TrainWrapper(constants)
 def testHjerrildChristensen(constants : Constants):
     InhConfusionMatrixObj = ConfusionMatrix((6,7), inconclusive = True)
@@ -64,8 +59,6 @@ def testHjerrildChristensen(constants : Constants):
                 fundamental = librosa.midi_to_hz(constants.tuning[string] + fret)
                 ToolBoxObj = ToolBox(compute_partials, compute_inharmonicity, 
                                 [constants.no_of_partials, fundamental/2, constants], [])
-                note_instance = NoteInstance(fundamental, 0, audio, ToolBoxObj, constants.sampling_rate, constants)
-                fundamental = note_instance.recompute_fundamental(constants)
                 note_instance = NoteInstance(fundamental, 0, audio, ToolBoxObj, constants.sampling_rate, constants)
                 Inharmonic_Detector.DetectString(note_instance, StrBetaObj, Inharmonic_Detector.expfunc, constants)
                 InhConfusionMatrixObj.matrix[string][note_instance.string] += 1

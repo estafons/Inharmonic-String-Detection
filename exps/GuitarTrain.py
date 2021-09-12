@@ -21,7 +21,7 @@ class GuitarSetStringBetas(StringBetas):
     def input_instance(self, instance_audio, midi_note, string, constants : Constants):
         fundamental = librosa.midi_to_hz(midi_note)
         ToolBoxObj = ToolBox(compute_partials, compute_inharmonicity, [constants.no_of_partials, fundamental/2, constants], [])
-        note_instance = NoteInstance(fundamental, 0, instance_audio, ToolBoxObj, constants.sampling_rate, constants)
+        note_instance = NoteInstance(fundamental, 0, instance_audio, ToolBoxObj, constants.sampling_rate, constants, midi_flag = True)
         fundamental = note_instance.recompute_fundamental(constants)
         note_instance = NoteInstance(fundamental, 0, instance_audio, ToolBoxObj, constants.sampling_rate, constants) # compute again with recomputed fundamental
         ToolBoxObj = ToolBox(compute_partials, compute_inharmonicity, [constants.no_of_partials, fundamental/2, constants], [])
