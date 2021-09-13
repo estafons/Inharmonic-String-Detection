@@ -1,4 +1,4 @@
-Create this directory tree to store your data and results:
+This directory tree is expected in order to store your data and results:
 
 ```
 .
