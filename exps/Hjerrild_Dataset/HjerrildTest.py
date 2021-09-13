@@ -28,12 +28,13 @@ import Inharmonic_Detector
 
 parser = argparse.ArgumentParser()
 parser.add_argument('config_path', type=str)
+parser.add_argument('workspace_folder', type=str)
 args = parser.parse_args()
 
 #input from user
 #config_path = Path("C:\\Users/stefa/Documents//Inharmonic String Detection/InharmonicStringDetection/constants.ini")
 try:
-    constants = Constants(args.config_path)
+    constants = Constants(args.config_path, args.workspace_folder)
 except Exception as e: 
     print(e)
 
@@ -59,11 +60,11 @@ def testHjerrildChristensen(constants : Constants):
                 # Better fundamental estimation (TODO: use librosa.pyin instead, delete next line and se midi_flag=False to avoid f0 re-compute)
                 fundamental_init = librosa.midi_to_hz(constants.tuning[string] + fret)
                 ToolBoxObj = ToolBox(partial_tracking_func=compute_partials, inharmonicity_compute_func=compute_inharmonicity, 
-                                partial_func_args=[constants.no_of_partials, fundamental/2, constants], inharmonic_func_args=[])
+                                partial_func_args=[constants.no_of_partials, fundamental_init/2, constants], inharmonic_func_args=[])
                 note_instance = NoteInstance(fundamental_init, 0, audio, ToolBoxObj, constants.sampling_rate, constants, midi_flag=True)
 
                 # Detect plucked string (i.e. assigns value to note_instance.string)
-                Inharmonic_Detector.DetectString(note_instance, StrBetaObj, Inharmonic_Detector.expfunc, constants)
+                Inharmonic_Detector.DetectString(note_instance, StrBetaObj, constants.betafunc, constants)
 
                 # Compute Confusion Matrix
                 InhConfusionMatrixObj.matrix[string][note_instance.string] += 1

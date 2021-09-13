@@ -1,6 +1,8 @@
 import configparser
 from pathlib import Path
 
+import betafuncs
+
 def is_string(value):
     try:
         str(value)
@@ -30,7 +32,7 @@ def is_list_of_int(value):
         return False
 
 class Constants():
-    def __init__(self, config_name):
+    def __init__(self, config_name, workspace_folder):
         config = configparser.ConfigParser()
         config.read(config_name)
 
@@ -52,8 +54,30 @@ class Constants():
                 else:
                     raise ValueError("constants.ini arguement with name " + str(key) + "is of innapropriate value."+
                          "chansge value or suplement Constants class in constants_parser.py")    
-        
+        self.track_path = workspace_folder + '/data/audio/'
+    # Path were training data are stored
+        self.training_path = workspace_folder + '/data/train/'
+        # Path were results should be stored
+        self.result_path = workspace_folder + '/data/results/'
+        # Path were annotations are stored
+        self.annos_path = workspace_folder + '/data/annos/'
+        # txt file that contains the list of names of the tracks to be tested (GuitarSet)
+        self.listoftracksfile = '/names.txt'
+        # Path were listoftracksfile is stored
+        self.dataset_names_path = workspace_folder
 
+        if self.train_mode == '1Fret':
+            self.betafunc = betafuncs.betafunc
+            assert len(self.train_frets) > 0
+        elif self.train_mode == '2FretA':
+            self.betafunc = betafuncs.expfunc
+            assert len(self.train_frets) == 2
+        if self.train_mode == '2FretB':
+            self.betafunc = betafuncs.linfunc
+            assert len(self.train_frets) == 2
+        elif self.train_mode == '3Fret':
+            self.betafunc = betafuncs.aphfunc
+            assert len(self.train_frets) == 3
         '''#PATHS
         self.track_path = config.get('GUITARSET_PATHS', 'track_path')
         self.training_path = config.get('GUITARSET_PATHS', 'training_path')

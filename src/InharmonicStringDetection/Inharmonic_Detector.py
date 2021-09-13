@@ -21,7 +21,7 @@ def DetectString(NoteObj : NoteInstance, StringBetasObj : StringBetas, betafunc,
     if NoteObj.beta < 10**(-7):
         NoteObj.string = 6
     else:
-        betas = [(abs(betafunc(comb, StringBetasObj) - NoteObj.beta), comb) for comb in combs]
+        betas = [(abs(betafunc(comb, StringBetasObj, constants) - NoteObj.beta), comb) for comb in combs]
         NoteObj.string = min(betas, key = lambda a: a[0])[1][0] # returns comb where 0 arguement is string
 
 def hz_to_midi(fundamental):
@@ -43,14 +43,3 @@ def determine_combinations(fundamental, constants):
         pass
     return res
 
-def betafunc(comb, StringBetasObj : StringBetas):
-    beta = StringBetasObj.betas_array[comb[0]][0] * 2**(comb[1]/6)
-    return beta
-
-#----------------beta func example for exp model
-def expfunc(comb, StringBetasObj : StringBetas):
-    fret1, fret2 = 0, 12
-    b2, b1 = StringBetasObj.betas_array[comb[0]][fret2], StringBetasObj.betas_array[comb[0]][fret1]
-    a = 6 * (math.log2(b2) - math.log2(b1)) / (fret2-fret1)
-    beta = StringBetasObj.betas_array[comb[0]][0] * 2**(a * comb[1]/6)
-    return beta

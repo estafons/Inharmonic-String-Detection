@@ -17,15 +17,17 @@ from Inharmonic_Detector import *
 from inharmonic_Analysis import *
 from constants_parser import Constants
 import genetic
+from helper import ConfusionMatrix
 #config_path = Path("C:\\Users/stefa/Documents//Inharmonic String Detection/exps/constants.ini")
 parser = argparse.ArgumentParser()
 parser.add_argument('config_path', type=str)
+parser.add_argument('workspace_folder', type=str)
 args = parser.parse_args()
 #input from user
 
 try:
-    constants = Constants(args.config_path)
-except Exception as e: 
+    constants = Constants(args.config_path, args.workspace_folder)
+except Exception as e:
     print(e)
     # raise RuntimeError(('could not open ' + str(args.config_path) + ', does not exist or given' +
                 #  'in wrong format try again as C:\\Users/user/Documents/path_to_config.ini'))
@@ -71,7 +73,7 @@ def predictTabThesis(track_instance : TrackInstance, constants = Constants):
     for tab_instance in track_instance.tablature.tablature:
         ToolBoxObj = ToolBox(compute_partials, compute_inharmonicity, [constants.no_of_partials, tab_instance.fundamental/2, constants], [])
         note_instance = NoteInstance(tab_instance.fundamental, tab_instance.onset, tab_instance.note_audio, ToolBoxObj, track_instance.sampling_rate, constants)
-        Inharmonic_Detector.DetectString(note_instance, StrBetaObj, Inharmonic_Detector.betafunc, constants)
+        Inharmonic_Detector.DetectString(note_instance, StrBetaObj, constants.betafunc, constants)
         tab_instance.string = note_instance.string
         if tab_instance.string != 6: # 6 marks inconclusive
             tab_instance.fret = Inharmonic_Detector.hz_to_midi(note_instance.fundamental) - constants.tuning[note_instance.string]

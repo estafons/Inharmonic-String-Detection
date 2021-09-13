@@ -7,3 +7,4 @@ exps/Hjerrild_Dataset/data/train/
 OutputToMIDI.py
 *.mid
 desktop.ini
+*.png

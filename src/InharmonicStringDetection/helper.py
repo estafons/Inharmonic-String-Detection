@@ -4,6 +4,8 @@ import itertools
 import matplotlib.pyplot as plt
 
 from track_class import Annotations
+import math
+from Inharmonic_Detector import StringBetas
 
 class ConfusionMatrix():
     def __init__(self, size, inconclusive):
@@ -57,3 +59,4 @@ class ConfusionMatrix():
             #plt.show()
             plt.savefig(Path(constants.result_path + title.replace(" ", "") +'.png'))
             return plt
+

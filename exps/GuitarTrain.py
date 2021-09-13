@@ -41,7 +41,7 @@ def train_GuitarSet(strBetaObj, constants, train_frets = [0]):
     for index, open_midi in enumerate(constants.tuning):
         for train_fret in train_frets:
             midi_train = open_midi + train_fret
-            path_to_train_data = str(Path(constants.training_path + str(midi_train) + "/" +str(index) + "/good/*.wav"))
+            path_to_train_data = str(Path(constants.training_path + str(midi_train) + "/" +str(index) + "/*.wav"))
             list_of_names = glob.glob(path_to_train_data)
             for note_name in list_of_names:
                 note_audio, _ = librosa.load(note_name, constants.sampling_rate)
@@ -52,7 +52,7 @@ def train_GuitarSet(strBetaObj, constants, train_frets = [0]):
 def GuitarSetTrainWrapper(constants):
 
     strBetaObj = GuitarSetStringBetas(np.zeros((len(constants.tuning), constants.no_of_frets)), constants)
-    train_GuitarSet(strBetaObj, train_frets = constants.train_frets)
+    train_GuitarSet(strBetaObj, constants, train_frets = constants.train_frets)
     strBetaObj.list_to_medians()
     print(" Median beta values for nFret methods:")
     print(strBetaObj.betas_array)
