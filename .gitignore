@@ -1,6 +1,7 @@
 tests.py
 *.jams
 exps/data/audio/*
+exps/Hjerrild_Dataset/data/train/
 *.pyc
 .vscode
 OutputToMIDI.py

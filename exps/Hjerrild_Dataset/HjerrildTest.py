@@ -23,7 +23,7 @@ sys.path.append(str(cur_path))
 from track_class import *
 from helper import ConfusionMatrix
 from HjerrildTrain import TrainWrapper
-from inharmonic_Analysis import *
+from inharmonic_Analysis import compute_partials, compute_inharmonicity, NoteInstance, ToolBox
 import Inharmonic_Detector
 
 parser = argparse.ArgumentParser()
@@ -34,12 +34,9 @@ args = parser.parse_args()
 #config_path = Path("C:\\Users/stefa/Documents//Inharmonic String Detection/InharmonicStringDetection/constants.ini")
 try:
     constants = Constants(args.config_path)
-except:
-    raise RuntimeError(('could not open ' + str(args.config_path) + ', does not exist or given' +
-                 'in wrong format try again as C:\\Users/user/Documents/path_to_config.ini'))
+except Exception as e: 
+    print(e)
 
-
-StrBetaObj = TrainWrapper(constants)
 def testHjerrildChristensen(constants : Constants):
     InhConfusionMatrixObj = ConfusionMatrix((6,7), inconclusive = True)
     if constants.guitar == 'firebrand':
@@ -54,18 +51,28 @@ def testHjerrildChristensen(constants : Constants):
                                             '/string' +str(string + 1) +'/' + str(fret) +'.wav')
                 audio, _ = librosa.load(path_to_track, constants.sampling_rate)
 
+                # Onset detection (instances not always occur at the beginning of the recording)
+                # NOTE: better think about this method again
                 y = librosa.onset.onset_detect(audio, constants.sampling_rate)
-                audio = audio[y[0]:] # adding this line because not all tracks start at the beggining
-                fundamental = librosa.midi_to_hz(constants.tuning[string] + fret)
-                ToolBoxObj = ToolBox(compute_partials, compute_inharmonicity, 
-                                [constants.no_of_partials, fundamental/2, constants], [])
-                note_instance = NoteInstance(fundamental, 0, audio, ToolBoxObj, constants.sampling_rate, constants)
+                audio = audio[y[0]:] # adding this line because ther5e might be more than one onsets occurring in the recording
+
+                # Better fundamental estimation (TODO: use librosa.pyin instead, delete next line and se midi_flag=False to avoid f0 re-compute)
+                fundamental_init = librosa.midi_to_hz(constants.tuning[string] + fret)
+                ToolBoxObj = ToolBox(partial_tracking_func=compute_partials, inharmonicity_compute_func=compute_inharmonicity, 
+                                partial_func_args=[constants.no_of_partials, fundamental/2, constants], inharmonic_func_args=[])
+                note_instance = NoteInstance(fundamental_init, 0, audio, ToolBoxObj, constants.sampling_rate, constants, midi_flag=True)
+
+                # Detect plucked string (i.e. assigns value to note_instance.string)
                 Inharmonic_Detector.DetectString(note_instance, StrBetaObj, Inharmonic_Detector.expfunc, constants)
+
+                # Compute Confusion Matrix
                 InhConfusionMatrixObj.matrix[string][note_instance.string] += 1
+   
     InhConfusionMatrixObj.plot_confusion_matrix(constants, normalize= True, 
                                                     title = str(constants.guitar) + str(constants.no_of_partials) +
                                                         'Inharmonic Confusion Matrix' +
                                                         str(round(InhConfusionMatrixObj.get_accuracy(),3)))
 
+StrBetaObj = TrainWrapper(constants)
 
 testHjerrildChristensen(constants)
