@@ -14,13 +14,15 @@ Create this directory tree to store your data and results:
 ## Performing Tests on GuitarSet dataset
 
 Download from GuitarSet dataset (https://zenodo.org/record/3371780):
-1) ```annotations.zip``` and extract all .jams to data/annos.
-2) ```audio_mono-mic.zip```, ``` audio_mono-pickup_mix.zip``` and extract all .wavs to data/audio.
+1) ```annotations.zip``` and extract all ```.jams``` files to data/annos.
+2) ```audio_mono-mic.zip```, ``` audio_mono-pickup_mix.zip``` and extract all ```.wav``` files to ```data/audio```.
 <!-- 3) what about training samples -->
 
-Specify the folders on the configuration file (currently **constants.ini**) where annotations and input audio is stored. 
+Specify the folders on the configuration file (currently ```constants.ini```) where annotations and input audio is stored. 
 
-The track names from the subset from GuitarSet that was considered monophonic (more than 60ms between onsets), is stored as a txt file and uploaded (```names.txt```). Specify the location where the ```names.txt``` file is located or another subset of your choice. Then run the function *TestGuitarSet* from script **GuitarSetTest.py** and aconfusion matrix will be saved at the location as specified in the **constants.py** file.
+The track names from the subset from GuitarSet that was considered monophonic (more than 60ms between onsets), is stored as a txt file and uploaded (```names.txt```). Specify the location where the ```names.txt``` file is located or another subset of your choice. 
+
+Then run the function *TestGuitarSet* from script ```GuitarSetTest.py``` and a confusion matrix will be saved at the location as specified in the ```constants.ini``` file.
 
 ### Training for GuitarSet
-Methods for training on the guitarset dataset on isolated note instances are store in **GuitarTrain.py** script. A folder structure as midi_note->string->good is expected where cropped note instances are stored for the specified midi_note and string number (strings are numbered 0,1,2,3,4,5 as E,A,G,D,B,e). Running the GuitarSetTrainWrapper method will print the betas computed and return a StringBetas object where they are stored. Also the user can specify the frets she wishes to train on on the constants.py file at constant ***train_frets***
+Methods for training on the guitarset dataset on isolated note instances can be found in ```GuitarTrain.py``` script. A folder structure as <#midi_note>──<#string>──><#good> is expected where cropped note instances are stored for the specified midi_note and string number (strings are numbered 0,1,2,3,4,5 as E,A,G,D,B,e). Running the ```GuitarSetTrainWrapper``` method will print the betas computed and return a ```StringBetas``` object where they are stored. Also the user can specify the frets she wishes to train on on the ```constants.ini``` file at constant ***train_frets***.
