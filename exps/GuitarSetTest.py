@@ -6,6 +6,7 @@ import numpy as np
 import configparser
 import os, sys
 import argparse
+from GuitarTrain import GuitarSetTrainWrapper
 
 BASE_PATH = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 cur_path = Path(BASE_PATH + '/src/InharmonicStringDetection')
@@ -99,3 +100,9 @@ def testGuitarSet(constants : Constants):
     #GenConfusionMatrixObj.plot_confusion_matrix(constants, normalize= True, 
     #                          title = 'Genetic Confusion Matrix'+str(round(GenConfusionMatrixObj.get_accuracy(),3)))
 
+
+
+if __name__ == '__main__':
+    StrBetaObj = GuitarSetTrainWrapper(constants)
+
+    testGuitarSet(constants)

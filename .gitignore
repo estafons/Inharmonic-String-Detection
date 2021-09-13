@@ -1,5 +1,6 @@
 tests.py
 *.jams
+exps/data/audio/*
 *.pyc
 .vscode
 OutputToMIDI.py
