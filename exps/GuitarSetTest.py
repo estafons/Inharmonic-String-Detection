@@ -25,9 +25,10 @@ args = parser.parse_args()
 
 try:
     constants = Constants(args.config_path)
-except:
-    raise RuntimeError(('could not open ' + str(args.config_path) + ', does not exist or given' +
-                 'in wrong format try again as C:\\Users/user/Documents/path_to_config.ini'))
+except Exception as e: 
+    print(e)
+    # raise RuntimeError(('could not open ' + str(args.config_path) + ', does not exist or given' +
+                #  'in wrong format try again as C:\\Users/user/Documents/path_to_config.ini'))
 
 
 def read_tablature_from_GuitarSet(jam_name, constants):
