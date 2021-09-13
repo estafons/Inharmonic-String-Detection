@@ -14,7 +14,7 @@ This directory tree is expected in order to store your data and results:
 ## Performing Tests on GuitarSet dataset
 
 Download from GuitarSet dataset (https://zenodo.org/record/3371780):
-1) ```annotations.zip``` and extract all ```.jams``` files to data/annos.
+1) ```annotations.zip``` and extract all ```.jams``` files to ```data/annos```.
 2) ```audio_mono-mic.zip```, ``` audio_mono-pickup_mix.zip``` and extract all ```.wav``` files to ```data/audio```.
 <!-- 3) what about training samples -->
 
