@@ -17,7 +17,7 @@ from Inharmonic_Detector import *
 from inharmonic_Analysis import *
 from constants_parser import Constants
 import genetic
-from helper import ConfusionMatrix
+from helper import ConfusionMatrix, compute_partial_orders
 #config_path = Path("C:\\Users/stefa/Documents//Inharmonic String Detection/exps/constants.ini")
 parser = argparse.ArgumentParser()
 parser.add_argument('config_path', type=str)
@@ -68,10 +68,10 @@ def load_data(track_name, annotation_name, constants : Constants):
     track_instance = TrackInstance(tablature, data, constants)
     return track_instance, annotations
 
-def predictTabThesis(track_instance : TrackInstance, constants = Constants):
+def predictTabThesis(track_instance : TrackInstance, constants : Constants, StrBetaObj):
     """Inharmonic prediction of tablature as implemented for thesis """
     for tab_instance in track_instance.tablature.tablature:
-        ToolBoxObj = ToolBox(compute_partials, compute_inharmonicity, [constants.no_of_partials, tab_instance.fundamental/2, constants], [])
+        ToolBoxObj = ToolBox(compute_partials_with_order, compute_inharmonicity, [tab_instance.fundamental/2, constants, StrBetaObj], [])
         note_instance = NoteInstance(tab_instance.fundamental, tab_instance.onset, tab_instance.note_audio, ToolBoxObj, track_instance.sampling_rate, constants)
         Inharmonic_Detector.DetectString(note_instance, StrBetaObj, constants.betafunc, constants)
         tab_instance.string = note_instance.string
@@ -81,7 +81,7 @@ def predictTabThesis(track_instance : TrackInstance, constants = Constants):
             tab_instance.fret = None
 
 
-def testGuitarSet(constants : Constants):
+def testGuitarSet(constants : Constants, StrBetaObj):
     """ function that runs tests on the jams files mentioned in the given file 
     and plots the confusion matrixes for both the genetic and inharmonic results."""
 
@@ -94,7 +94,7 @@ def testGuitarSet(constants : Constants):
         name = name.replace('\n', '')
         track_name = name[:-5] + '_' + constants.dataset +'.wav'
         track_instance, annotations = load_data(track_name, name, constants)
-        predictTabThesis(track_instance, constants)
+        predictTabThesis(track_instance, constants, StrBetaObj)
         InhConfusionMatrixObj.add_to_matrix(track_instance.tablature.tablature, annotations)
         #tab, g = genetic.genetic(track_instance.tablature, constants)
         #GenConfusionMatrixObj.add_to_matrix(tab, annotations)
@@ -107,5 +107,5 @@ def testGuitarSet(constants : Constants):
 
 if __name__ == '__main__':
     StrBetaObj = GuitarSetTrainWrapper(constants)
-
-    testGuitarSet(constants)
+    compute_partial_orders(StrBetaObj, constants)
+    testGuitarSet(constants, StrBetaObj)

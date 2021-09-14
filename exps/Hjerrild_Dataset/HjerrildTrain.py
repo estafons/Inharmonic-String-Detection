@@ -11,17 +11,6 @@ sys.path.append(str(cur_path))
 
 from GuitarTrain import *
 
-parser = argparse.ArgumentParser()
-parser.add_argument('config_path', type=str)
-args = parser.parse_args()
-
-#input from user
-#config_path = Path("C:\\Users/stefa/Documents//Inharmonic String Detection/exps/constants.ini")
-try:
-    constants = Constants(args.config_path)
-except:
-    raise RuntimeError(('could not open ' + str(args.config_path) + ', does not exist or given' +
-                 'in wrong format try again as C:\\Users/user/Documents/path_to_config.ini'))
 
 def HjerrildChristensenTrain(strBetaObj, constants : Constants, train_frets = [0]):
     if constants.guitar == 'firebrand':

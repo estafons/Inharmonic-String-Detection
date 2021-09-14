@@ -3,16 +3,7 @@ import os, sys
 import librosa
 import argparse
 
-'''from sympy import symbols, solve
-from sympy import Poly
-from sympy.solvers.inequalities import solve_poly_inequality
-k = symbols('k')
-print(solve_poly_inequality(Poly(k, k, domain='ZZ'), '<'))
 
-polyn = Poly(10**(-4)*k**4 -k -1/2, k)
-sol = solve(polyn)
-#sol = solve_poly_inequality(polyn, '==')
-print(sol)'''
 
 BASE_PATH = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 cur_path = Path(BASE_PATH + '/src/InharmonicStringDetection')
@@ -21,9 +12,11 @@ cur_path = Path(BASE_PATH + '/exps')
 sys.path.append(str(cur_path))
 
 from track_class import *
-from helper import ConfusionMatrix
+from helper import ConfusionMatrix, compute_partial_orders
 from HjerrildTrain import TrainWrapper
-from inharmonic_Analysis import compute_partials, compute_inharmonicity, NoteInstance, ToolBox
+from inharmonic_Analysis import (compute_partials, compute_inharmonicity, NoteInstance, 
+                                    ToolBox, compute_partials_with_order, 
+                                        compute_partials_with_order_strict)
 import Inharmonic_Detector
 
 parser = argparse.ArgumentParser()
@@ -35,10 +28,10 @@ args = parser.parse_args()
 #config_path = Path("C:\\Users/stefa/Documents//Inharmonic String Detection/InharmonicStringDetection/constants.ini")
 try:
     constants = Constants(args.config_path, args.workspace_folder)
-except Exception as e: 
+except Exception as e:
     print(e)
 
-def testHjerrildChristensen(constants : Constants):
+def testHjerrildChristensen(constants : Constants, StrBetaObj):
     InhConfusionMatrixObj = ConfusionMatrix((6,7), inconclusive = True)
     if constants.guitar == 'firebrand':
         dataset_nums = [1,2,3,5,6,7,8,9,10]
@@ -59,8 +52,8 @@ def testHjerrildChristensen(constants : Constants):
 
                 # Better fundamental estimation (TODO: use librosa.pyin instead, delete next line and se midi_flag=False to avoid f0 re-compute)
                 fundamental_init = librosa.midi_to_hz(constants.tuning[string] + fret)
-                ToolBoxObj = ToolBox(partial_tracking_func=compute_partials, inharmonicity_compute_func=compute_inharmonicity, 
-                                partial_func_args=[constants.no_of_partials, fundamental_init/2, constants], inharmonic_func_args=[])
+                ToolBoxObj = ToolBox(partial_tracking_func=compute_partials_with_order, inharmonicity_compute_func=compute_inharmonicity, 
+                                partial_func_args=[fundamental_init/2, constants, StrBetaObj], inharmonic_func_args=[])
                 note_instance = NoteInstance(fundamental_init, 0, audio, ToolBoxObj, constants.sampling_rate, constants, midi_flag=True)
 
                 # Detect plucked string (i.e. assigns value to note_instance.string)
@@ -74,6 +67,8 @@ def testHjerrildChristensen(constants : Constants):
                                                         'Inharmonic Confusion Matrix' +
                                                         str(round(InhConfusionMatrixObj.get_accuracy(),3)))
 
-StrBetaObj = TrainWrapper(constants)
+if __name__ == '__main__':
 
-testHjerrildChristensen(constants)
+    StrBetaObj = TrainWrapper(constants)
+    compute_partial_orders(StrBetaObj, constants)
+    testHjerrildChristensen(constants, StrBetaObj)
