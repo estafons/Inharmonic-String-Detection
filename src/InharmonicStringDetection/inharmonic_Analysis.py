@@ -1,5 +1,7 @@
 import random
 import numpy as np
+from numpy.core.fromnumeric import std
+from numpy.lib.function_base import median
 import scipy
 from random import choice
 from scipy.optimize import least_squares
@@ -37,7 +39,8 @@ class NoteInstance():
         if midi_flag:
             self.recompute_fundamental(constants, fundamental/2)
         ToolBoxObj.partial_func(self, ToolBoxObj.partial_func_args) # if a different partial tracking is incorporated keep second function arguement, else return beta from second function and change entirely
-        ToolBoxObj.inharmonic_func(self, ToolBoxObj.inharmonic_func_args)
+        if ToolBoxObj.partial_func == compute_partials:
+            ToolBoxObj.inharmonic_func(self, ToolBoxObj.inharmonic_func_args)
         
     def recompute_fundamental(self, constants : Constants, window = 10): # delete if not needed
         filtered = zero_out(self.fft, self.fundamental, window, constants)
@@ -58,6 +61,51 @@ def compute_partials(note_instance, partial_func_args):
         peaks, _  =scipy.signal.find_peaks(np.abs(filtered),distance=100000) # better way to write this?
         max_peak = note_instance.frequencies[peaks[0]]
         note_instance.partials.append(Partial(max_peak, i))
+
+def compute_partials_with_order(note_instance, partial_func_args):
+    freq_diviate = partial_func_args[0]
+    constants = partial_func_args[1]
+    StrBetaObj = partial_func_args[2]
+    b = []
+    midi_note = round(librosa.hz_to_midi(note_instance.fundamental))
+    t =  len(StrBetaObj.beta_lim[midi_note - 40])
+    for n in range(0, t):
+        note_instance.partials = []
+        StrBetaObj.beta_lim[midi_note - 40].sort(reverse = True)
+        k_max = StrBetaObj.beta_lim[midi_note - 40][n]
+        #if k_max > constants.k_max:
+        #    k_max = constants.k_max
+        compute_partials(note_instance, [k_max, freq_diviate, constants])
+        compute_inharmonicity(note_instance, [])
+        #print(k_max, note_instance.beta) #uncoment if you want to check variation of betas in relation with k_max. Indicates why bellow code was added
+        if note_instance.beta > 10**(-7):
+            b.append(note_instance.beta)
+    if std(b)/np.mean(b) < 0.5: #coefficient of variation. If small then low variance of betas so get median, else mark as inconclusive
+        note_instance.beta = median(b)
+    else:
+        note_instance.beta = 10**(-10)
+        #    continue
+        #else:
+        #    return
+    return
+
+def compute_partials_with_order_strict(note_instance, partial_func_args):
+    freq_diviate = partial_func_args[0]
+    constants = partial_func_args[1]
+    StrBetaObj = partial_func_args[2]
+    midi_note = round(librosa.hz_to_midi(note_instance.fundamental))
+    t =  len(StrBetaObj.beta_lim[midi_note - 40])
+    for n in range(0, t):
+        note_instance.partials = []
+        k = min(StrBetaObj.beta_lim[midi_note - 40])
+        
+        compute_partials(note_instance, [k, freq_diviate, constants])
+        compute_inharmonicity(note_instance, [])
+        if note_instance.beta < 10**(-7):
+            continue
+        else:
+            return
+    return
 
 
 def compute_differences(note_instance):
