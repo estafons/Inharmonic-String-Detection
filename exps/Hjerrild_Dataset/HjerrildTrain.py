@@ -21,7 +21,7 @@ def HjerrildChristensenTrain(strBetaObj, constants : Constants, train_frets = [0
     for dataset_no in dataset_nums:
         # print(dataset_no)
         for string in range(0,6):
-            # print(dataset_no, string)
+            print(dataset_no, string)
             for fret in constants.train_frets:
                 midi = constants.tuning[string] + fret
                 path_to_track = Path(constants.path_to_hjerrild_christensen +
