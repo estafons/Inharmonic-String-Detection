@@ -7,8 +7,16 @@ from random import choice
 from scipy.optimize import least_squares
 import librosa
 import os
+from sklearn.preprocessing import PolynomialFeatures
+from sklearn.linear_model import (LinearRegression, TheilSenRegressor, RANSACRegressor, HuberRegressor)
 
 from constants_parser import Constants
+
+import sys
+# sys.path.append('../../../')
+print(sys.path)
+from ransac import RansacModel
+from linearleastsquare import LinearLeastSqaureModel
 
 class Partial():
     def __init__(self, frequency, order):
@@ -62,6 +70,11 @@ def compute_partials(note_instance, partial_func_args):
         max_peak = note_instance.frequencies[peaks[0]]
         note_instance.partials.append(Partial(max_peak, i))
 
+
+
+
+
+# 
 def compute_partials_with_order(note_instance, partial_func_args):
     freq_diviate = partial_func_args[0]
     constants = partial_func_args[1]
@@ -78,8 +91,12 @@ def compute_partials_with_order(note_instance, partial_func_args):
         compute_partials(note_instance, [k_max, freq_diviate, constants])
         compute_inharmonicity(note_instance, [])
         #print(k_max, note_instance.beta) #uncoment if you want to check variation of betas in relation with k_max. Indicates why bellow code was added
+
+        # NOTE: check for new threshold
         if note_instance.beta > 10**(-7):
             b.append(note_instance.beta)
+    # print()
+    # print(b, StrBetaObj.beta_lim[midi_note - 40])        
     if std(b)/np.mean(b) < 0.5: #coefficient of variation. If small then low variance of betas so get median, else mark as inconclusive
         note_instance.beta = median(b)
     else:
@@ -117,7 +134,9 @@ def compute_differences(note_instance):
 def compute_inharmonicity(note_instance, inharmonic_func_args):
     differences, orders = zip(*compute_differences(note_instance))
     u=np.array(orders)
-    res=compute_least(u,differences)
+    # res=compute_least(u,differences) # least_squares
+    res=compute_least_TheilSen(u,differences) # least_squares
+    # res=RANSAC_fit(u,differences) # least_squares
     [a,b,c]=res
     beta=2*a/(note_instance.fundamental+b)
     note_instance.beta = beta
@@ -137,6 +156,45 @@ def compute_least(u,y):
     x0=[0.00001,0.00001,0.000001]
     res = least_squares(fun, x0, jac=jac,bounds=(0,np.inf), args=(u, y),loss = 'soft_l1', verbose=0)
     return res.x    
+
+def compute_least_TheilSen(u,y): 
+    u = u[:, np.newaxis]
+    poly = PolynomialFeatures(3)
+    # print
+    u_poly = poly.fit_transform(u)
+    u_poly = np.delete(u_poly, 2, axis=1)
+
+    # estimator =  LinearRegression(fit_intercept=False)
+    # estimator.fit(u_poly, y)
+
+    estimator = TheilSenRegressor(random_state=42)
+    estimator.fit(u_poly, y)
+
+    # print("coefficients:", estimator.coef_)
+    return estimator.coef_[::-1]
+
+# def RANSAC_fit(u, y): #__gb__
+
+#     u_3 = np.power(u, 3)
+
+#     A = np.stack((u_3, u, np.ones((len(u)), dtype = int)), axis = 1)
+#     threshold = np.std(y)/2  # this can be tuned to sd/3 or sd/5 for various curves and better consistent results as a result of random sampling
+    
+#     # Instantiating the linear least sqaure model
+#     linear_ls_model = LinearLeastSqaureModel()
+#     # linear_ls_model_estimate = linear_ls_model.fit(A, y)
+#     # linear_model_y = A.dot(linear_ls_model_estimate)
+
+#     # Instantiating the ransac model
+#     ransac_model = RansacModel(linear_ls_model)
+#     # ransac_model_estimate = ransac_model.fit(A, y, 3, threshold)
+#     ransac_model_coeff = ransac_model.fit(A, y, 3, threshold)
+#     # ransac_model_y = A.dot(ransac_model_estimate)
+
+#     # return linear_model_y, ransac_model_y
+#     # print(linear_model_y)
+#     return ransac_model_coeff
+
 
 def zero_out(fft, center_freq, window_length, constants : Constants):
     """return amplitude values of fft arround a given frequency when outside window amplitude is zeroed out"""

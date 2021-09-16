@@ -2,6 +2,9 @@ tests.py
 *.jams
 exps/data/audio/*
 exps/Hjerrild_Dataset/data/train/
+src/InharmonicStringDetection/example_sklearn.py
+src/InharmonicStringDetection/rasnac.py
+src/InharmonicStringDetection/linearleastsquare.py
 *.pyc
 .vscode
 OutputToMIDI.py

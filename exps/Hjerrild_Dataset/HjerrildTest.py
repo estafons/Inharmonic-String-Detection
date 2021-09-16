@@ -37,7 +37,9 @@ def testHjerrildChristensen(constants : Constants, StrBetaObj):
         dataset_nums = [1,2,3,5,6,7,8,9,10]
     elif constants.guitar == 'martin':
         dataset_nums = [1,2,3,4,5,6,7,8,9,10]
+    print("Testing to the training set complement...")
     for dataset_no in dataset_nums:
+        print(dataset_no)
         for string in range(0,6):
             for fret in range(0,12):
                 path_to_track = Path(constants.path_to_hjerrild_christensen +
@@ -52,8 +54,10 @@ def testHjerrildChristensen(constants : Constants, StrBetaObj):
 
                 # Better fundamental estimation (TODO: use librosa.pyin instead, delete next line and se midi_flag=False to avoid f0 re-compute)
                 fundamental_init = librosa.midi_to_hz(constants.tuning[string] + fret)
-                ToolBoxObj = ToolBox(partial_tracking_func=compute_partials_with_order, inharmonicity_compute_func=compute_inharmonicity, 
-                                partial_func_args=[fundamental_init/2, constants, StrBetaObj], inharmonic_func_args=[])
+                # ToolBoxObj = ToolBox(partial_tracking_func=compute_partials_with_order, inharmonicity_compute_func=compute_inharmonicity, 
+                #                 partial_func_args=[fundamental_init/2, constants, StrBetaObj], inharmonic_func_args=[])
+                ToolBoxObj = ToolBox(partial_tracking_func=compute_partials, inharmonicity_compute_func=compute_inharmonicity, 
+                                partial_func_args=[constants.no_of_partials, fundamental_init/2, constants, StrBetaObj], inharmonic_func_args=[])
                 note_instance = NoteInstance(fundamental_init, 0, audio, ToolBoxObj, constants.sampling_rate, constants, midi_flag=True)
 
                 # Detect plucked string (i.e. assigns value to note_instance.string)
@@ -70,5 +74,5 @@ def testHjerrildChristensen(constants : Constants, StrBetaObj):
 if __name__ == '__main__':
 
     StrBetaObj = TrainWrapper(constants)
-    compute_partial_orders(StrBetaObj, constants)
+    # compute_partial_orders(StrBetaObj, constants)
     testHjerrildChristensen(constants, StrBetaObj)

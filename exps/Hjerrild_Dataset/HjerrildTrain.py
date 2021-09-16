@@ -11,17 +11,17 @@ sys.path.append(str(cur_path))
 
 from GuitarTrain import *
 
-parser = argparse.ArgumentParser()
-parser.add_argument('config_path', type=str)
-args = parser.parse_args()
 
 def HjerrildChristensenTrain(strBetaObj, constants : Constants, train_frets = [0]):
     if constants.guitar == 'firebrand':
         dataset_nums = [1,2,3,5,6,7,8,9,10]
     elif constants.guitar == 'martin':
         dataset_nums = [1,2,3,4,5,6,7,8,9,10]
+    print('Training on the specified subset...')    
     for dataset_no in dataset_nums:
+        # print(dataset_no)
         for string in range(0,6):
+            print(dataset_no, string)
             for fret in constants.train_frets:
                 midi = constants.tuning[string] + fret
                 path_to_track = Path(constants.path_to_hjerrild_christensen +

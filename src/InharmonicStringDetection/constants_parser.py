@@ -58,7 +58,8 @@ class Constants():
     # Path were training data are stored
         self.training_path = workspace_folder + '/data/train/'
         # Path were results should be stored
-        self.result_path = workspace_folder + '/data/results/'
+        # self.result_path = workspace_folder + '/data/results/'
+        self.result_path = workspace_folder + '/results/'
         # Path were annotations are stored
         self.annos_path = workspace_folder + '/data/annos/'
         # txt file that contains the list of names of the tracks to be tested (GuitarSet)
