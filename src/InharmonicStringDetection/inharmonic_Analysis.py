@@ -42,6 +42,8 @@ class NoteInstance():
         self.audio = audio
         self.sampling_rate = constants.sampling_rate
         self.fft=np.fft.fft(self.audio,n = constants.size_of_fft)
+        # np.arrange(constants.size_of_fft)
+        
         self.frequencies=np.fft.fftfreq(constants.size_of_fft,1/self.sampling_rate)
         self.partials = []
         if midi_flag:
@@ -124,7 +126,6 @@ def compute_partials_with_order_strict(note_instance, partial_func_args):
             return
     return
 
-
 def compute_differences(note_instance):
     differences = []
     for i, partial in enumerate(note_instance.partials):
@@ -134,14 +135,12 @@ def compute_differences(note_instance):
 def compute_inharmonicity(note_instance, inharmonic_func_args):
     differences, orders = zip(*compute_differences(note_instance))
     u=np.array(orders)
-    # res=compute_least(u,differences) # least_squares
-    res=compute_least_TheilSen(u,differences) # least_squares
-    # res=RANSAC_fit(u,differences) # least_squares
+    res=compute_least(u,differences) # least_squares
+    # res=compute_least_TheilSen(u,differences) # least_squares
     [a,b,c]=res
     beta=2*a/(note_instance.fundamental+b)
     note_instance.beta = beta
     
-
 def compute_least(u,y):
     def model(x, u):
         return x[0] * u**3 + x[1]*u + x[2]
@@ -157,43 +156,25 @@ def compute_least(u,y):
     res = least_squares(fun, x0, jac=jac,bounds=(0,np.inf), args=(u, y),loss = 'soft_l1', verbose=0)
     return res.x    
 
+
+# https://scikit-learn.org/stable/auto_examples/linear_model/plot_robust_fit.html#sphx-glr-auto-examples-linear-model-plot-robust-fit-py
+# https://scikit-learn.org/stable/modules/generated/sklearn.linear_model.TheilSenRegressor.html#sklearn.linear_model.TheilSenRegressor
 def compute_least_TheilSen(u,y): 
     u = u[:, np.newaxis]
     poly = PolynomialFeatures(3)
     # print
     u_poly = poly.fit_transform(u)
-    u_poly = np.delete(u_poly, 2, axis=1)
+    u_poly = np.delete(u_poly, 2, axis=1) # delete second coefficient (i.e. b=0, for  b * x**2)
 
     # estimator =  LinearRegression(fit_intercept=False)
     # estimator.fit(u_poly, y)
 
     estimator = TheilSenRegressor(random_state=42)
+    # estimator = HuberRegressor()
     estimator.fit(u_poly, y)
 
     # print("coefficients:", estimator.coef_)
     return estimator.coef_[::-1]
-
-# def RANSAC_fit(u, y): #__gb__
-
-#     u_3 = np.power(u, 3)
-
-#     A = np.stack((u_3, u, np.ones((len(u)), dtype = int)), axis = 1)
-#     threshold = np.std(y)/2  # this can be tuned to sd/3 or sd/5 for various curves and better consistent results as a result of random sampling
-    
-#     # Instantiating the linear least sqaure model
-#     linear_ls_model = LinearLeastSqaureModel()
-#     # linear_ls_model_estimate = linear_ls_model.fit(A, y)
-#     # linear_model_y = A.dot(linear_ls_model_estimate)
-
-#     # Instantiating the ransac model
-#     ransac_model = RansacModel(linear_ls_model)
-#     # ransac_model_estimate = ransac_model.fit(A, y, 3, threshold)
-#     ransac_model_coeff = ransac_model.fit(A, y, 3, threshold)
-#     # ransac_model_y = A.dot(ransac_model_estimate)
-
-#     # return linear_model_y, ransac_model_y
-#     # print(linear_model_y)
-#     return ransac_model_coeff
 
 
 def zero_out(fft, center_freq, window_length, constants : Constants):

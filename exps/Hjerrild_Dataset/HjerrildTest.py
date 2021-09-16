@@ -2,7 +2,7 @@ from pathlib import Path
 import os, sys
 import librosa
 import argparse
-
+import numpy as np
 
 
 BASE_PATH = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -54,11 +54,26 @@ def testHjerrildChristensen(constants : Constants, StrBetaObj):
 
                 # Better fundamental estimation (TODO: use librosa.pyin instead, delete next line and se midi_flag=False to avoid f0 re-compute)
                 fundamental_init = librosa.midi_to_hz(constants.tuning[string] + fret)
-                # ToolBoxObj = ToolBox(partial_tracking_func=compute_partials_with_order, inharmonicity_compute_func=compute_inharmonicity, 
+                # librosa pyin fundamental estimation
+                f0s, _, _ = librosa.pyin(audio, fmin=80, fmax=1500, sr=constants.sampling_rate)
+                f0s = f0s[~np.isnan(f0s)]
+
+                # ### simple method #### __gb__
+                # f0_id = np.argmin(np.abs(f0s-fundamental_init))
+                # f0 = f0s[f0_id]
+
+                ### more sophisticated method i.e. mean of 10 closest estimations to expected value #### __gb__
+                idx = np.argsort(np.abs(f0s-fundamental_init))
+                f0 = np.sum( f0s[idx[:10]] )/10
+                # print(f0, fundamental_init)
+                
+                # ToolBoxObj = ToolBox(partial_tracking_func=compute_partials_with_order_strict, inharmonicity_compute_func=compute_inharmonicity, 
                 #                 partial_func_args=[fundamental_init/2, constants, StrBetaObj], inharmonic_func_args=[])
                 ToolBoxObj = ToolBox(partial_tracking_func=compute_partials, inharmonicity_compute_func=compute_inharmonicity, 
                                 partial_func_args=[constants.no_of_partials, fundamental_init/2, constants, StrBetaObj], inharmonic_func_args=[])
-                note_instance = NoteInstance(fundamental_init, 0, audio, ToolBoxObj, constants.sampling_rate, constants, midi_flag=True)
+                # note_instance = NoteInstance(fundamental_init, 0, audio, ToolBoxObj, constants.sampling_rate, constants, midi_flag=True)
+                # __gb__
+                note_instance = NoteInstance(f0, 0, audio, ToolBoxObj, constants.sampling_rate, constants)
 
                 # Detect plucked string (i.e. assigns value to note_instance.string)
                 Inharmonic_Detector.DetectString(note_instance, StrBetaObj, constants.betafunc, constants)
