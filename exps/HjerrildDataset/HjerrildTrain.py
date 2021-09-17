@@ -2,6 +2,8 @@
 from pathlib import Path
 import argparse
 import os, sys
+import numpy as np
+import librosa
 BASE_PATH = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 # cur_path = Path(BASE_PATH + '/src/InharmonicStringDetection')
 cur_path = Path(BASE_PATH + '/src/')
@@ -9,7 +11,7 @@ sys.path.append(str(cur_path))
 cur_path = Path(BASE_PATH + '/exps')
 sys.path.append(str(cur_path))
 
-from GuitarTrain import *
+from Inharmonic_Detector import StringBetas, Constants
 from helper import printProgressBar
 
 
@@ -24,7 +26,7 @@ def HjerrildChristensenTrain(strBetaObj, constants : Constants, train_frets = [0
         # print(dataset_no)
         for string in range(0,6):
             # print(dataset_no, string)
-            printProgressBar(count,6*len(dataset_nums),decimals=0, length=100)
+            printProgressBar(count,6*len(dataset_nums),decimals=0, length=50)
             for fret in constants.train_frets:
                 midi = constants.tuning[string] + fret
                 path_to_track = Path(constants.path_to_hjerrild_christensen +
@@ -38,7 +40,7 @@ def HjerrildChristensenTrain(strBetaObj, constants : Constants, train_frets = [0
             count+=1
 
 def TrainWrapper(constants : Constants):
-    strBetaObj = GuitarSetStringBetas(np.zeros((len(constants.tuning), constants.no_of_frets)), constants)
+    strBetaObj = StringBetas(np.zeros((len(constants.tuning), constants.no_of_frets)), constants)
     HjerrildChristensenTrain(strBetaObj, constants, train_frets = constants.train_frets)
     strBetaObj.list_to_medians()
     print(strBetaObj.betas_array)

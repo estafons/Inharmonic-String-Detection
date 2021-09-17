@@ -18,6 +18,7 @@ import matplotlib.pyplot as plt
 # from ransac import RansacModel
 # from linearleastsquare import LinearLeastSqaureModel
 
+
 class Partial():
     def __init__(self, frequency, order):
         self.frequency = frequency
@@ -52,39 +53,54 @@ class NoteInstance():
         # if ToolBoxObj.partial_func == compute_partials:
         #     ToolBoxObj.inharmonic_func(self, ToolBoxObj.inharmonic_func_args)
 
-    def plot_DFT(self, w=None, peaks=None, peaks_idx=None):
+    def plot_DFT(self, w=None, peaks=None, peaks_idx=None, b_est=None, lim=None, res=None):
+        [a,b,c] = res
+        fig = plt.figure(figsize=(15, 10))
         plt.plot(self.frequencies, self.fft.real)
         for k in range(50):
             plt.axvline(x=self.fundamental*k, color='r', ls='--', alpha=0.85, lw=0.5)     
 
-        if w:
+        if w: # draw windows as little boxes
             f0 = self.fundamental
-            for k in range(0,30):
-                f = k*f0 * np.sqrt(1+self.beta*k**2)
+            for k in range(1,lim):
+                # f = k*f0 * np.sqrt(1+b_est*k**2)
+                f = window_centering_func(k,f0, a=a,b=b,c=c)
                 rect=mpatches.Rectangle((f-w//2,-100),w,200, fill=False, color="purple", linewidth=2)
                 plt.gca().add_patch(rect)
 
         if peaks and peaks_idx:
             plt.plot(peaks, self.fft.real[peaks_idx], "x")
 
-        plt.xlim(xmax = 5000, xmin = 0)
+        plt.xlim(xmax = 3000, xmin = 0)
         plt.show()
 
-    def plot_partial_deviations(self, differences, orders, w=None, b_est=0, kapa=None, y=None):
-        plt.scatter(orders, differences) #, label="partials' devaiation")
-        f0 = self.fundamental
+    def plot_partial_deviations(self, differences, orders, w=None, b_est=None, lim=None, res=None, peaks_idx=None):
+        fig = plt.figure(figsize=(15, 10))
+        [a,b,c] = res
+        kapa = np.linspace(0, lim, num=lim*10)
+        y = a*kapa**3 + b*kapa + c
 
+        PeakAmps = [ self.frequencies[peak_idx] for peak_idx in peaks_idx ]
+        # Normalize
+        PeakAmps = PeakAmps / max(PeakAmps)
+        
+        plt.scatter(np.array(orders)+2, differences, alpha=PeakAmps) #, label="partials' deviation")
+        f0 = self.fundamental
         # plot litte boxes
-        for k in range(len(differences)):
-            pos = k*f0*np.sqrt(1+b_est*k**2)-k*f0
-            rect=mpatches.Rectangle((k-0.25,pos-w//2),0.5,w, fill=False, color="purple", linewidth=2)
+        for k in range(2, len(differences)+2):
+            # pos = k*f0*np.sqrt(1+b_est*k**2)
+            # pos = a*k**3 + b*k + c
+            pos = window_centering_func(k, f0, a, b, c) - k*f0
+
+            rect=mpatches.Rectangle((k-0.25, pos-w//2), 0.5, w, fill=False, color="purple", linewidth=2)
             plt.gca().add_patch(rect)
 
         plt.plot(kapa,y, label = 'new_estimate')
 
         plt.grid()
         plt.legend()
-        plt.title('beta_estimate: '+ str(b_est))
+        plt.title('f0: ' + str(round(self.fundamental,2)) + ', beta_estimate: '+ str(round(b_est,6)))
+      
         plt.show()
 
 
@@ -95,22 +111,32 @@ class NoteInstance():
         self.fundamental = max_peak
         return max_peak
 
+
+def window_centering_func(k,f0=None,a=None,b=None,c=None, b_est=None):
+    if b_est: # standard inharmonicity equation indicating partials position
+        center_freq = k*f0 * np.sqrt(1+b_est*k**2)
+    else: # polynomial approximation of partials
+        center_freq = a*k**3+b*k+c + (k*f0)
+    return center_freq        
+
+
 def compute_partials(note_instance, partial_func_args):
     """compute up to no_of_partials partials for note instance. 
     Freq_deviate is the length of window arround k*f0 that the partials are tracked with highest peak."""
-    no_of_partials = partial_func_args[0]
+    # no_of_partials = partial_func_args[0] NOTE: deal with it somehow
     freq_diviate = partial_func_args[1]
     constants = partial_func_args[2]
     diviate = round(freq_diviate/(note_instance.sampling_rate/note_instance.fft.size))
-
+    f0 = note_instance.fundamental
     Peaks, Peaks_Idx = [], []
 
-    b_est=0
-    N=6 # n_iterations # TODO: connect iterations with the value constants.no_of_partials
+    b_est, a, b, c = 0, 0, 0, 0
+    N=10 # n_iterations # TODO: connect iterations with the value constants.no_of_partials
     for i in range(N):
-        lim = 5*(i+1)+1 # NOTE: till 30th partial
+        lim = 5*(i+1)+1 # NOTE: till 30th/50th partial
         for k in range(2,lim): # initially range(2,11)
-            center_freq=k*note_instance.fundamental*np.sqrt(1+b_est*k**2)
+            # center_freq = k*f0 * np.sqrt(1+b_est*k**2)
+            center_freq = window_centering_func(k,f0, a=a,b=b,c=c) # centering window in which to look for peak/partial
             filtered = zero_out(note_instance.fft, center_freq=center_freq , window_length=diviate, constants=constants)
             peaks, _  =scipy.signal.find_peaks(np.abs(filtered),distance=100000) # better way to write this?
             max_peak = note_instance.frequencies[peaks[0]]
@@ -124,13 +150,9 @@ def compute_partials(note_instance, partial_func_args):
         differences, orders = zip(*compute_differences(note_instance))
         if i != N-1:
             note_instance.partials=[]
-        # TODO: change self.fundamental/2 so that it becomes variable
-        
-        k = np.linspace(0, lim-2, num=lim*10)
-        y = a*k**3 + b*k + c
-        if constants.plot: note_instance.plot_partial_deviations(differences, orders, w=note_instance.fundamental/2, b_est=b_est, kapa=k, y=y)
-    
-    if constants.plot: note_instance.plot_DFT(freq_diviate, Peaks, Peaks_Idx )
+        # TODO: change self.fundamental/2 so that it becomes variable      
+        if constants.plot: note_instance.plot_partial_deviations(differences, orders, w=note_instance.fundamental/2, b_est=b_est, lim=lim, res=[a,b,c], peaks_idx=Peaks_Idx)
+        if constants.plot: note_instance.plot_DFT(freq_diviate, Peaks, Peaks_Idx, b_est, lim, res=[a,b,c])
     
     del Peaks, Peaks_Idx
 
@@ -144,7 +166,7 @@ def compute_differences(note_instance):
 def compute_inharmonicity(note_instance, inharmonic_func_args):
     differences, orders = zip(*compute_differences(note_instance))
   
-    u=np.array(orders)
+    u=np.array(orders)+2
     if note_instance.polyfit == 'lsq':
         res=compute_least(u,differences) # least_squares
     if note_instance.polyfit == 'Thei':
@@ -190,6 +212,8 @@ def compute_least_TheilSen(u,y):
 
     # print("coefficients:", estimator.coef_)
     return estimator.coef_[::-1]
+
+
 
 
 def zero_out(fft, center_freq, window_length, constants : Constants):

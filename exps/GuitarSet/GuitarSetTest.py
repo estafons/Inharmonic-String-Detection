@@ -9,7 +9,7 @@ import argparse
 from GuitarTrain import GuitarSetTrainWrapper
 
 BASE_PATH = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-cur_path = Path(BASE_PATH + '/src/InharmonicStringDetection')
+cur_path = Path(BASE_PATH + '/src/')
 sys.path.append(str(cur_path))
 
 from track_class import *
@@ -22,15 +22,16 @@ from helper import ConfusionMatrix, compute_partial_orders
 parser = argparse.ArgumentParser()
 parser.add_argument('config_path', type=str)
 parser.add_argument('workspace_folder', type=str)
+parser.add_argument('-plot', action='store_true') 
+
 args = parser.parse_args()
-#input from user
 
 try:
     constants = Constants(args.config_path, args.workspace_folder)
 except Exception as e:
     print(e)
-    # raise RuntimeError(('could not open ' + str(args.config_path) + ', does not exist or given' +
-                #  'in wrong format try again as C:\\Users/user/Documents/path_to_config.ini'))
+
+constants.plot = args.plot
 
 
 def read_tablature_from_GuitarSet(jam_name, constants):

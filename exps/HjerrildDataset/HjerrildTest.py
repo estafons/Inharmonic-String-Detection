@@ -13,7 +13,8 @@ cur_path = Path(BASE_PATH + '/exps')
 sys.path.append(str(cur_path))
 
 from track_class import *
-from helper import ConfusionMatrix, compute_partial_orders
+from helper import ConfusionMatrix, compute_partial_orders, printProgressBar
+
 from HjerrildTrain import TrainWrapper
 from inharmonic_Analysis import (compute_partials, compute_inharmonicity, NoteInstance, 
                                     ToolBox, compute_partials_with_order, 
@@ -47,7 +48,7 @@ def testHjerrildChristensen(constants : Constants, StrBetaObj):
     for dataset_no in dataset_nums:
         # print(dataset_no)
         for string in range(0,6):
-            printProgressBar(count,6*len(dataset_nums),decimals=0, length=100)
+            printProgressBar(count,6*len(dataset_nums)-1,decimals=0, length=50)
             for fret in range(0,12):
                 path_to_track = Path(constants.path_to_hjerrild_christensen +
                                      constants.guitar + str(dataset_no) + 
