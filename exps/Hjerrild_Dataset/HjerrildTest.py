@@ -6,7 +6,8 @@ import numpy as np
 
 
 BASE_PATH = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-cur_path = Path(BASE_PATH + '/src/InharmonicStringDetection')
+# cur_path = Path(BASE_PATH + '/src/InharmonicStringDetection')
+cur_path = Path(BASE_PATH + '/src/')
 sys.path.append(str(cur_path))
 cur_path = Path(BASE_PATH + '/exps')
 sys.path.append(str(cur_path))
@@ -22,14 +23,18 @@ import Inharmonic_Detector
 parser = argparse.ArgumentParser()
 parser.add_argument('config_path', type=str)
 parser.add_argument('workspace_folder', type=str)
+parser.add_argument('-plot', action='store_true') 
+
 args = parser.parse_args()
 
-#input from user
-#config_path = Path("C:\\Users/stefa/Documents//Inharmonic String Detection/InharmonicStringDetection/constants.ini")
 try:
     constants = Constants(args.config_path, args.workspace_folder)
 except Exception as e:
     print(e)
+
+constants.plot = args.plot
+
+
 
 def testHjerrildChristensen(constants : Constants, StrBetaObj):
     InhConfusionMatrixObj = ConfusionMatrix((6,7), inconclusive = True)
@@ -56,27 +61,34 @@ def testHjerrildChristensen(constants : Constants, StrBetaObj):
             
                 # Better fundamental estimation (TODO: use librosa.pyin instead, delete next line and se midi_flag=False to avoid f0 re-compute)
                 fundamental_init = librosa.midi_to_hz(constants.tuning[string] + fret)
-                # # librosa pyin fundamental estimation
-                # f0s, _, _ = librosa.pyin(audio, fmin=80, fmax=1500, sr=constants.sampling_rate)
-                # f0s = f0s[~np.isnan(f0s)]
+                if constants.f0again == 'external': 
+                    # librosa pyin fundamental estimation
+                    f0s, _, _ = librosa.pyin(audio, fmin=80, fmax=1500, sr=constants.sampling_rate)
+                    f0s = f0s[~np.isnan(f0s)]
 
-                # # ### simple method #### __gb__
-                # # f0_id = np.argmin(np.abs(f0s-fundamental_init))
-                # # f0 = f0s[f0_id]
+                    # ### simple method #### __gb__
+                    # f0_id = np.argmin(np.abs(f0s-fundamental_init))
+                    # f0 = f0s[f0_id]
 
-                # ### more sophisticated method i.e. mean of 10 closest estimations to expected value #### __gb__
-                # idx = np.argsort(np.abs(f0s-fundamental_init))
-                # f0 = np.sum( f0s[idx[:10]] )/10
-                # # print(f0, fundamental_init)
+                    ### more sophisticated method i.e. mean of 10 closest estimations to expected value #### __gb__
+                    idx = np.argsort(np.abs(f0s-fundamental_init))
+                    f0 = np.sum( f0s[idx[:10]] )/10
                 
+                # NOTE: below commented is Stef's alternative method for variable partial numebers to be employed
                 # ToolBoxObj = ToolBox(partial_tracking_func=compute_partials_with_order_strict, inharmonicity_compute_func=compute_inharmonicity, 
                 #                 partial_func_args=[fundamental_init/2, constants, StrBetaObj], inharmonic_func_args=[])
+
                 ToolBoxObj = ToolBox(partial_tracking_func=compute_partials, inharmonicity_compute_func=compute_inharmonicity, 
                                 partial_func_args=[constants.no_of_partials, fundamental_init/2, constants, StrBetaObj], inharmonic_func_args=[])
-                note_instance = NoteInstance(fundamental_init, 0, audio, ToolBoxObj, constants.sampling_rate, constants, midi_flag=True)
-                # __gb__
-                # note_instance = NoteInstance(f0, 0, audio, ToolBoxObj, constants.sampling_rate, constants)
-
+                if constants.f0again == 'internal':
+                    note_instance = NoteInstance(fundamental_init, 0, audio, ToolBoxObj, constants.sampling_rate, constants, midi_flag=True)
+                elif constants.f0again == 'external': 
+                    note_instance = NoteInstance(f0, 0, audio, ToolBoxObj, constants.sampling_rate, constants)
+                elif constants.f0again == 'no': 
+                    note_instance = NoteInstance(fundamental_init, 0, audio, ToolBoxObj, constants.sampling_rate, constants)
+                else:
+                    printS("Wrong arguments given for f0again. Add a valid value in the corresponding field of constants.ini: 'interanal' or 'external' or 'no'")
+                    exit(1)
                 # Detect plucked string (i.e. assigns value to note_instance.string)
                 Inharmonic_Detector.DetectString(note_instance, StrBetaObj, constants.betafunc, constants)
 

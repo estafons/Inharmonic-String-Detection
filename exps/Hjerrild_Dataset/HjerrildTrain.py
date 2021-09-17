@@ -4,7 +4,8 @@ import argparse
 import os, sys
 
 BASE_PATH = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-cur_path = Path(BASE_PATH + '/src/InharmonicStringDetection')
+# cur_path = Path(BASE_PATH + '/src/InharmonicStringDetection')
+cur_path = Path(BASE_PATH + '/src/')
 sys.path.append(str(cur_path))
 cur_path = Path(BASE_PATH + '/exps')
 sys.path.append(str(cur_path))
