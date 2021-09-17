@@ -2,7 +2,6 @@
 from pathlib import Path
 import argparse
 import os, sys
-
 BASE_PATH = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 # cur_path = Path(BASE_PATH + '/src/InharmonicStringDetection')
 cur_path = Path(BASE_PATH + '/src/')
@@ -11,6 +10,7 @@ cur_path = Path(BASE_PATH + '/exps')
 sys.path.append(str(cur_path))
 
 from GuitarTrain import *
+from helper import printProgressBar
 
 
 def HjerrildChristensenTrain(strBetaObj, constants : Constants, train_frets = [0]):
@@ -18,11 +18,13 @@ def HjerrildChristensenTrain(strBetaObj, constants : Constants, train_frets = [0
         dataset_nums = [1,2,3,5,6,7,8,9,10]
     elif constants.guitar == 'martin':
         dataset_nums = [1,2,3,4,5,6,7,8,9,10]
-    print('Training on the specified subset...')    
+    print('Training on the specified subset...')
+    count=0    
     for dataset_no in dataset_nums:
         # print(dataset_no)
         for string in range(0,6):
-            print(dataset_no, string)
+            # print(dataset_no, string)
+            printProgressBar(count,6*len(dataset_nums),decimals=0, length=100)
             for fret in constants.train_frets:
                 midi = constants.tuning[string] + fret
                 path_to_track = Path(constants.path_to_hjerrild_christensen +
@@ -33,6 +35,7 @@ def HjerrildChristensenTrain(strBetaObj, constants : Constants, train_frets = [0
                 audio = audio[y[0]:] # adding this line because not all tracks start at the beggining
                 note_instance = strBetaObj.input_instance(audio, midi, string, constants)
                 strBetaObj.add_to_list(note_instance)
+            count+=1
 
 def TrainWrapper(constants : Constants):
     strBetaObj = GuitarSetStringBetas(np.zeros((len(constants.tuning), constants.no_of_frets)), constants)

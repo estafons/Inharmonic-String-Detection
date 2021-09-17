@@ -41,6 +41,7 @@ class NoteInstance():
         self.onset = onset
         self.audio = audio
         self.sampling_rate = constants.sampling_rate
+        self.polyfit = constants.polyfit
         self.fft=np.fft.fft(self.audio,n = constants.size_of_fft)
         self.frequencies=np.fft.fftfreq(constants.size_of_fft,1/self.sampling_rate)
         self.partials = []
@@ -144,9 +145,9 @@ def compute_inharmonicity(note_instance, inharmonic_func_args):
     differences, orders = zip(*compute_differences(note_instance))
   
     u=np.array(orders)
-    if constants.polyfit == 'lsq':
+    if note_instance.polyfit == 'lsq':
         res=compute_least(u,differences) # least_squares
-    if constants.polyfit == 'Thei':
+    if note_instance.polyfit == 'Thei':
         res=compute_least_TheilSen(u,differences) # least_squares
     
     [a,b,c]=res

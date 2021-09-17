@@ -15,5 +15,5 @@ The results will be stored to dir ```./results```.
 Configure the model by tweekinig values of ```constants.ini``` accordingly and then run:
 
 ```
-python HjerrildTest.py constants.ini .
+python HjerrildTest.py constants.ini . {-plot}
 ```

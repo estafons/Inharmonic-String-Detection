@@ -43,8 +43,10 @@ def testHjerrildChristensen(constants : Constants, StrBetaObj):
     elif constants.guitar == 'martin':
         dataset_nums = [1,2,3,4,5,6,7,8,9,10]
     print("Testing to the training set complement...")
+    count=0
     for dataset_no in dataset_nums:
-        print(dataset_no)
+        # print(dataset_no)
+        print(dataset_no/len(dataset_nums)," completed         \r",)
         for string in range(0,6):
             for fret in range(0,12):
                 path_to_track = Path(constants.path_to_hjerrild_christensen +
@@ -94,13 +96,21 @@ def testHjerrildChristensen(constants : Constants, StrBetaObj):
 
                 # Compute Confusion Matrix
                 InhConfusionMatrixObj.matrix[string][note_instance.string] += 1
-   
+            count+=1
     InhConfusionMatrixObj.plot_confusion_matrix(constants, normalize= True, 
                                                     title = str(constants.guitar) + str(constants.no_of_partials) +
                                                         'Inharmonic Confusion Matrix' +
                                                         str(round(InhConfusionMatrixObj.get_accuracy(),3)))
 
 if __name__ == '__main__':
+    print('Check if you are OK with certain important configuration constants:')
+    print('****************************')
+    print('train_mode:', constants.train_mode)
+    print('train_frets:', constants.train_frets)
+    print('polyfit:', constants.polyfit)
+    print('f0again:', constants.f0again)
+    print('****************************')
+    print()
 
     StrBetaObj = TrainWrapper(constants)
     # compute_partial_orders(StrBetaObj, constants)
