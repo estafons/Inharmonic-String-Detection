@@ -112,6 +112,15 @@ def testGuitarSet(constants : Constants, StrBetaObj):
 
 
 if __name__ == '__main__':
+    print('Check if you are OK with certain important configuration constants:')
+    print('****************************')
+    print('dataset:', constants.dataset)
+    print('train_mode:', constants.train_mode)
+    print('train_frets:', constants.train_frets)
+    print('polyfit:', constants.polyfit)
+    print('****************************')
+    print()
+
     StrBetaObj = GuitarSetTrainWrapper(constants)
     # compute_partial_orders(StrBetaObj, constants)
     testGuitarSet(constants, StrBetaObj)
