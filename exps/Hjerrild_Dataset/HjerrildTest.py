@@ -46,8 +46,8 @@ def testHjerrildChristensen(constants : Constants, StrBetaObj):
     count=0
     for dataset_no in dataset_nums:
         # print(dataset_no)
-        print(dataset_no/len(dataset_nums)," completed         \r",)
         for string in range(0,6):
+            printProgressBar(count,6*len(dataset_nums),decimals=0, length=100)
             for fret in range(0,12):
                 path_to_track = Path(constants.path_to_hjerrild_christensen +
                                      constants.guitar + str(dataset_no) + 
