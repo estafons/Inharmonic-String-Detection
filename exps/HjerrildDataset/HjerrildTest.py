@@ -4,7 +4,6 @@ import librosa
 import argparse
 import numpy as np
 
-
 BASE_PATH = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 # cur_path = Path(BASE_PATH + '/src/InharmonicStringDetection')
 cur_path = Path(BASE_PATH + '/src/')
@@ -80,7 +79,7 @@ def testHjerrildChristensen(constants : Constants, StrBetaObj):
                 # NOTE: below commented is Stef's alternative method for variable partial numebers to be employed
                 # ToolBoxObj = ToolBox(partial_tracking_func=compute_partials_with_order_strict, inharmonicity_compute_func=compute_inharmonicity, 
                 #                 partial_func_args=[fundamental_init/2, constants, StrBetaObj], inharmonic_func_args=[])
-
+                # TODO: make inharmonicity_compute_func have a meaning, also 1st arg of partial_func_args
                 ToolBoxObj = ToolBox(partial_tracking_func=compute_partials, inharmonicity_compute_func=compute_inharmonicity, 
                                 partial_func_args=[constants.no_of_partials, fundamental_init/2, constants, StrBetaObj], inharmonic_func_args=[])
                 if constants.f0again == 'internal':
@@ -110,6 +109,7 @@ if __name__ == '__main__':
     print('train_frets:', constants.train_frets)
     print('polyfit:', constants.polyfit)
     print('f0again:', constants.f0again)
+    print('guitar:',constants.guitar)
     print('****************************')
     print()
 

@@ -131,7 +131,7 @@ def compute_partials(note_instance, partial_func_args):
     Peaks, Peaks_Idx = [], []
 
     b_est, a, b, c = 0, 0, 0, 0
-    N=10 # n_iterations # TODO: connect iterations with the value constants.no_of_partials
+    N=6 # n_iterations # TODO: connect iterations with the value constants.no_of_partials
     for i in range(N):
         lim = 5*(i+1)+1 # NOTE: till 30th/50th partial
         for k in range(2,lim): # initially range(2,11)
@@ -226,7 +226,11 @@ def zero_out(fft, center_freq, window_length, constants : Constants):
 
     # for i in range(dom_freq_bin-window_length,dom_freq_bin+window_length): #NOTE: possible error
     for i in range(dom_freq_bin-window_length//2,dom_freq_bin+window_length//2): # __gb_
-        x[i] = temp[i]**2
+        try:
+            x[i] = temp[i]**2
+        except Exception as e:
+            print(e)
+            break
     return x
 
 

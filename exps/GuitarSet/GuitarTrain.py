@@ -9,36 +9,18 @@ BASE_PATH = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__fi
 cur_path = Path(BASE_PATH + '/src/')
 sys.path.append(str(cur_path))
 
+from helper import printProgressBar
 from inharmonic_Analysis import *
 from Inharmonic_Detector import StringBetas
 from constants_parser import Constants
-
-# class GuitarSetStringBetas(StringBetas):
-#     def add_to_list(self, note_instance):
-#         self.betas_list_array[note_instance.string][note_instance.fret].append(note_instance.beta)
-#         #self.betas_list_array.remove(0)
-    
-#     def input_instance(self, instance_audio, midi_note, string, constants : Constants):
-#         fundamental = librosa.midi_to_hz(midi_note)
-#         ToolBoxObj = ToolBox(compute_partials, compute_inharmonicity, [constants.no_of_partials, fundamental/2, constants], [])
-#         note_instance = NoteInstance(fundamental, 0, instance_audio, ToolBoxObj, constants.sampling_rate, constants, midi_flag = True)
-#         fundamental = note_instance.recompute_fundamental(constants)
-#         note_instance = NoteInstance(fundamental, 0, instance_audio, ToolBoxObj, constants.sampling_rate, constants) # compute again with recomputed fundamental
-#         ToolBoxObj = ToolBox(compute_partials, compute_inharmonicity, [constants.no_of_partials, fundamental/2, constants], [])
-#         note_instance.string = string
-#         note_instance.fret = midi_note - constants.tuning[note_instance.string]
-#         return note_instance
-    
-#     def list_to_medians(self):
-#         for i, r in enumerate(self.betas_list_array):
-#             for j, l in enumerate(r):
-#                 self.betas_array[i][j] = np.median(l)
 
 def train_GuitarSet(strBetaObj, constants, train_frets = [0]):
     '''train on selected instances from guitarset saved in specified folder. Fundamental 
     frequency is recomputed (since it is not available otherwise) by computing the expected
      fundamental based on midi note and finding the highest peak in a +-10 hz frame'''
+    print('Training on the specified subset...')
     for index, open_midi in enumerate(constants.tuning):
+        printProgressBar(index,len(constants.tuning),decimals=0, length=50)
         for train_fret in train_frets:
             midi_train = open_midi + train_fret
             path_to_train_data = str(Path(constants.training_path + str(midi_train) + "/" +str(index) + "/*.wav"))
