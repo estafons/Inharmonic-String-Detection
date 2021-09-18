@@ -137,13 +137,18 @@ def compute_partials(note_instance, partial_func_args):
         for k in range(2,lim): # initially range(2,11)
             # center_freq = k*f0 * np.sqrt(1+b_est*k**2)
             center_freq = window_centering_func(k,f0, a=a,b=b,c=c) # centering window in which to look for peak/partial
-            filtered = zero_out(note_instance.fft, center_freq=center_freq , window_length=diviate, constants=constants)
-            peaks, _  =scipy.signal.find_peaks(np.abs(filtered),distance=100000) # better way to write this?
-            max_peak = note_instance.frequencies[peaks[0]]
-            note_instance.partials.append(Partial(max_peak, k))
-            # store just for plotting
-            Peaks.append(note_instance.frequencies[peaks[0]])
-            Peaks_Idx.append(peaks[0])            
+            try:
+                filtered = zero_out(note_instance.fft, center_freq=center_freq , window_length=diviate, constants=constants)
+               
+                peaks, _  =scipy.signal.find_peaks(np.abs(filtered),distance=100000) # better way to write this?
+                max_peak = note_instance.frequencies[peaks[0]]
+                note_instance.partials.append(Partial(max_peak, k))
+                # store just for plotting
+                Peaks.append(note_instance.frequencies[peaks[0]])
+                Peaks_Idx.append(peaks[0])            
+            except Exception as e:
+                print(e)
+                pass
         # iterative beta estimates
         b_est, [a,b,c] = compute_inharmonicity(note_instance, [])
         # compute differences/deviations
@@ -225,12 +230,9 @@ def zero_out(fft, center_freq, window_length, constants : Constants):
     window_length = int(window_length)
 
     # for i in range(dom_freq_bin-window_length,dom_freq_bin+window_length): #NOTE: possible error
-    for i in range(dom_freq_bin-window_length//2,dom_freq_bin+window_length//2): # __gb_
-        try:
-            x[i] = temp[i]**2
-        except Exception as e:
-            print(e)
-            break
+    for i in range(dom_freq_bin-window_length//2, dom_freq_bin+window_length//2): # __gb_
+        x[i] = temp[i]**2
+
     return x
 
 
