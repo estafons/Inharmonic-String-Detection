@@ -101,8 +101,8 @@ def testGuitarSet(constants : Constants, StrBetaObj):
         track_instance, annotations = load_data(track_name, name, constants)
         predictTabThesis(track_instance, constants, StrBetaObj)
         InhConfusionMatrixObj.add_to_matrix(track_instance.tablature.tablature, annotations)
-        #tab, g = genetic.genetic(track_instance.tablature, constants)
-        #GenConfusionMatrixObj.add_to_matrix(tab, annotations)
+        tab, g = genetic.genetic(track_instance.tablature, constants)
+        GenConfusionMatrixObj.add_to_matrix(tab, annotations)
         # if count==2: break
     InhConfusionMatrixObj.plot_confusion_matrix(constants, normalize= True, 
                                 title = str(constants.no_of_partials) + 'Inharmonic Confusion Matrix' +str(round(InhConfusionMatrixObj.get_accuracy(),3)))
