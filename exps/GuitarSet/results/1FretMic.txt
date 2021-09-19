@@ -16,8 +16,8 @@ audio_based accuracy:  0.7752808988764045
 
 Creating initial population for GA...
 GA optimization in progress...
- |███████████---------------------------------------| 23% 
-GA accuracy:  0.8426966292134831
+ |████████████--------------------------------------| 24% 
+GA accuracy:  0.898876404494382
 
 Audio-based detection running...
 01_Funk1-97-C_solo.jams 1 / 53
@@ -25,8 +25,8 @@ audio_based accuracy:  0.7403846153846154
 
 Creating initial population for GA...
 GA optimization in progress...
- |████████████--------------------------------------| 25% 
-GA accuracy:  0.8942307692307693
+ |██████████----------------------------------------| 21% 
+GA accuracy:  0.8653846153846154
 
 Audio-based detection running...
 02_BN1-147-Gb_solo.jams 2 / 53
@@ -34,8 +34,8 @@ audio_based accuracy:  0.8409090909090909
 
 Creating initial population for GA...
 GA optimization in progress...
- |██████--------------------------------------------| 12% 
-GA accuracy:  0.9090909090909091
+ |██████--------------------------------------------| 13% 
+GA accuracy:  0.8863636363636364
 
 Audio-based detection running...
 02_BN2-131-B_solo.jams 3 / 53
@@ -43,8 +43,8 @@ audio_based accuracy:  0.8333333333333334
 
 Creating initial population for GA...
 GA optimization in progress...
- |████████------------------------------------------| 17% 
-GA accuracy:  0.9696969696969697
+ |██████████----------------------------------------| 21% 
+GA accuracy:  0.9545454545454546
 
 Audio-based detection running...
 02_BN2-166-Ab_solo.jams 4 / 53
@@ -52,8 +52,8 @@ audio_based accuracy:  0.5254237288135594
 
 Creating initial population for GA...
 GA optimization in progress...
- |██████████----------------------------------------| 21% 
-GA accuracy:  0.5932203389830508
+ |████████------------------------------------------| 17% 
+GA accuracy:  0.559322033898305
 
 Audio-based detection running...
 02_BN3-154-E_solo.jams 5 / 53
@@ -62,7 +62,7 @@ audio_based accuracy:  0.8987341772151899
 Creating initial population for GA...
 GA optimization in progress...
  |███████-------------------------------------------| 14% 
-GA accuracy:  0.9873417721518988
+GA accuracy:  1.0
 
 Audio-based detection running...
 02_Funk1-114-Ab_solo.jams 6 / 53
@@ -70,8 +70,8 @@ audio_based accuracy:  0.5841584158415841
 
 Creating initial population for GA...
 GA optimization in progress...
- |███████████████-----------------------------------| 31% 
-GA accuracy:  0.7623762376237624
+ |████████████████----------------------------------| 32% 
+GA accuracy:  0.8217821782178217
 
 Audio-based detection running...
 02_Funk2-108-Eb_solo.jams 7 / 53
@@ -79,7 +79,7 @@ audio_based accuracy:  0.7959183673469388
 
 Creating initial population for GA...
 GA optimization in progress...
- |██████████----------------------------------------| 20% 
+ |████████████--------------------------------------| 25% 
 GA accuracy:  0.9693877551020408
 
 Audio-based detection running...
@@ -88,7 +88,7 @@ audio_based accuracy:  0.7619047619047619
 
 Creating initial population for GA...
 GA optimization in progress...
- |██████--------------------------------------------| 12% 
+ |██████--------------------------------------------| 13% 
 GA accuracy:  0.9761904761904762
 
 Audio-based detection running...
@@ -97,8 +97,8 @@ audio_based accuracy:  0.9452054794520548
 
 Creating initial population for GA...
 GA optimization in progress...
- |███████-------------------------------------------| 14% 
-GA accuracy:  0.9726027397260274
+ |██████--------------------------------------------| 12% 
+GA accuracy:  0.9452054794520548
 
 Audio-based detection running...
 02_Rock3-148-C_solo.jams 10 / 53
@@ -106,8 +106,8 @@ audio_based accuracy:  0.8
 
 Creating initial population for GA...
 GA optimization in progress...
- |███████-------------------------------------------| 15% 
-GA accuracy:  0.9384615384615385
+ |████████------------------------------------------| 17% 
+GA accuracy:  0.9692307692307692
 
 Audio-based detection running...
 02_SS2-88-F_solo.jams 11 / 53
@@ -115,8 +115,8 @@ audio_based accuracy:  0.8571428571428571
 
 Creating initial population for GA...
 GA optimization in progress...
- |███████-------------------------------------------| 15% 
-GA accuracy:  0.8452380952380952
+ |█████████-----------------------------------------| 18% 
+GA accuracy:  0.8928571428571429
 
 Audio-based detection running...
 02_SS3-98-C_solo.jams 12 / 53
@@ -124,33 +124,29 @@ audio_based accuracy:  0.7165354330708661
 
 Creating initial population for GA...
 GA optimization in progress...
- |█████████████-------------------------------------| 27% 
-GA accuracy:  0.7165354330708661
+ |████████████████----------------------------------| 32% 
+GA accuracy:  0.7086614173228346
 
 Audio-based detection running...
 03_BN1-129-Eb_solo.jams 13 / 53
 index 269441 is out of bounds for axis 0 with size 262144
-index 291024 is out of bounds for axis 0 with size 262144
+MyExplanation: Certain windows where peaks are to be located surpassed the length of the DFT.
 audio_based accuracy:  0.9310344827586207
 
 Creating initial population for GA...
 GA optimization in progress...
- |██████--------------------------------------------| 13% 
+ |█████---------------------------------------------| 11% 
 GA accuracy:  0.9655172413793104
 
 Audio-based detection running...
 03_BN3-119-G_solo.jams 14 / 53
 index 273419 is out of bounds for axis 0 with size 262144
-index 298348 is out of bounds for axis 0 with size 262144
-index 324918 is out of bounds for axis 0 with size 262144
-index 353192 is out of bounds for axis 0 with size 262144
-index 383234 is out of bounds for axis 0 with size 262144
-index 415106 is out of bounds for axis 0 with size 262144
+MyExplanation: Certain windows where peaks are to be located surpassed the length of the DFT.
 audio_based accuracy:  0.8734177215189873
 
 Creating initial population for GA...
 GA optimization in progress...
- |███████-------------------------------------------| 15% 
+ |█████████-----------------------------------------| 18% 
 GA accuracy:  0.9367088607594937
 
 Audio-based detection running...
@@ -159,8 +155,8 @@ audio_based accuracy:  0.8333333333333334
 
 Creating initial population for GA...
 GA optimization in progress...
- |██████████████------------------------------------| 28% 
-GA accuracy:  0.9375
+ |█████████████-------------------------------------| 26% 
+GA accuracy:  0.90625
 
 Audio-based detection running...
 03_Jazz1-130-D_solo.jams 16 / 53
@@ -168,8 +164,8 @@ audio_based accuracy:  0.8142857142857143
 
 Creating initial population for GA...
 GA optimization in progress...
- |███████████---------------------------------------| 22% 
-GA accuracy:  0.9142857142857143
+ |████████------------------------------------------| 17% 
+GA accuracy:  0.9
 
 Audio-based detection running...
 03_Jazz1-200-B_solo.jams 17 / 53
@@ -177,7 +173,7 @@ audio_based accuracy:  0.9069767441860465
 
 Creating initial population for GA...
 GA optimization in progress...
- |████----------------------------------------------| 8% 
+ |███-----------------------------------------------| 7% 
 GA accuracy:  1.0
 
 Audio-based detection running...
@@ -186,8 +182,8 @@ audio_based accuracy:  0.9090909090909091
 
 Creating initial population for GA...
 GA optimization in progress...
- |█████████-----------------------------------------| 18% 
-GA accuracy:  0.935064935064935
+ |███████-------------------------------------------| 15% 
+GA accuracy:  0.948051948051948
 
 Audio-based detection running...
 03_Rock1-130-A_solo.jams 19 / 53
@@ -195,20 +191,19 @@ audio_based accuracy:  0.896551724137931
 
 Creating initial population for GA...
 GA optimization in progress...
- |█████████-----------------------------------------| 18% 
-GA accuracy:  0.9310344827586207
+ |██████--------------------------------------------| 13% 
+GA accuracy:  0.9655172413793104
 
 Audio-based detection running...
 03_SS2-107-Ab_solo.jams 20 / 53
 index 271038 is out of bounds for axis 0 with size 262144
-index 293535 is out of bounds for axis 0 with size 262144
-index 317377 is out of bounds for axis 0 with size 262144
+MyExplanation: Certain windows where peaks are to be located surpassed the length of the DFT.
 audio_based accuracy:  0.8712871287128713
 
 Creating initial population for GA...
 GA optimization in progress...
- |██████████----------------------------------------| 20% 
-GA accuracy:  0.9405940594059405
+ |███████████---------------------------------------| 22% 
+GA accuracy:  0.9504950495049505
 
 Audio-based detection running...
 04_BN1-129-Eb_solo.jams 21 / 53
@@ -216,7 +211,7 @@ audio_based accuracy:  0.9285714285714286
 
 Creating initial population for GA...
 GA optimization in progress...
- |█████---------------------------------------------| 10% 
+ |████----------------------------------------------| 9% 
 GA accuracy:  0.8809523809523809
 
 Audio-based detection running...
@@ -225,7 +220,7 @@ audio_based accuracy:  0.8541666666666666
 
 Creating initial population for GA...
 GA optimization in progress...
- |█████---------------------------------------------| 11% 
+ |████----------------------------------------------| 8% 
 GA accuracy:  1.0
 
 Audio-based detection running...
@@ -235,7 +230,7 @@ audio_based accuracy:  0.9159663865546218
 Creating initial population for GA...
 GA optimization in progress...
  |█████████-----------------------------------------| 18% 
-GA accuracy:  0.9663865546218487
+GA accuracy:  0.9831932773109243
 
 Audio-based detection running...
 04_Funk3-112-C#_solo.jams 24 / 53
@@ -243,7 +238,7 @@ audio_based accuracy:  0.9
 
 Creating initial population for GA...
 GA optimization in progress...
- |████████------------------------------------------| 17% 
+ |██████████----------------------------------------| 21% 
 GA accuracy:  0.9444444444444444
 
 Audio-based detection running...
@@ -252,8 +247,8 @@ audio_based accuracy:  0.8347826086956521
 
 Creating initial population for GA...
 GA optimization in progress...
- |█████████████-------------------------------------| 26% 
-GA accuracy:  0.9565217391304348
+ |█████████████-------------------------------------| 27% 
+GA accuracy:  0.9739130434782609
 
 Audio-based detection running...
 04_SS2-107-Ab_solo.jams 26 / 53
@@ -261,8 +256,8 @@ audio_based accuracy:  0.9104477611940298
 
 Creating initial population for GA...
 GA optimization in progress...
- |██████████----------------------------------------| 20% 
-GA accuracy:  0.9402985074626866
+ |█████████-----------------------------------------| 19% 
+GA accuracy:  0.8805970149253731
 
 Audio-based detection running...
 04_SS2-88-F_solo.jams 27 / 53
@@ -270,7 +265,7 @@ audio_based accuracy:  0.9156626506024096
 
 Creating initial population for GA...
 GA optimization in progress...
- |███████-------------------------------------------| 14% 
+ |██████--------------------------------------------| 13% 
 GA accuracy:  0.9759036144578314
 
 Audio-based detection running...
@@ -280,7 +275,7 @@ audio_based accuracy:  0.6136363636363636
 Creating initial population for GA...
 GA optimization in progress...
  |███████-------------------------------------------| 14% 
-GA accuracy:  0.7954545454545454
+GA accuracy:  0.6590909090909091
 
 Audio-based detection running...
 05_BN1-147-Gb_solo.jams 29 / 53
@@ -294,16 +289,13 @@ GA accuracy:  0.9259259259259259
 Audio-based detection running...
 05_BN2-131-B_solo.jams 30 / 53
 index 267375 is out of bounds for axis 0 with size 262144
-index 292151 is out of bounds for axis 0 with size 262144
-index 318563 is out of bounds for axis 0 with size 262144
-index 346673 is out of bounds for axis 0 with size 262144
-index 376541 is out of bounds for axis 0 with size 262144
+MyExplanation: Certain windows where peaks are to be located surpassed the length of the DFT.
 audio_based accuracy:  0.782608695652174
 
 Creating initial population for GA...
 GA optimization in progress...
- |████████████--------------------------------------| 25% 
-GA accuracy:  0.8695652173913043
+ |█████████-----------------------------------------| 19% 
+GA accuracy:  0.9710144927536232
 
 Audio-based detection running...
 05_BN2-166-Ab_solo.jams 31 / 53
@@ -311,8 +303,8 @@ audio_based accuracy:  0.8656716417910447
 
 Creating initial population for GA...
 GA optimization in progress...
- |█████████-----------------------------------------| 18% 
-GA accuracy:  0.9402985074626866
+ |██████████----------------------------------------| 20% 
+GA accuracy:  0.9104477611940298
 
 Audio-based detection running...
 05_BN3-119-G_solo.jams 32 / 53
@@ -320,7 +312,7 @@ audio_based accuracy:  0.7580645161290323
 
 Creating initial population for GA...
 GA optimization in progress...
- |█████████-----------------------------------------| 19% 
+ |████████------------------------------------------| 17% 
 GA accuracy:  0.9516129032258065
 
 Audio-based detection running...
@@ -329,7 +321,7 @@ audio_based accuracy:  0.7678571428571429
 
 Creating initial population for GA...
 GA optimization in progress...
- |██████--------------------------------------------| 13% 
+ |████████------------------------------------------| 16% 
 GA accuracy:  0.8214285714285714
 
 Audio-based detection running...
@@ -338,7 +330,7 @@ audio_based accuracy:  0.9180327868852459
 
 Creating initial population for GA...
 GA optimization in progress...
- |████----------------------------------------------| 9% 
+ |█████---------------------------------------------| 11% 
 GA accuracy:  0.9836065573770492
 
 Audio-based detection running...
@@ -347,8 +339,8 @@ audio_based accuracy:  0.797979797979798
 
 Creating initial population for GA...
 GA optimization in progress...
- |██████████----------------------------------------| 20% 
-GA accuracy:  0.8787878787878788
+ |███████████---------------------------------------| 22% 
+GA accuracy:  0.898989898989899
 
 Audio-based detection running...
 05_Funk3-112-C#_solo.jams 36 / 53
@@ -356,7 +348,7 @@ audio_based accuracy:  0.9142857142857143
 
 Creating initial population for GA...
 GA optimization in progress...
- |█████████-----------------------------------------| 19% 
+ |████████------------------------------------------| 17% 
 GA accuracy:  0.9285714285714286
 
 Audio-based detection running...
@@ -365,7 +357,7 @@ audio_based accuracy:  0.7846153846153846
 
 Creating initial population for GA...
 GA optimization in progress...
- |███████-------------------------------------------| 15% 
+ |████████------------------------------------------| 17% 
 GA accuracy:  0.9230769230769231
 
 Audio-based detection running...
@@ -374,8 +366,8 @@ audio_based accuracy:  0.7586206896551724
 
 Creating initial population for GA...
 GA optimization in progress...
- |████████------------------------------------------| 16% 
-GA accuracy:  0.8793103448275862
+ |███████████---------------------------------------| 22% 
+GA accuracy:  0.9137931034482759
 
 Audio-based detection running...
 05_Jazz1-200-B_solo.jams 39 / 53
@@ -383,8 +375,8 @@ audio_based accuracy:  0.74
 
 Creating initial population for GA...
 GA optimization in progress...
- |███████-------------------------------------------| 14% 
-GA accuracy:  0.8
+ |██████--------------------------------------------| 12% 
+GA accuracy:  0.76
 
 Audio-based detection running...
 05_Jazz2-187-F#_solo.jams 40 / 53
@@ -392,8 +384,8 @@ audio_based accuracy:  0.7540983606557377
 
 Creating initial population for GA...
 GA optimization in progress...
- |█████████-----------------------------------------| 19% 
-GA accuracy:  0.7868852459016393
+ |███████-------------------------------------------| 14% 
+GA accuracy:  0.819672131147541
 
 Audio-based detection running...
 05_Jazz3-137-Eb_solo.jams 41 / 53
@@ -401,7 +393,7 @@ audio_based accuracy:  0.7922077922077922
 
 Creating initial population for GA...
 GA optimization in progress...
- |██████████----------------------------------------| 21% 
+ |████████------------------------------------------| 17% 
 GA accuracy:  0.8831168831168831
 
 Audio-based detection running...
@@ -410,8 +402,8 @@ audio_based accuracy:  0.8695652173913043
 
 Creating initial population for GA...
 GA optimization in progress...
- |████████------------------------------------------| 16% 
-GA accuracy:  1.0
+ |███████-------------------------------------------| 14% 
+GA accuracy:  0.9565217391304348
 
 Audio-based detection running...
 05_Rock1-130-A_solo.jams 43 / 53
@@ -420,7 +412,7 @@ audio_based accuracy:  0.7833333333333333
 Creating initial population for GA...
 GA optimization in progress...
  |██████████----------------------------------------| 20% 
-GA accuracy:  0.9166666666666666
+GA accuracy:  0.9666666666666667
 
 Audio-based detection running...
 05_Rock1-90-C#_solo.jams 44 / 53
@@ -428,7 +420,7 @@ audio_based accuracy:  0.8181818181818182
 
 Creating initial population for GA...
 GA optimization in progress...
- |███████████---------------------------------------| 23% 
+ |██████████----------------------------------------| 21% 
 GA accuracy:  0.9595959595959596
 
 Audio-based detection running...
@@ -437,8 +429,8 @@ audio_based accuracy:  0.6162790697674418
 
 Creating initial population for GA...
 GA optimization in progress...
- |███████████████-----------------------------------| 30% 
-GA accuracy:  0.7441860465116279
+ |██████████████------------------------------------| 28% 
+GA accuracy:  0.7674418604651163
 
 Audio-based detection running...
 05_Rock3-148-C_solo.jams 46 / 53
@@ -446,8 +438,8 @@ audio_based accuracy:  0.8688524590163934
 
 Creating initial population for GA...
 GA optimization in progress...
- |████████------------------------------------------| 17% 
-GA accuracy:  0.9672131147540983
+ |███████-------------------------------------------| 15% 
+GA accuracy:  0.9508196721311475
 
 Audio-based detection running...
 05_SS1-100-C#_comp.jams 47 / 53
@@ -456,7 +448,7 @@ audio_based accuracy:  0.5980392156862745
 Creating initial population for GA...
 GA optimization in progress...
  |████████████████----------------------------------| 33% 
-GA accuracy:  0.8333333333333334
+GA accuracy:  0.9019607843137255
 
 Audio-based detection running...
 05_SS1-68-E_comp.jams 48 / 53
@@ -464,8 +456,8 @@ audio_based accuracy:  0.8531468531468531
 
 Creating initial population for GA...
 GA optimization in progress...
- |███████████---------------------------------------| 22% 
-GA accuracy:  1.0
+ |█████████-----------------------------------------| 19% 
+GA accuracy:  0.993006993006993
 
 Audio-based detection running...
 05_SS2-107-Ab_solo.jams 49 / 53
@@ -473,8 +465,8 @@ audio_based accuracy:  0.8045977011494253
 
 Creating initial population for GA...
 GA optimization in progress...
- |███████████---------------------------------------| 23% 
-GA accuracy:  0.9310344827586207
+ |██████████----------------------------------------| 21% 
+GA accuracy:  0.9080459770114943
 
 Audio-based detection running...
 05_SS2-88-F_solo.jams 50 / 53
@@ -482,8 +474,8 @@ audio_based accuracy:  0.8924731182795699
 
 Creating initial population for GA...
 GA optimization in progress...
- |█████████-----------------------------------------| 19% 
-GA accuracy:  0.9139784946236559
+ |██████████----------------------------------------| 20% 
+GA accuracy:  0.9247311827956989
 
 Audio-based detection running...
 05_SS3-84-Bb_solo.jams 51 / 53
@@ -500,5 +492,9 @@ audio_based accuracy:  0.8494623655913979
 
 Creating initial population for GA...
 GA optimization in progress...
- |███████-------------------------------------------| 14% 
-GA accuracy:  0.946236559139785
+ |██████████----------------------------------------| 21% 
+GA accuracy:  0.9139784946236559
+Normalized confusion matrix
+Audio-based mean accuracy: 1
+Normalized confusion matrix
+GA context-based mean accuracy: 1
