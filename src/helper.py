@@ -12,6 +12,7 @@ from Inharmonic_Detector import StringBetas
 class ConfusionMatrix():
     def __init__(self, size, inconclusive):
         self.matrix = np.zeros(size)
+        self.current_matrix = np.zeros(size)
         self.x_classes = ['E', 'A', 'D', 'G', 'B', 'e']
         if inconclusive:
             self.y_classes = ['E', 'A', 'D', 'G', 'B', 'e', 'inconclusive']
@@ -21,9 +22,13 @@ class ConfusionMatrix():
     def add_to_matrix(self, tab_as_list, annotations : Annotations):
         for tab_instance, annos_instance in zip(tab_as_list, annotations.tablature.tablature):
             self.matrix[annos_instance.string][tab_instance.string] += 1
+            self.current_matrix[annos_instance.string][tab_instance.string] += 1
     
     def get_accuracy(self):
-        return np.trace(self.matrix)/np.sum(self.matrix)
+        total_acc = np.trace(self.matrix)/np.sum(self.matrix)
+        current_acc = np.trace(self.current_matrix)/np.sum(self.current_matrix)
+        return total_acc, current_acc
+        
     def plot_confusion_matrix(self, constants,
                             normalize=False,
                             title='Confusion matrix',
@@ -59,7 +64,8 @@ class ConfusionMatrix():
             plt.xlabel('Predicted label')
             plt.tight_layout()
             #plt.show()
-            plt.savefig(Path(constants.result_path + title.replace(" ", "") +'.png'))
+         
+            plt.savefig(Path(constants.result_path + title.replace(" ", "") +'_'+constants.dataset+'_'+constants.train_mode+'_'+constants.polyfit+'.png'))
             return plt
 
 

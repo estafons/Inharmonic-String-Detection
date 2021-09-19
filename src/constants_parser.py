@@ -64,8 +64,8 @@ class Constants():
         self.annos_path = workspace_folder + '/data/annos/'
         # txt file that contains the list of names of the tracks to be tested (GuitarSet)
         self.listoftracksfile = '/names.txt'
-        # Path were listoftracksfile is stored
-        self.dataset_names_path = workspace_folder
+        # Path were listoftracksfile is stored NOTE: commented out!!
+        # self.dataset_names_path = workspace_folder
 
         if self.train_mode == '1Fret':
             self.betafunc = betafuncs.betafunc

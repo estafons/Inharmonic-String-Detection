@@ -86,28 +86,16 @@ class NoteInstance():
         if peaks and peaks_idx:
             ax.plot(peaks, self.fft.real[peaks_idx], "x")
 
-        # plt.xlim(xmax = 3000, xmin = 0)
         ax.set_xlim(0, window_centering_func(lim+1,f0, a=a,b=b,c=c))
         ax.set_ylim(-100, 100)
-        # if not save_path:  
-        #     plt.show()
-        # else:
-        #     fig.savefig(save_path)
-       
-        # ax.clf()
+
         return ax
 
 
     def plot_partial_deviations(self, lim=None, res=None, peaks_idx=None, ax=None, note_string='', annos_string=''):
-        # if fig:
-        #     ax = fig.add_subplot(2, 1, 1)
-        # else:
-        #     fig =  plt.figure(figsize=(15, 10))
-        #     ax = fig.add_subplot(1, 1, 1)
 
         differences = self.differences
         w = self.fundamental/2
-        # fig = plt.figure(figsize=(15, 10))
         [a,b,c] = res
         kapa = np.linspace(0, lim, num=lim*10)
         y = a*kapa**3 + b*kapa + c
@@ -117,13 +105,10 @@ class NoteInstance():
             PeakAmps = PeakAmps / max(PeakAmps) # Normalize
         else:
             PeakAmps = 1
-        # plt.scatter(np.array(orders)+2, differences, alpha=PeakAmps) #, label="partials' deviation")
         ax.scatter(np.arange(2,len(differences)+2), differences, alpha=PeakAmps)
         f0 = self.fundamental
         # plot litte boxes
         for k in range(2, len(differences)+2):
-            # pos = k*f0*np.sqrt(1+b_est*k**2)
-            # pos = a*k**3 + b*k + c
             pos = window_centering_func(k, f0, a, b, c) - k*f0
 
             rect=mpatches.Rectangle((k-0.25, pos-w//2), 0.5, w, fill=False, color="purple", linewidth=2)
@@ -143,8 +128,7 @@ class NoteInstance():
         else:
             c='black'
         
-
-        plt.title("pred: "+ note_string + " annotation: " + annos_string + ' f0: ' + str(round(self.fundamental,2)) + ', beta_estimate: '+ str(round(self.beta,6)), color=c)
+        plt.title("pred: "+ note_string + ", annotation: " + annos_string + ' || f0: ' + str(round(self.fundamental,2)) + ', beta_estimate: '+ str(round(self.beta,6)) + '\n a = ' + str(round(a,5)), color=c)
 
         # if not save_path:  
         #     plt.show()
@@ -197,7 +181,8 @@ def compute_partials(note_instance, partial_func_args):
                 Peaks_Idx.append(peaks[0])            
             except Exception as e:
                 print(e)
-                pass
+                print('MyExplanation: Certain windows where peaks are to be located surpassed the length of the DFT.')
+                break
         # iterative beta estimates
         _, [a,b,c] = compute_inharmonicity(note_instance, [])
         note_instance.abc = [a,b,c]

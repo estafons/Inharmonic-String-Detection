@@ -1,6 +1,8 @@
 from deap import base, creator, tools
 from genetic_tools import *
 from constants_parser import Constants
+from helper import printProgressBar
+# from scoop import futures
 
 def delete_extra_info(tablature : Tablature):
     for tab_instance in tablature.tablature:
@@ -20,7 +22,7 @@ def genetic(inharmonic_tablature : Tablature, constants : Constants):
     # create toolbox
     toolbox = base.Toolbox()
 
-
+    # toolbox.register("map", futures.map)
     toolbox.register("random_tab", get_random_tablature, inharmonic_tablature, constants)
     toolbox.register("individual", tools.initIterate, creator.Individual,
                         toolbox.random_tab)
@@ -34,13 +36,20 @@ def genetic(inharmonic_tablature : Tablature, constants : Constants):
    # pool = multiprocessing.Pool()
    # toolbox.register("map", pool.map)#
     toolbox.register("map", map) # windows workarround. Cant use multiprocessing at the moment
+    print()
+    print('Creating initial population for GA...')
     #create initial population
     pop = toolbox.population()
     fitnesses = list(toolbox.map(toolbox.evaluate, pop))
+    # print()
+    print('GA optimization in progress...')
     for ind, fit in zip(pop, fitnesses):
-        ind.fitness.values = fit
+        # ind.fitness.values = fit
+        ind.fitness.values = (fit[0],)
+
     for g in range(ngen):
-        print(g)
+        # print(g)
+        printProgressBar(g, ngen, decimals=0, length=50)
 
         offspring = toolbox.select(pop)
         offspring = list(toolbox.map(toolbox.clone, offspring))
@@ -63,7 +72,9 @@ def genetic(inharmonic_tablature : Tablature, constants : Constants):
         invalid_ind = [ind for ind in offspring if not ind.fitness.valid]
         fitnesses = toolbox.map(toolbox.evaluate, invalid_ind)
         for ind, fit in zip(invalid_ind, fitnesses):
-            ind.fitness.values = fit
+            # NOTE: ask stef why
+            # ind.fitness.values = fit
+            ind.fitness.values = (fit[0],)
 
         # The population is entirely replaced by the offspring
         offspring.extend(tools.selBest(pop, constants.parents_to_next_gen))
@@ -75,7 +86,10 @@ def genetic(inharmonic_tablature : Tablature, constants : Constants):
             break
 
         #print([x.string for x in res])
+    print()
     [winner] = tools.selBest(selected, 1)
+    del creator.FitnessMin
+    del creator.Individual
     return winner, g
 
 #tab = Tablature([(0.1, 110, 0),(0.1, 110, 1),(0.1, 110, 1), (0.1, 110, 1),(0.1, 110, 1),(0.1, 110, 1),(0.1, 110, 1),(0.1, 110, 1),(0.1, 110, 1),(0.1, 110, 1),(0.1, 110, 1),(0.1, 110, 1)], [], True)
