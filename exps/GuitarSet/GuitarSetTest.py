@@ -7,6 +7,7 @@ import configparser
 import os, sys
 import argparse
 from GuitarTrain import GuitarSetTrainWrapper
+import threading
 
 BASE_PATH = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 cur_path = Path(BASE_PATH + '/src/')
@@ -18,6 +19,10 @@ from inharmonic_Analysis import *
 from constants_parser import Constants
 import genetic
 from helper import ConfusionMatrix, compute_partial_orders, printProgressBar
+
+from playsound import playsound
+import soundfile as sf
+
 #config_path = Path("C:\\Users/stefa/Documents//Inharmonic String Detection/exps/constants.ini")
 parser = argparse.ArgumentParser()
 parser.add_argument('config_path', type=str)
@@ -69,9 +74,11 @@ def load_data(track_name, annotation_name, constants : Constants):
     track_instance = TrackInstance(tablature, data, constants)
     return track_instance, annotations
 
-def predictTabThesis(track_instance : TrackInstance, constants : Constants, StrBetaObj):
+def predictTabThesis(track_instance : TrackInstance, annotations : Annotations, constants : Constants, StrBetaObj, filename=None):
+    def close_event(): # https://stackoverflow.com/questions/30364770/how-to-set-timeout-to-pyplot-show-in-matplotlib
+        plt.close() #timer calls this function after 3 seconds and closes the window 
     """Inharmonic prediction of tablature as implemented for thesis """
-    for tab_instance in track_instance.tablature.tablature:
+    for tab_instance, annos_instance in zip(track_instance.tablature.tablature, annotations.tablature.tablature):
         # ToolBoxObj = ToolBox(compute_partials_with_order, compute_inharmonicity, [tab_instance.fundamental/2, constants, StrBetaObj], [])
         # TODO: make inharmonicity_compute_func have a meaning, also 1st arg of partial_func_args
         ToolBoxObj = ToolBox(partial_tracking_func=compute_partials, inharmonicity_compute_func=compute_inharmonicity, 
@@ -81,8 +88,28 @@ def predictTabThesis(track_instance : TrackInstance, constants : Constants, StrB
         tab_instance.string = note_instance.string
         if tab_instance.string != 6: # 6 marks inconclusive
             tab_instance.fret = Inharmonic_Detector.hz_to_midi(note_instance.fundamental) - constants.tuning[note_instance.string]
+            # if constants.plot:
+
+            # librosa.output.write_wav('./tmp.wav', tab_instance.note_audio, sr=22050)
+            # TODO: make it show image (only) while sound plays!
+            sf.write('tmp.wav', tab_instance.note_audio, 16000, 'PCM_24')
+            playsound('tmp.wav')
+            fig = plt.figure(figsize=(15, 10))
+            timer = fig.canvas.new_timer(interval = 3000) #creating a timer object and setting an interval of 3000 milliseconds
+            timer.add_callback(close_event)
+            ax1 = fig.add_subplot(2, 1, 1)
+            ax2 = fig.add_subplot(2, 1, 2)
+            #  TODO: fix lim
+            print(annos_instance.string)
+            note_instance.plot_partial_deviations(lim=30, res=note_instance.abc, ax=ax1, note_string=str(note_instance.string), annos_string=str(annos_instance.string))#, peaks_idx=Peaks_Idx)
+            note_instance.plot_DFT(lim=30, ax=ax2)   
+            fig.savefig('imgs/auto_img_test_examples/'+str(note_instance.string)+'_'+str(filename)+'.png')
+            timer.start()
+            plt.show()
+            # plt.close()              
         else:
             tab_instance.fret = None
+            # note_instance.plot_partial_deviations(lim=30, res=note_instance.abc, save_path="NOT")
 
 
 def testGuitarSet(constants : Constants, StrBetaObj):
@@ -99,7 +126,7 @@ def testGuitarSet(constants : Constants, StrBetaObj):
         name = name.replace('\n', '')
         track_name = name[:-5] + '_' + constants.dataset +'.wav'
         track_instance, annotations = load_data(track_name, name, constants)
-        predictTabThesis(track_instance, constants, StrBetaObj)
+        predictTabThesis(track_instance, annotations, constants, StrBetaObj, name)
         InhConfusionMatrixObj.add_to_matrix(track_instance.tablature.tablature, annotations)
         tab, g = genetic.genetic(track_instance.tablature, constants)
         GenConfusionMatrixObj.add_to_matrix(tab, annotations)

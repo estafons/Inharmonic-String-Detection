@@ -10,7 +10,6 @@ import os
 from sklearn.preprocessing import PolynomialFeatures
 from sklearn.linear_model import (LinearRegression, TheilSenRegressor, RANSACRegressor, HuberRegressor)
 import matplotlib.patches as mpatches
-
 from constants_parser import Constants
 
 import matplotlib.pyplot as plt
@@ -46,6 +45,11 @@ class NoteInstance():
         self.fft=np.fft.fft(self.audio,n = constants.size_of_fft)
         self.frequencies=np.fft.fftfreq(constants.size_of_fft,1/self.sampling_rate)
         self.partials = []
+        self.differences = []
+        self.abc = []
+        self.large_window = None
+        # self.train = False
+        self.string = None
         if midi_flag:
             self.recompute_fundamental(constants, fundamental/2)
 
@@ -53,38 +57,68 @@ class NoteInstance():
         # if ToolBoxObj.partial_func == compute_partials:
         #     ToolBoxObj.inharmonic_func(self, ToolBoxObj.inharmonic_func_args)
 
-    def plot_DFT(self, w=None, peaks=None, peaks_idx=None, b_est=None, lim=None, res=None):
-        [a,b,c] = res
-        fig = plt.figure(figsize=(15, 10))
-        plt.plot(self.frequencies, self.fft.real)
+    def get_string(string):
+        self.string = string
+
+    def plot_DFT(self, peaks=None, peaks_idx=None, lim=None, ax=None, save_path=None):
+        [a,b,c] = self.abc
+        w = self.large_window
+        # if fig:
+        #     ax = fig.add_subplot(2, 1, 2)
+        # else:
+        #     fig =  plt.figure(figsize=(15, 10))
+        #     ax = fig.add_subplot(1, 1, 1)
+
+     
+        ax.plot(self.frequencies, self.fft.real)
         for k in range(50):
-            plt.axvline(x=self.fundamental*k, color='r', ls='--', alpha=0.85, lw=0.5)     
+            ax.axvline(x=self.fundamental*k, color='r', ls='--', alpha=0.85, lw=0.5)     
 
         if w: # draw windows as little boxes
             f0 = self.fundamental
             for k in range(1,lim):
                 # f = k*f0 * np.sqrt(1+b_est*k**2)
                 f = window_centering_func(k,f0, a=a,b=b,c=c)
-                rect=mpatches.Rectangle((f-w//2,-100),w,200, fill=False, color="purple", linewidth=2)
-                plt.gca().add_patch(rect)
+                rect=mpatches.Rectangle((f-w//2,-80),w,160, fill=False, color="purple", linewidth=2)
+                # plt.gca().add_patch(rect)
+                ax.add_patch(rect)
 
         if peaks and peaks_idx:
-            plt.plot(peaks, self.fft.real[peaks_idx], "x")
+            ax.plot(peaks, self.fft.real[peaks_idx], "x")
 
-        plt.xlim(xmax = 3000, xmin = 0)
-        plt.show()
+        # plt.xlim(xmax = 3000, xmin = 0)
+        ax.set_xlim(0, window_centering_func(lim+1,f0, a=a,b=b,c=c))
+        ax.set_ylim(-100, 100)
+        # if not save_path:  
+        #     plt.show()
+        # else:
+        #     fig.savefig(save_path)
+       
+        # ax.clf()
+        return ax
 
-    def plot_partial_deviations(self, differences, orders, w=None, b_est=None, lim=None, res=None, peaks_idx=None):
-        fig = plt.figure(figsize=(15, 10))
+
+    def plot_partial_deviations(self, lim=None, res=None, peaks_idx=None, ax=None, note_string='', annos_string=''):
+        # if fig:
+        #     ax = fig.add_subplot(2, 1, 1)
+        # else:
+        #     fig =  plt.figure(figsize=(15, 10))
+        #     ax = fig.add_subplot(1, 1, 1)
+
+        differences = self.differences
+        w = self.fundamental/2
+        # fig = plt.figure(figsize=(15, 10))
         [a,b,c] = res
         kapa = np.linspace(0, lim, num=lim*10)
         y = a*kapa**3 + b*kapa + c
 
-        PeakAmps = [ self.frequencies[peak_idx] for peak_idx in peaks_idx ]
-        # Normalize
-        PeakAmps = PeakAmps / max(PeakAmps)
-        
-        plt.scatter(np.array(orders)+2, differences, alpha=PeakAmps) #, label="partials' deviation")
+        if peaks_idx:
+            PeakAmps = [ self.frequencies[peak_idx] for peak_idx in peaks_idx ]
+            PeakAmps = PeakAmps / max(PeakAmps) # Normalize
+        else:
+            PeakAmps = 1
+        # plt.scatter(np.array(orders)+2, differences, alpha=PeakAmps) #, label="partials' deviation")
+        ax.scatter(np.arange(2,len(differences)+2), differences, alpha=PeakAmps)
         f0 = self.fundamental
         # plot litte boxes
         for k in range(2, len(differences)+2):
@@ -93,16 +127,31 @@ class NoteInstance():
             pos = window_centering_func(k, f0, a, b, c) - k*f0
 
             rect=mpatches.Rectangle((k-0.25, pos-w//2), 0.5, w, fill=False, color="purple", linewidth=2)
-            plt.gca().add_patch(rect)
+            # plt.gca().add_patch(rect)
+            ax.add_patch(rect)
 
-        plt.plot(kapa,y, label = 'new_estimate')
+        ax.plot(kapa,y, label = 'new_estimate')
 
-        plt.grid()
-        plt.legend()
-        plt.title('f0: ' + str(round(self.fundamental,2)) + ', beta_estimate: '+ str(round(b_est,6)))
-      
-        plt.show()
+        ax.grid()
+        ax.legend()
 
+        if annos_string:
+            if int(note_string) == int(annos_string):
+                c = 'green'
+            else:
+                c = 'red'
+        else:
+            c='black'
+        
+
+        plt.title("pred: "+ note_string + " annotation: " + annos_string + ' f0: ' + str(round(self.fundamental,2)) + ', beta_estimate: '+ str(round(self.beta,6)), color=c)
+
+        # if not save_path:  
+        #     plt.show()
+        # else:
+        #     fig.savefig(save_path)
+
+        return ax
 
     def recompute_fundamental(self, constants : Constants, window = 10): # delete if not needed
         filtered = zero_out(self.fft, self.fundamental, window, constants)
@@ -122,15 +171,15 @@ def window_centering_func(k,f0=None,a=None,b=None,c=None, b_est=None):
 
 def compute_partials(note_instance, partial_func_args):
     """compute up to no_of_partials partials for note instance. 
-    Freq_deviate is the length of window arround k*f0 that the partials are tracked with highest peak."""
+    large_window is the length of window arround k*f0 that the partials are tracked with highest peak."""
     # no_of_partials = partial_func_args[0] NOTE: deal with it somehow
-    freq_diviate = partial_func_args[1]
+    note_instance.large_window = partial_func_args[1]
     constants = partial_func_args[2]
-    diviate = round(freq_diviate/(note_instance.sampling_rate/note_instance.fft.size))
+    diviate = round(note_instance.large_window/(note_instance.sampling_rate/note_instance.fft.size))
     f0 = note_instance.fundamental
     Peaks, Peaks_Idx = [], []
 
-    b_est, a, b, c = 0, 0, 0, 0
+    a, b, c = 0, 0, 0
     N=6 # n_iterations # TODO: connect iterations with the value constants.no_of_partials
     for i in range(N):
         lim = 5*(i+1)+1 # NOTE: till 30th/50th partial
@@ -140,7 +189,7 @@ def compute_partials(note_instance, partial_func_args):
             try:
                 filtered = zero_out(note_instance.fft, center_freq=center_freq , window_length=diviate, constants=constants)
                
-                peaks, _  =scipy.signal.find_peaks(np.abs(filtered),distance=100000) # better way to write this?
+                peaks, _  = scipy.signal.find_peaks(np.abs(filtered),distance=100000) # better way to write this?
                 max_peak = note_instance.frequencies[peaks[0]]
                 note_instance.partials.append(Partial(max_peak, k))
                 # store just for plotting
@@ -150,14 +199,22 @@ def compute_partials(note_instance, partial_func_args):
                 print(e)
                 pass
         # iterative beta estimates
-        b_est, [a,b,c] = compute_inharmonicity(note_instance, [])
+        _, [a,b,c] = compute_inharmonicity(note_instance, [])
+        note_instance.abc = [a,b,c]
         # compute differences/deviations
-        differences, orders = zip(*compute_differences(note_instance))
+        note_instance.differences, orders = zip(*compute_differences(note_instance))
         if i != N-1:
             note_instance.partials=[]
-        # TODO: change self.fundamental/2 so that it becomes variable      
-        if constants.plot: note_instance.plot_partial_deviations(differences, orders, w=note_instance.fundamental/2, b_est=b_est, lim=lim, res=[a,b,c], peaks_idx=Peaks_Idx)
-        if constants.plot: note_instance.plot_DFT(freq_diviate, Peaks, Peaks_Idx, b_est, lim, res=[a,b,c])
+            Peaks=[]
+            Peaks_Idx=[]
+
+    # if constants.plot: 
+    #     fig = plt.figure(figsize=(15, 10))
+    #     note_instance.plot_partial_deviations(lim=lim, res=note_instance.abc, fig=fig)#, peaks_idx=Peaks_Idx)
+    #     note_instance.plot_DFT(Peaks, Peaks_Idx, lim, fig=fig)   
+    #     # fig.savefig()
+    #     plt.show()
+    #     plt.clf()
     
     del Peaks, Peaks_Idx
 
