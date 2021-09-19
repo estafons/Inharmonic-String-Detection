@@ -77,6 +77,10 @@ def load_data(track_name, annotation_name, constants : Constants):
 def predictTabThesis(track_instance : TrackInstance, annotations : Annotations, constants : Constants, StrBetaObj, filename=None):
     def close_event(): # https://stackoverflow.com/questions/30364770/how-to-set-timeout-to-pyplot-show-in-matplotlib
         plt.close() #timer calls this function after 3 seconds and closes the window 
+    def listen_to_the_intance(audio):
+        sf.write('tmp.wav', audio, 16000, 'PCM_24')
+        playsound('tmp.wav')
+
     """Inharmonic prediction of tablature as implemented for thesis """
     for tab_instance, annos_instance in zip(track_instance.tablature.tablature, annotations.tablature.tablature):
         # ToolBoxObj = ToolBox(compute_partials_with_order, compute_inharmonicity, [tab_instance.fundamental/2, constants, StrBetaObj], [])
@@ -92,8 +96,9 @@ def predictTabThesis(track_instance : TrackInstance, annotations : Annotations, 
 
             # librosa.output.write_wav('./tmp.wav', tab_instance.note_audio, sr=22050)
             # TODO: make it show image (only) while sound plays!
-            sf.write('tmp.wav', tab_instance.note_audio, 16000, 'PCM_24')
-            playsound('tmp.wav')
+            x = threading.Thread(target=listen_to_the_intance, args=(tab_instance.note_audio,))
+            # listen_to_the_intance(audio)
+            x.start()
             fig = plt.figure(figsize=(15, 10))
             timer = fig.canvas.new_timer(interval = 3000) #creating a timer object and setting an interval of 3000 milliseconds
             timer.add_callback(close_event)
