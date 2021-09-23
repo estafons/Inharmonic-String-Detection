@@ -12,3 +12,8 @@ OutputToMIDI.py
 desktop.ini
 *.png
 exps/GuitarSet/tmp.wav
+n_tonos.py
+example_sklearn.py
+linearleastsquare.py
+rasnac.py
+exps
