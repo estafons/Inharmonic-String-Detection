@@ -15,5 +15,5 @@ exps/GuitarSet/tmp.wav
 n_tonos.py
 example_sklearn.py
 linearleastsquare.py
-rasnac.py
+ransac.py
 exps
