@@ -110,7 +110,6 @@ def predictTabThesis(track_instance : TrackInstance, annotations : Annotations, 
             tab_instance.fret = None
 
         # NOTE
-        # print('onset:', annos_instance.onset)
         if constants.plot:
             x = threading.Thread(target=listen_to_the_intance, args=(tab_instance.note_audio,))
             x.start()
