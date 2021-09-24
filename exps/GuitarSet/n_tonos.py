@@ -61,6 +61,9 @@ def get_annos_for_separate_strings(data, annotation_name, constants : Constants)
 def compute_track_betas(track_instance : TrackInstance, annotations : Annotations, constants : Constants, StrBetaObj, channel):
     global betas
     global median_betas
+    def close_event(): # https://stackoverflow.com/questions/30364770/how-to-set-timeout-to-pyplot-show-in-matplotlib
+        plt.close() #timer calls this function after 3 seconds and closes the window 
+
     def listen_to_the_intance(audio):
         sf.write('tmp.wav', audio, 16000, 'PCM_16')
         playsound('tmp.wav')     
@@ -69,19 +72,26 @@ def compute_track_betas(track_instance : TrackInstance, annotations : Annotation
         ToolBoxObj = ToolBox(partial_tracking_func=compute_partials, inharmonicity_compute_func=compute_inharmonicity, partial_func_args=[constants.no_of_partials, tab_instance.fundamental/2, constants, StrBetaObj], inharmonic_func_args=[])
         note_instance = NoteInstance(tab_instance.fundamental, tab_instance.onset, tab_instance.note_audio, ToolBoxObj, track_instance.sampling_rate, constants)
         Inharmonic_Detector.DetectString(note_instance, StrBetaObj, constants.betafunc, constants)
-        tab_instance.string = note_instance.string
-        if note_instance.string==channel:
+        tab_instance.string = note_instance.string # predicted string
+        if annos_instance.string==channel and note_instance.string!=6:
+            # print("found!!")
             tab_instance.fret = Inharmonic_Detector.hz_to_midi(note_instance.fundamental) - constants.tuning[note_instance.string]
-            betas[note_instance.string,tab_instance.fret].append(note_instance.beta)   
+            betas[annos_instance.string,tab_instance.fret].append(note_instance.beta)   
             if constants.plot:
-                listen_to_the_intance(tab_instance.note_audio)
+                x = threading.Thread(target=listen_to_the_intance, args=(tab_instance.note_audio,))
+                x.start()
                 fig = plt.figure(figsize=(15, 10))
+                timer = fig.canvas.new_timer(interval = 3000) #creating a timer object and setting an interval of 3000 milliseconds
+                timer.add_callback(close_event)
                 ax1 = fig.add_subplot(2, 1, 1)
                 ax2 = fig.add_subplot(2, 1, 2)
+                #  TODO: fix lim
                 note_instance.plot_partial_deviations(lim=30, res=note_instance.abc, ax=ax1, note_string=str(note_instance.string), annos_string=str(annos_instance.string))#, peaks_idx=Peaks_Idx)
                 note_instance.plot_DFT(lim=30, ax=ax2)   
+                timer.start()
                 plt.show()
-                plt.close()            
+        # else:
+        #     print('irrelevant string:', note_instance.string)       
 
 def compute_all_betas(constants : Constants, StrBetaObj):
     """ function that runs tests on the jams files mentioned in the given file 
@@ -93,6 +103,8 @@ def compute_all_betas(constants : Constants, StrBetaObj):
     for count, name in enumerate(lines):
         if '_hex' not in name:
             continue        
+        # if '_solo' not in name:
+        #     continue
         print(name)
         track_name = name
         name = name.split('.')[0]
@@ -105,11 +117,12 @@ def compute_all_betas(constants : Constants, StrBetaObj):
         multi_channel_data, _ = librosa.core.load(track_name, constants.sampling_rate, mono=False) # _ cause dont need to reassign sampling rate
         """ loop over each channel in order to compute betas for separate and debleeded note instances """
         for channel in range(6):
-            print(channel)
+            # print(channel)
             data = multi_channel_data[channel,:]
             track_instance, annotations = get_annos_for_separate_strings(data, annotation_name, constants)
             compute_track_betas(track_instance, annotations, constants, StrBetaObj, channel)
-
+        if count==0:
+            break
 
 if __name__ == '__main__':
 
