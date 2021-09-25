@@ -19,7 +19,7 @@ from Inharmonic_Detector import *
 from inharmonic_Analysis import *
 from constants_parser import Constants
 import genetic
-from helper import ConfusionMatrix, compute_partial_orders, printProgressBar
+from helper import ConfusionMatrix, compute_partial_orders, printProgressBar, listen_to_the_intance 
 
 from playsound import playsound
 import soundfile as sf
@@ -91,9 +91,6 @@ def load_data(track_name, annotation_name, constants : Constants):
 def predictTabThesis(track_instance : TrackInstance, annotations : Annotations, constants : Constants, StrBetaObj, filename=None):
     def close_event(): # https://stackoverflow.com/questions/30364770/how-to-set-timeout-to-pyplot-show-in-matplotlib
         plt.close() #timer calls this function after 3 seconds and closes the window 
-    def listen_to_the_intance(audio):
-        sf.write('tmp.wav', audio, 16000, 'PCM_16')
-        playsound('tmp.wav')
 
     """Inharmonic prediction of tablature as implemented for thesis """
     for tab_instance, annos_instance in zip(track_instance.tablature.tablature, annotations.tablature.tablature):
@@ -119,8 +116,11 @@ def predictTabThesis(track_instance : TrackInstance, annotations : Annotations, 
             ax1 = fig.add_subplot(2, 1, 1)
             ax2 = fig.add_subplot(2, 1, 2)
             #  TODO: fix lim
-            note_instance.plot_partial_deviations(lim=30, res=note_instance.abc, ax=ax1, note_string=str(note_instance.string), annos_string=str(annos_instance.string))#, peaks_idx=Peaks_Idx)
-            note_instance.plot_DFT(lim=30, ax=ax2)   
+            peak_freqs = [partial.frequency for partial in note_instance.partials]
+            peaks_idx = [partial.peak_idx for partial in note_instance.partials]
+            
+            note_instance.plot_partial_deviations(lim=30, res=note_instance.abc, ax=ax1, note_instance=note_instance, annos_instance=annos_instance, tab_instance=tab_instance) #, peaks_idx=Peaks_Idx)
+            note_instance.plot_DFT(peak_freqs, peaks_idx, lim=30, ax=ax2)   
             fig.savefig('imgs/auto_img_test_examples/'+str(note_instance.string)+'_'+str(filename)+'.png')
             timer.start()
             plt.show()

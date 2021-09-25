@@ -18,10 +18,7 @@ from Inharmonic_Detector import *
 from inharmonic_Analysis import *
 from constants_parser import Constants
 import genetic
-from helper import ConfusionMatrix, compute_partial_orders, printProgressBar
-
-from playsound import playsound
-import soundfile as sf
+from helper import listen_to_the_intance
 
 import statistics
 
@@ -64,19 +61,21 @@ def compute_track_betas(track_instance : TrackInstance, annotations : Annotation
     def close_event(): # https://stackoverflow.com/questions/30364770/how-to-set-timeout-to-pyplot-show-in-matplotlib
         plt.close() #timer calls this function after 3 seconds and closes the window 
 
-    def listen_to_the_intance(audio):
-        sf.write('tmp.wav', audio, 16000, 'PCM_16')
-        playsound('tmp.wav')     
     """Inharmonic prediction of tablature for eachstring/channel separately """
     for tab_instance, annos_instance in zip(track_instance.tablature.tablature, annotations.tablature.tablature):
+        if annos_instance.string!=channel:
+            continue
         ToolBoxObj = ToolBox(partial_tracking_func=compute_partials, inharmonicity_compute_func=compute_inharmonicity, partial_func_args=[constants.no_of_partials, tab_instance.fundamental/2, constants, StrBetaObj], inharmonic_func_args=[])
         note_instance = NoteInstance(tab_instance.fundamental, tab_instance.onset, tab_instance.note_audio, ToolBoxObj, track_instance.sampling_rate, constants)
         Inharmonic_Detector.DetectString(note_instance, StrBetaObj, constants.betafunc, constants)
         tab_instance.string = note_instance.string # predicted string
-        if annos_instance.string==channel and note_instance.string!=6:
+        if note_instance.string!=6:
             # print("found!!")
             tab_instance.fret = Inharmonic_Detector.hz_to_midi(note_instance.fundamental) - constants.tuning[note_instance.string]
             betas[annos_instance.string,tab_instance.fret].append(note_instance.beta)   
+            # x = threading.Thread(target=listen_to_the_intance, args=(tab_instance.note_audio,))
+            # x.start()
+            # print(note_instance.string, annos_instance.string, tab_instance.fret)
             if constants.plot:
                 x = threading.Thread(target=listen_to_the_intance, args=(tab_instance.note_audio,))
                 x.start()
@@ -86,9 +85,12 @@ def compute_track_betas(track_instance : TrackInstance, annotations : Annotation
                 ax1 = fig.add_subplot(2, 1, 1)
                 ax2 = fig.add_subplot(2, 1, 2)
                 #  TODO: fix lim
-                note_instance.plot_partial_deviations(lim=30, res=note_instance.abc, ax=ax1, note_string=str(note_instance.string), annos_string=str(annos_instance.string))#, peaks_idx=Peaks_Idx)
-                note_instance.plot_DFT(lim=30, ax=ax2)   
-                timer.start()
+                peak_freqs = [partial.frequency for partial in note_instance.partials]
+                peaks_idx = [partial.peak_idx for partial in note_instance.partials]
+                
+                note_instance.plot_partial_deviations(lim=30, res=note_instance.abc, ax=ax1, note_instance=note_instance, annos_instance=annos_instance, tab_instance=tab_instance) #, peaks_idx=Peaks_Idx)
+                note_instance.plot_DFT(peak_freqs, peaks_idx, lim=30, ax=ax2)   
+                # timer.start()
                 plt.show()
         # else:
         #     print('irrelevant string:', note_instance.string)       
@@ -101,10 +103,11 @@ def compute_all_betas(constants : Constants, StrBetaObj):
 
     lines = os.listdir(constants.dataset_names_path+'/data/audio')
     for count, name in enumerate(lines):
+        # print(name, count)
         if '_hex' not in name:
             continue        
-        # if '_solo' not in name:
-        #     continue
+        if '_solo' not in name:
+            continue
         print(name)
         track_name = name
         name = name.split('.')[0]
@@ -121,7 +124,7 @@ def compute_all_betas(constants : Constants, StrBetaObj):
             data = multi_channel_data[channel,:]
             track_instance, annotations = get_annos_for_separate_strings(data, annotation_name, constants)
             compute_track_betas(track_instance, annotations, constants, StrBetaObj, channel)
-        if count==0:
+        if count > 10:
             break
 
 if __name__ == '__main__':

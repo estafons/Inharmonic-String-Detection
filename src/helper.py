@@ -9,6 +9,9 @@ from track_class import Annotations
 import math
 from Inharmonic_Detector import StringBetas
 
+from playsound import playsound
+import soundfile as sf
+
 class ConfusionMatrix():
     def __init__(self, size, inconclusive):
         self.matrix = np.zeros(size)
@@ -101,3 +104,7 @@ def printProgressBar(iteration, total, prefix = '', suffix = '', decimals = 1, l
     # Print New Line on Complete
     if iteration == total: 
         print()
+
+def listen_to_the_intance(audio):
+    sf.write('tmp.wav', audio, 44100, 'PCM_16')
+    playsound('tmp.wav')

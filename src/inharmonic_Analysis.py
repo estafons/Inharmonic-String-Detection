@@ -19,9 +19,10 @@ import matplotlib.pyplot as plt
 
 
 class Partial():
-    def __init__(self, frequency, order):
+    def __init__(self, frequency, order, peak_idx):
         self.frequency = frequency
         self.order = order
+        self.peak_idx = peak_idx
 
 class ToolBox():
     """here all tools developed are stored. designed this way so 
@@ -54,8 +55,6 @@ class NoteInstance():
             self.recompute_fundamental(constants, fundamental/2)
 
         ToolBoxObj.partial_func(self, ToolBoxObj.partial_func_args) # if a different partial tracking is incorporated keep second function arguement, else return beta from second function and change entirely
-        # if ToolBoxObj.partial_func == compute_partials:
-        #     ToolBoxObj.inharmonic_func(self, ToolBoxObj.inharmonic_func_args)
 
     def get_string(string):
         self.string = string
@@ -63,15 +62,11 @@ class NoteInstance():
     def plot_DFT(self, peaks=None, peaks_idx=None, lim=None, ax=None, save_path=None):
         [a,b,c] = self.abc
         w = self.large_window
-        # if fig:
-        #     ax = fig.add_subplot(2, 1, 2)
-        # else:
-        #     fig =  plt.figure(figsize=(15, 10))
-        #     ax = fig.add_subplot(1, 1, 1)
-
      
+        # main function
         ax.plot(self.frequencies, self.fft.real)
-        for k in range(50):
+
+        for k in range(50): # draw vertical red dotted lines indicating harmonics
             ax.axvline(x=self.fundamental*k, color='r', ls='--', alpha=0.85, lw=0.5)     
 
         if w: # draw windows as little boxes
@@ -83,8 +78,8 @@ class NoteInstance():
                 # plt.gca().add_patch(rect)
                 ax.add_patch(rect)
 
-        if peaks and peaks_idx:
-            ax.plot(peaks, self.fft.real[peaks_idx], "x")
+        if peaks and peaks_idx: # draw peaks
+            ax.plot(peaks, self.fft.real[peaks_idx], "x", alpha=0.7)
 
         ax.set_xlim(0, window_centering_func(lim+1,f0, a=a,b=b,c=c))
         ax.set_ylim(-100, 100)
@@ -92,7 +87,7 @@ class NoteInstance():
         return ax
 
 
-    def plot_partial_deviations(self, lim=None, res=None, peaks_idx=None, ax=None, note_string='', annos_string=''):
+    def plot_partial_deviations(self, lim=None, res=None, peaks_idx=None, ax=None, note_instance=None, annos_instance=None, tab_instance=None):
 
         differences = self.differences
         w = self.fundamental/2
@@ -116,24 +111,18 @@ class NoteInstance():
             ax.add_patch(rect)
 
         ax.plot(kapa,y, label = 'new_estimate')
-
         ax.grid()
         ax.legend()
 
-        if annos_string:
-            if int(note_string) == int(annos_string):
+        if annos_instance:
+            if note_instance.string == annos_instance.string:
                 c = 'green'
             else:
                 c = 'red'
         else:
-            c='black'
+            c = 'black'
         
-        plt.title("pred: "+ note_string + ", annotation: " + annos_string + ' || f0: ' + str(round(self.fundamental,2)) + ', beta_estimate: '+ str(round(self.beta,6)) + '\n a = ' + str(round(a,5)), color=c)
-
-        # if not save_path:  
-        #     plt.show()
-        # else:
-        #     fig.savefig(save_path)
+        plt.title("pred: "+ str(note_instance.string) + ", annotation: " + str(annos_instance.string) + ', fret: ' + str(tab_instance.fret) + ' || f0: ' + str(round(self.fundamental,2)) + ', beta_estimate: '+ str(round(self.beta,6)) + '\n a = ' + str(round(a,5)), color=c)
 
         return ax
 
@@ -161,7 +150,6 @@ def compute_partials(note_instance, partial_func_args):
     constants = partial_func_args[2]
     diviate = round(note_instance.large_window/(note_instance.sampling_rate/note_instance.fft.size))
     f0 = note_instance.fundamental
-    Peaks, Peaks_Idx = [], []
 
     a, b, c = 0, 0, 0
     N=6 # n_iterations # TODO: connect iterations with the value constants.no_of_partials
@@ -175,10 +163,8 @@ def compute_partials(note_instance, partial_func_args):
                
                 peaks, _  = scipy.signal.find_peaks(np.abs(filtered),distance=100000) # better way to write this?
                 max_peak = note_instance.frequencies[peaks[0]]
-                note_instance.partials.append(Partial(max_peak, k))
-                # store just for plotting
-                Peaks.append(note_instance.frequencies[peaks[0]])
-                Peaks_Idx.append(peaks[0])            
+                note_instance.partials.append(Partial(frequency=max_peak, order=k, peak_idx=peaks[0]))
+          
             except Exception as e:
                 print(e)
                 print('MyExplanation: Certain windows where peaks are to be located surpassed the length of the DFT.')
@@ -190,8 +176,9 @@ def compute_partials(note_instance, partial_func_args):
         note_instance.differences, orders = zip(*compute_differences(note_instance))
         if i != N-1:
             note_instance.partials=[]
-            Peaks=[]
-            Peaks_Idx=[]
+
+        peak_freqs = [partial.frequency for partial in note_instance.partials]
+        peaks_idx = [partial.peak_idx for partial in note_instance.partials]
 
     # if constants.plot: 
     #     fig = plt.figure(figsize=(15, 10))
@@ -201,7 +188,7 @@ def compute_partials(note_instance, partial_func_args):
     #     plt.show()
     #     plt.clf()
     
-    del Peaks, Peaks_Idx
+    # del Peaks, Peaks_Idx
 
 
 def compute_differences(note_instance):
