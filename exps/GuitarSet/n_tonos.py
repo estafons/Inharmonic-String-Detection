@@ -26,6 +26,9 @@ import warnings
 warnings.filterwarnings("ignore")
 
 from GuitarSetTest import read_tablature_from_GuitarSet
+import pickle     
+
+
 
 parser = argparse.ArgumentParser()
 parser.add_argument('config_path', type=str)
@@ -73,9 +76,6 @@ def compute_track_betas(track_instance : TrackInstance, annotations : Annotation
             # print("found!!")
             tab_instance.fret = Inharmonic_Detector.hz_to_midi(note_instance.fundamental) - constants.tuning[note_instance.string]
             betas[annos_instance.string,tab_instance.fret].append(note_instance.beta)   
-            # x = threading.Thread(target=listen_to_the_intance, args=(tab_instance.note_audio,))
-            # x.start()
-            # print(note_instance.string, annos_instance.string, tab_instance.fret)
             if constants.plot:
                 x = threading.Thread(target=listen_to_the_intance, args=(tab_instance.note_audio,))
                 x.start()
@@ -84,7 +84,6 @@ def compute_track_betas(track_instance : TrackInstance, annotations : Annotation
                 timer.add_callback(close_event)
                 ax1 = fig.add_subplot(2, 1, 1)
                 ax2 = fig.add_subplot(2, 1, 2)
-                #  TODO: fix lim
                 peak_freqs = [partial.frequency for partial in note_instance.partials]
                 peaks_idx = [partial.peak_idx for partial in note_instance.partials]
                 
@@ -92,8 +91,6 @@ def compute_track_betas(track_instance : TrackInstance, annotations : Annotation
                 note_instance.plot_DFT(peak_freqs, peaks_idx, lim=30, ax=ax2)   
                 # timer.start()
                 plt.show()
-        # else:
-        #     print('irrelevant string:', note_instance.string)       
 
 def compute_all_betas(constants : Constants, StrBetaObj):
     """ function that runs tests on the jams files mentioned in the given file 
@@ -104,14 +101,17 @@ def compute_all_betas(constants : Constants, StrBetaObj):
     lines = os.listdir(constants.dataset_names_path+'/data/audio')
     for count, name in enumerate(lines):
         # print(name, count)
-        if '_hex.' not in name:
-            continue        
+        if '_hex_cln.' not in name:
+            continue    
+        # if '_hex.' not in name:
+        #     continue        
         if '_solo' not in name:
             continue
         print(name)
         track_name = name
         name = name.split('.')[0]
-        name = name[:-4] + '.jams'
+        # name = name[:-4] + '.jams'
+        name = name[:-8] + '.jams'
         print(name, count,'/',len(lines))
 
         """ load 6-channel track and annotations"""
@@ -120,18 +120,15 @@ def compute_all_betas(constants : Constants, StrBetaObj):
         multi_channel_data, _ = librosa.core.load(track_name, constants.sampling_rate, mono=False) # _ cause dont need to reassign sampling rate
         """ loop over each channel in order to compute betas for separate and debleeded note instances """
         for channel in range(6):
-            # print(channel)
             data = multi_channel_data[channel,:]
             track_instance, annotations = get_annos_for_separate_strings(data, annotation_name, constants)
             compute_track_betas(track_instance, annotations, constants, StrBetaObj, channel)
-        # if count > 10:
-        #     break
+
 
 if __name__ == '__main__':
 
     print('Check if you are OK with certain important configuration constants:')
     print('****************************')
-    print('dataset:', constants.dataset)
     print('train_mode:', constants.train_mode)
     print('train_frets:', constants.train_frets)
     print('polyfit:', constants.polyfit)
@@ -146,7 +143,15 @@ if __name__ == '__main__':
 
     median_betas = np.array([[None]*20]*6)
 
-    StrBetaObj = GuitarSetTrainWrapper(constants)
+    # StrBetaObj = GuitarSetTrainWrapper(constants)
+    # with open('data/train/StrBetaObj.pickle', 'wb') as file:
+    #     pickle.dump(StrBetaObj, file)
+    # aaa
+
+    with open('data/train/StrBetaObj.pickle', 'rb') as file:
+        StrBetaObj = pickle.load(file)
+
+
     # compute_partial_orders(StrBetaObj, constants)
     compute_all_betas(constants, StrBetaObj)
 
