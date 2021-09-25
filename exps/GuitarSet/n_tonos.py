@@ -104,7 +104,7 @@ def compute_all_betas(constants : Constants, StrBetaObj):
     lines = os.listdir(constants.dataset_names_path+'/data/audio')
     for count, name in enumerate(lines):
         # print(name, count)
-        if '_hex' not in name:
+        if '_hex.' not in name:
             continue        
         if '_solo' not in name:
             continue
@@ -124,8 +124,8 @@ def compute_all_betas(constants : Constants, StrBetaObj):
             data = multi_channel_data[channel,:]
             track_instance, annotations = get_annos_for_separate_strings(data, annotation_name, constants)
             compute_track_betas(track_instance, annotations, constants, StrBetaObj, channel)
-        if count > 10:
-            break
+        # if count > 10:
+        #     break
 
 if __name__ == '__main__':
 
