@@ -143,13 +143,13 @@ if __name__ == '__main__':
 
     median_betas = np.array([[None]*20]*6)
 
-    StrBetaObj = GuitarSetTrainWrapper(constants)
-    with open('data/train/StrBetaObj.pickle', 'wb') as file:
-        pickle.dump(StrBetaObj, file)
-    aaa
+    # StrBetaObj = GuitarSetTrainWrapper(constants)
+    # with open('data/train/StrBetaObj.pickle', 'wb') as file:
+    #     pickle.dump(StrBetaObj, file)
+    # aaa
 
-    # with open('data/train/StrBetaObj.pickle', 'rb') as file:
-    #     StrBetaObj = pickle.load(file)
+    with open('data/train/StrBetaObj.pickle', 'rb') as file:
+        StrBetaObj = pickle.load(file)
 
 
     # compute_partial_orders(StrBetaObj, constants)
