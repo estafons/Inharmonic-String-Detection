@@ -111,7 +111,7 @@ def compute_all_betas(constants : Constants, StrBetaObj):
         print(name)
         track_name = name
         name = name.split('.')[0]
-        name = name[:-8] + '.jams'
+        name = name[:-4] + '.jams'
         print(name, count,'/',len(lines))
 
         """ load 6-channel track and annotations"""
