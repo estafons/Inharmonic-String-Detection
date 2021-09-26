@@ -9,7 +9,7 @@ import os, sys
 import argparse
 from GuitarTrain import GuitarSetTrainWrapper
 import threading
-
+import pickle 
 BASE_PATH = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 cur_path = Path(BASE_PATH + '/src/')
 sys.path.append(str(cur_path))
@@ -122,7 +122,7 @@ def predictTabThesis(track_instance : TrackInstance, annotations : Annotations, 
             note_instance.plot_partial_deviations(lim=30, res=note_instance.abc, ax=ax1, note_instance=note_instance, annos_instance=annos_instance, tab_instance=tab_instance) #, peaks_idx=Peaks_Idx)
             note_instance.plot_DFT(peak_freqs, peaks_idx, lim=30, ax=ax2)   
             fig.savefig('imgs/auto_img_test_examples/'+str(note_instance.string)+'_'+str(filename)+'.png')
-            timer.start()
+            # timer.start()
             plt.show()
 
 def testGuitarSet(constants : Constants, StrBetaObj):
@@ -179,6 +179,9 @@ if __name__ == '__main__':
     print('****************************')
     print()
 
-    StrBetaObj = GuitarSetTrainWrapper(constants)
+    # StrBetaObj = GuitarSetTrainWrapper(constants)
     # compute_partial_orders(StrBetaObj, constants)
+    with open('data/train/StrBetaObj.pickle', 'rb') as file:
+        StrBetaObj = pickle.load(file)
+
     testGuitarSet(constants, StrBetaObj)
