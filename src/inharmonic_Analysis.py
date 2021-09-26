@@ -71,7 +71,7 @@ class NoteInstance():
 
         if w: # draw windows as little boxes
             f0 = self.fundamental
-            for k in range(1,lim):
+            for k in range(1,lim+1):
                 # f = k*f0 * np.sqrt(1+b_est*k**2)
                 f = window_centering_func(k,f0, a=a,b=b,c=c)
                 rect=mpatches.Rectangle((f-w//2,-80),w,160, fill=False, color="purple", linewidth=2)
@@ -90,7 +90,7 @@ class NoteInstance():
     def plot_partial_deviations(self, lim=None, res=None, peaks_idx=None, ax=None, note_instance=None, annos_instance=None, tab_instance=None):
 
         differences = self.differences
-        w = self.fundamental/2
+        w = self.large_window
         [a,b,c] = res
         kapa = np.linspace(0, lim, num=lim*10)
         y = a*kapa**3 + b*kapa + c
@@ -148,14 +148,14 @@ def compute_partials(note_instance, partial_func_args):
     # no_of_partials = partial_func_args[0] NOTE: deal with it somehow
     note_instance.large_window = partial_func_args[1]
     constants = partial_func_args[2]
-    diviate = round(note_instance.large_window/(note_instance.sampling_rate/note_instance.fft.size))
+    diviate = round(note_instance.large_window*note_instance.fft.size/note_instance.sampling_rate)
     f0 = note_instance.fundamental
 
     a, b, c = 0, 0, 0
     N=6 # n_iterations # TODO: connect iterations with the value constants.no_of_partials
     for i in range(N):
         lim = 5*(i+1)+1 # NOTE: till 30th/50th partial
-        for k in range(2,lim): # initially range(2,11)
+        for k in range(2,lim): # NOTE: 2 stands for the 2nd partial! TODO: use 3 instead if we wan t to start processing from the 2nd partial and further
             # center_freq = k*f0 * np.sqrt(1+b_est*k**2)
             center_freq = window_centering_func(k,f0, a=a,b=b,c=c) # centering window in which to look for peak/partial
             try:
@@ -194,7 +194,7 @@ def compute_partials(note_instance, partial_func_args):
 def compute_differences(note_instance):
     differences = []
     for i, partial in enumerate(note_instance.partials):
-        differences.append((abs(partial.frequency-(i+2)*note_instance.fundamental), i)) # i+2 since we start at first partial of order 2
+        differences.append((abs(partial.frequency-(i+2)*note_instance.fundamental), i)) # i+2 since we start at first partial of order k=2
     return differences
 
 def compute_inharmonicity(note_instance, inharmonic_func_args):
@@ -320,8 +320,6 @@ def compute_partials_old(note_instance, partial_func_args):
         # print(peaks)
         max_peak = note_instance.frequencies[peaks[0]]
         note_instance.partials.append(Partial(max_peak, i))
-
-
 
 
 def compute_partials_with_order(note_instance, partial_func_args):
