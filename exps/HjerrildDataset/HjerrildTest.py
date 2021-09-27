@@ -24,7 +24,8 @@ parser = argparse.ArgumentParser()
 parser.add_argument('config_path', type=str)
 parser.add_argument('workspace_folder', type=str)
 parser.add_argument('-plot', action='store_true') 
-
+parser.add_argument('--guitar', type=str, default= '')
+parser.add_argument('--train_mode', type=str, default= '')
 args = parser.parse_args()
 
 try:
@@ -33,6 +34,11 @@ except Exception as e:
 	print(e)
 
 constants.plot = args.plot
+if args.guitar:
+    constants.guitar = args.guitar
+if args.train_mode:
+    constants.train_mode = args.train_mode
+    constants.update_betafunc()
 
 
 
@@ -49,7 +55,7 @@ def testHjerrildChristensen(constants : Constants, StrBetaObj):
 		for string in range(0,6):
 			printProgressBar(count,6*len(dataset_nums)-1,decimals=0, length=50)
 			for fret in range(0,12):
-				path_to_track = Path(constants.path_to_hjerrild_christensen +
+				path_to_track = Path(constants.workspace_folder + '/'+ constants.path_to_hjerrild_christensen +
 									 constants.guitar + str(dataset_no) + 
 											'/string' +str(string + 1) +'/' + str(fret) +'.wav')
 				audio, _ = librosa.load(path_to_track, constants.sampling_rate)
@@ -58,7 +64,7 @@ def testHjerrildChristensen(constants : Constants, StrBetaObj):
 				# y = librosa.onset.onset_detect(audio, constants.sampling_rate)
 				# audio = audio[int(y[0]):] # adding this line because ther5e might be more than one onsets occurring in the recording
 
-				path_to_onsettime = Path('data/onsets/' +
+				path_to_onsettime = Path(constants.workspace_folder + '/data/onsets/' +
 									 constants.guitar + str(dataset_no) + 
 											'/string' +str(string + 1) +'/' + str(fret) +'.txt')
 				try:
