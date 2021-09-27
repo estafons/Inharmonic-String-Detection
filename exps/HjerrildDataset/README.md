@@ -4,16 +4,11 @@ https://vbn.aau.dk/en/publications/estimation-of-guitar-string-fret-and-plucking
 
 and extract the content of dir ```hjerrild_ICASSP2019_guitar_dataset``` to ```./data/tran'```.
 
-Then run:
-
-```
-python GuitarSetTest.py constants.ini . {-plot}
-```
-
-The results will be stored to dir ```./results```.
 
 Configure the model by tweekinig values of ```constants.ini``` accordingly and then run:
 
 ```
 python HjerrildTest.py constants.ini . {-plot}
 ```
+
+The results will be stored to dir ```./results```.
