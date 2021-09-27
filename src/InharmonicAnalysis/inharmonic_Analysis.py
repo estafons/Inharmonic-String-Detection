@@ -10,9 +10,10 @@ import os
 from sklearn.preprocessing import PolynomialFeatures
 from sklearn.linear_model import (LinearRegression, TheilSenRegressor, RANSACRegressor, HuberRegressor)
 import matplotlib.patches as mpatches
-from constants_parser import Constants
-
 import matplotlib.pyplot as plt
+
+from InharmonicAnalysis.constants_parser import Constants
+
 
 # from ransac import RansacModel
 # from linearleastsquare import LinearLeastSqaureModel
@@ -22,7 +23,7 @@ class Partial():
     def __init__(self, frequency, order):
         self.frequency = frequency
         self.order = order
-
+        
 class ToolBox():
     """here all tools developed are stored. designed this way so 
     it can be expanded and incorporate other methods for partial detection 

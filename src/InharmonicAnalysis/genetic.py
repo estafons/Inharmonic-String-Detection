@@ -1,8 +1,7 @@
 from deap import base, creator, tools
-from genetic_tools import *
-from constants_parser import Constants
-from helper import printProgressBar
-# from scoop import futures
+from InharmonicAnalysis.genetic_tools import *
+from InharmonicAnalysis.constants_parser import Constants
+from InharmonicAnalysis.helper import printProgressBar
 
 def delete_extra_info(tablature : Tablature):
     for tab_instance in tablature.tablature:
@@ -91,6 +90,3 @@ def genetic(inharmonic_tablature : Tablature, constants : Constants):
     del creator.FitnessMin
     del creator.Individual
     return winner, g
-
-#tab = Tablature([(0.1, 110, 0),(0.1, 110, 1),(0.1, 110, 1), (0.1, 110, 1),(0.1, 110, 1),(0.1, 110, 1),(0.1, 110, 1),(0.1, 110, 1),(0.1, 110, 1),(0.1, 110, 1),(0.1, 110, 1),(0.1, 110, 1)], [], True)
-#print(genetic(tab))

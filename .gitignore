@@ -16,4 +16,10 @@ n_tonos.py
 example_sklearn.py
 linearleastsquare.py
 ransac.py
-exps
+exps/
+LICENSE
+dist/
+pyproject.toml
+setup.cfg
+src/InharmonicAnalysis.egg-info/
+tests/

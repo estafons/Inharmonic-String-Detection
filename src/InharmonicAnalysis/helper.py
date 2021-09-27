@@ -5,9 +5,9 @@ import matplotlib.pyplot as plt
 from sympy import symbols, solveset, S
 from sympy import Poly
 
-from track_class import Annotations
+from InharmonicAnalysis.track_class import Annotations
 import math
-from Inharmonic_Detector import StringBetas
+from InharmonicAnalysis.Inharmonic_Detector import StringBetas
 
 class ConfusionMatrix():
     def __init__(self, size, inconclusive):

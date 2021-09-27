@@ -2,12 +2,11 @@ from constants_parser import Constants
 from random import choice
 from copy import deepcopy
 import random
-from itertools import tee, islice
+from itertools import tee
 import math
 
-from Inharmonic_Detector import determine_combinations
-from track_class import *
-import constants_parser
+from InharmonicAnalysis.Inharmonic_Detector import determine_combinations
+from InharmonicAnalysis.track_class import *
 
 def pairwise(iterable):
     "s -> (s0,s1), (s1,s2), (s2, s3), ..."

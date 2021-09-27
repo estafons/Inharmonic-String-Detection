@@ -1,5 +1,5 @@
-from constants_parser import Constants
-import Inharmonic_Detector
+from InharmonicAnalysis.constants_parser import Constants
+import InharmonicAnalysis.Inharmonic_Detector
 
 class Tablature():
     def __init__(self, tups, audio, constants : Constants, annotation = False):
