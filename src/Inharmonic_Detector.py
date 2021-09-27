@@ -30,6 +30,13 @@ class StringBetas():
             for j, l in enumerate(r):
                 self.betas_array[i][j] = np.median(l)
 
+    def set_limits(self, constants):
+        max_beta = 0
+        for string, s in enumerate(constants.tuning):
+            if self.betas_array[string][0] > max_beta:
+                max_beta = self.betas_array[string][0]
+        constants.upper_limit =  10**(math.log(max_beta*2**(constants.no_of_frets/6), 10)) # didnt ceil up to the nearest, because sometimes 10**-3 appear ceiling up to 10**-2 making a huge difference
+        constants.lower_limit = 10**(math.floor(math.log(np.nanmin(self.betas_array), 10)))
 
 class InharmonicDetector():
     def __init__(self, NoteObj : NoteInstance, StringBetasObj : StringBetas):
@@ -62,7 +69,7 @@ class InharmonicDetector():
 def DetectString(NoteObj : NoteInstance, StringBetasObj : StringBetas, betafunc, constants : Constants):
     """ betafunc is the function to simulate beta. As input takes the combination and the beta array."""
     combs = determine_combinations(NoteObj.fundamental, constants)
-    if NoteObj.beta < 10**(-7):
+    if (constants.lower_limit < NoteObj.beta < constants.upper_limit):
         NoteObj.string = 6
     else:
         betas = [(abs(betafunc(comb, StringBetasObj, constants) - NoteObj.beta), comb) for comb in combs]
