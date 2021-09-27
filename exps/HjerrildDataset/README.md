@@ -7,7 +7,7 @@ and extract the content of dir ```hjerrild_ICASSP2019_guitar_dataset``` to ```./
 Then run:
 
 ```
-python GuitarSetTest.py constants.ini .
+python GuitarSetTest.py constants.ini . {-plot}
 ```
 
 The results will be stored to dir ```./results```.
