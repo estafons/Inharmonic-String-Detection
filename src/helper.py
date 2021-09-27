@@ -30,6 +30,9 @@ class ConfusionMatrix():
     def get_accuracy(self):
         total_acc = np.trace(self.matrix)/np.sum(self.matrix)
         current_acc = np.trace(self.current_matrix)/np.sum(self.current_matrix)
+        inconclusive_rate = np.sum(self.current_matrix, axis = 0)[6]/np.sum(self.current_matrix)
+        print("inconclusive rate is {} and pure accuracy {}".format(inconclusive_rate, 
+                                                    np.trace(self.current_matrix)/(np.sum(self.current_matrix)-np.sum(self.current_matrix, axis = 0)[6])))
         return total_acc, current_acc
         
     def plot_confusion_matrix(self, constants,

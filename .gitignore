@@ -13,3 +13,10 @@ OutputToMIDI.py
 desktop.ini
 *.png
 exps/GuitarSet/tmp.wav
+LICENSE
+dist/
+exps/data/
+pyproject.toml
+setup.cfg
+src/InharmonicAnalysis.egg-info/
+tests/

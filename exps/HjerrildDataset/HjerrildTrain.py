@@ -44,6 +44,8 @@ def TrainWrapper(constants : Constants):
     HjerrildChristensenTrain(strBetaObj, constants, train_frets = constants.train_frets)
     strBetaObj.list_to_medians()
     print(strBetaObj.betas_array)
+    strBetaObj.set_limits(constants)
+    print(constants.upper_limit, constants.lower_limit)
     return strBetaObj
 
 #TrainWrapper(constants)
