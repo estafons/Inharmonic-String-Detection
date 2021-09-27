@@ -34,7 +34,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument('config_path', type=str)
 parser.add_argument('workspace_folder', type=str)
 parser.add_argument('-plot', action='store_true') 
-parser.add_argument('-run_genetic_alg', action='store_true') 
+parser.add_argument('-compute', action='store_true') 
 
 args = parser.parse_args()
 
@@ -46,7 +46,6 @@ except Exception as e:
 
 # HARDWIRE CONSTANTS
 constants.plot = args.plot
-constants.run_genetic_alg = args.run_genetic_alg
 
 
 def get_annos_for_separate_strings(data, annotation_name, constants : Constants):
@@ -89,7 +88,7 @@ def compute_track_betas(track_instance : TrackInstance, annotations : Annotation
                 
                 note_instance.plot_partial_deviations(lim=30, res=note_instance.abc, ax=ax1, note_instance=note_instance, annos_instance=annos_instance, tab_instance=tab_instance) #, peaks_idx=Peaks_Idx)
                 note_instance.plot_DFT(peak_freqs, peaks_idx, lim=30, ax=ax2)   
-                # timer.start()
+                timer.start()
                 plt.show()
 
 def compute_all_betas(constants : Constants, StrBetaObj):
@@ -105,8 +104,8 @@ def compute_all_betas(constants : Constants, StrBetaObj):
             continue    
         # if '_hex.' not in name:
         #     continue        
-        if '_solo' not in name:
-            continue
+        # if '_solo' not in name:
+        #     continue
         print(name)
         track_name = name
         name = name.split('.')[0]
@@ -121,12 +120,14 @@ def compute_all_betas(constants : Constants, StrBetaObj):
         """ loop over each channel in order to compute betas for separate and debleeded note instances """
         for channel in range(6):
             data = multi_channel_data[channel,:]
-            track_instance, annotations = get_annos_for_separate_strings(data, annotation_name, constants)
-            compute_track_betas(track_instance, annotations, constants, StrBetaObj, channel)
+            try:
+                track_instance, annotations = get_annos_for_separate_strings(data, annotation_name, constants)
+                compute_track_betas(track_instance, annotations, constants, StrBetaObj, channel)
+            except Exception as e:
+                print(e)
 
 
 if __name__ == '__main__':
-
     print('Check if you are OK with certain important configuration constants:')
     print('****************************')
     print('train_mode:', constants.train_mode)
@@ -153,20 +154,33 @@ if __name__ == '__main__':
 
 
     # compute_partial_orders(StrBetaObj, constants)
+    # if args.compute:
     compute_all_betas(constants, StrBetaObj)
-
     for s in range(6):
         for n in range(20):
             if betas[s,n]: # not None
                 median_betas[s,n] = statistics.median(betas[s,n])
-
     np.savez("./results/n_tonos.npz", median_betas=median_betas)
-    # npzfile = np.load('./results/n_tonos.npz', allow_pickle=True) # allow_pickle is needed because dtype=object, since None elements exist.
+
+    # for s in range(6):
+    #     plt.plot(range(15), median_betas[s,:], label=str(s))
+
+    npzfile = np.load('./results/n_tonos.npz', allow_pickle=True) # allow_pickle is needed because dtype=object, since None elements exist.
+
+    median_betas = npzfile['median_betas']
+
+
+    nf=13
+    # for s in range(6):
+    #     plt.plot(range(nf), median_betas[s,:], label=str(s))
 
     for s in range(6):
-        plt.plot(range(20), median_betas[s,:], label=str(s))
+        # print(median_betas[s,:12])
+        diff = np.log2(median_betas[s,:nf].astype(np.float64))-np.log2(median_betas[s,0].astype(np.float64))
+        plt.plot(range(nf), 6*diff, label=str(s))
 
-    plt.xticks(range(1,20))
+
+    plt.xticks(range(1,13))
     plt.grid()
     plt.legend()
     plt.savefig('./results/n_tonos.png')

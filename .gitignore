@@ -7,6 +7,7 @@ src/InharmonicStringDetection/rasnac.py
 src/InharmonicStringDetection/linearleastsquare.py
 *.pyc
 .vscode
+*.wav
 OutputToMIDI.py
 *.mid
 desktop.ini
