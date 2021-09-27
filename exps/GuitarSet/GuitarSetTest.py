@@ -179,9 +179,9 @@ if __name__ == '__main__':
     print('****************************')
     print()
 
-    # StrBetaObj = GuitarSetTrainWrapper(constants)
+    StrBetaObj = GuitarSetTrainWrapper(constants)
     # compute_partial_orders(StrBetaObj, constants)
-    with open('data/train/StrBetaObj.pickle', 'rb') as file:
-        StrBetaObj = pickle.load(file)
+    # with open('data/train/StrBetaObj.pickle', 'rb') as file:
+    #     StrBetaObj = pickle.load(file)
 
     testGuitarSet(constants, StrBetaObj)
