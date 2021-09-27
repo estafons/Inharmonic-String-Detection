@@ -35,7 +35,7 @@ class Constants():
     def __init__(self, config_name, workspace_folder):
         config = configparser.ConfigParser()
         config.read(config_name)
-
+        self.workspace_folder = workspace_folder
         for section_name in config.sections():
             for key, value in config.items(section_name):
                 if str(key) == 'size_of_fft':
@@ -66,19 +66,25 @@ class Constants():
         self.listoftracksfile = '/names.txt'
         # Path were listoftracksfile is stored NOTE: commented out!!
         # self.dataset_names_path = workspace_folder
-
+        self.train_frets_copy = self.train_frets.copy()
+        self.update_betafunc()
+    def update_betafunc(self):
         if self.train_mode == '1Fret':
             self.betafunc = betafuncs.betafunc
+            self.train_frets = [self.train_frets_copy[0]]
             assert len(self.train_frets) > 0
         elif self.train_mode == '2FretA':
             self.betafunc = betafuncs.expfunc
-            assert len(self.train_frets) == 2
+            self.train_frets = [self.train_frets_copy[0], self.train_frets_copy[-1]]
+            assert len(self.train_frets) >= 2
         if self.train_mode == '2FretB':
             self.betafunc = betafuncs.linfunc
-            assert len(self.train_frets) == 2
+            self.train_frets = [self.train_frets_copy[0], self.train_frets_copy[-1]]
+            assert len(self.train_frets) >= 2
         elif self.train_mode == '3Fret':
             self.betafunc = betafuncs.aphfunc
-            assert len(self.train_frets) == 3
+            self.train_frets = self.train_frets_copy[0:3].copy()
+            assert len(self.train_frets) >= 3
         '''#PATHS
         self.track_path = config.get('GUITARSET_PATHS', 'track_path')
         self.training_path = config.get('GUITARSET_PATHS', 'training_path')

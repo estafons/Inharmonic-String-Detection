@@ -29,7 +29,7 @@ def HjerrildChristensenTrain(strBetaObj, constants : Constants, train_frets = [0
             printProgressBar(count,6*len(dataset_nums),decimals=0, length=50)
             for fret in constants.train_frets:
                 midi = constants.tuning[string] + fret
-                path_to_track = Path(constants.path_to_hjerrild_christensen +
+                path_to_track = Path(constants.workspace_folder + '/' + constants.path_to_hjerrild_christensen +
                                      constants.guitar + str(dataset_no) + 
                                             '/string' +str(string + 1) +'/' + str(fret) +'.wav')
                 audio, _ = librosa.load(path_to_track, constants.sampling_rate)
