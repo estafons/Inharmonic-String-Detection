@@ -70,11 +70,10 @@ def DetectString(NoteObj : NoteInstance, StringBetasObj : StringBetas, betafunc,
     """ betafunc is the function to simulate beta. As input takes the combination and the beta array."""
     combs = determine_combinations(NoteObj.fundamental, constants)
     if (constants.lower_limit < NoteObj.beta < constants.upper_limit):
-        NoteObj.string = 6
-    else:
         betas = [(abs(betafunc(comb, StringBetasObj, constants) - NoteObj.beta), comb) for comb in combs]
         NoteObj.string = min(betas, key = lambda a: a[0])[1][0] # returns comb where 0 arguement is string
-
+    else:
+        NoteObj.string = 6
 def hz_to_midi(fundamental):
     return round(12*math.log(fundamental/440,2)+69)
 
