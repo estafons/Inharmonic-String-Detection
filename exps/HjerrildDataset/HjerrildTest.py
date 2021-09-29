@@ -67,17 +67,17 @@ def testHjerrildChristensen(constants : Constants, StrBetaObj):
 				path_to_onsettime = Path(constants.workspace_folder + '/data/onsets/' +
 									 constants.guitar + str(dataset_no) + 
 											'/string' +str(string + 1) +'/' + str(fret) +'.txt')
-				try:
+				# try:
 
-					with open(path_to_onsettime, 'r') as f:
-						onsetsec = float(f.read())
-						onsetidx = int(onsetsec*constants.sampling_rate)
-						plus60idx = int(0.06*constants.sampling_rate)
-						# print(onsetidx, plus60idx)
-					audio = audio[onsetidx:(onsetidx+plus60idx)] # adding this line because ther5e might be more than one onsets occurring in the recording
-				except ValueError:
-					print('Error:',path_to_onsettime)
-					break
+				with open(path_to_onsettime, 'r') as f:
+					onsetsec = float(f.read())
+					onsetidx = int(onsetsec*constants.sampling_rate)
+					plus60idx = int(0.06*constants.sampling_rate)
+					# print(onsetidx, plus60idx)
+				audio = audio[onsetidx:(onsetidx+plus60idx)] # adding this line because ther5e might be more than one onsets occurring in the recording
+				# except ValueError:
+				# 	print('Error:',path_to_onsettime)
+				# 	break
 
 			
 				# Better fundamental estimation (TODO: use librosa.pyin instead, delete next line and se midi_flag=False to avoid f0 re-compute)
@@ -116,10 +116,12 @@ def testHjerrildChristensen(constants : Constants, StrBetaObj):
 				# Compute Confusion Matrix
 				InhConfusionMatrixObj.matrix[string][note_instance.string] += 1
 			count+=1
+			# print(InhConfusionMatrixObj.get_accuracy())			
 	InhConfusionMatrixObj.plot_confusion_matrix(constants, normalize= True, 
 													title = str(constants.guitar) + str(constants.no_of_partials) +
 														'Inharmonic Confusion Matrix' +
-														str(round(InhConfusionMatrixObj.get_accuracy(),3)))
+														str(round(InhConfusionMatrixObj.get_accuracy()[0],3)))
+														# str(round(InhConfusionMatrixObj.get_accuracy()[1],3))
 
 if __name__ == '__main__':
 	print('Check if you are OK with certain important configuration constants:')
