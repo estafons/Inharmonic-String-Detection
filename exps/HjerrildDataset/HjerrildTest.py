@@ -74,7 +74,8 @@ def testHjerrildChristensen(constants : Constants, StrBetaObj):
 					onsetidx = int(onsetsec*constants.sampling_rate)
 					plus60idx = int(0.06*constants.sampling_rate)
 					# print(onsetidx, plus60idx)
-				audio = audio[onsetidx:(onsetidx+plus60idx)] # adding this line because ther5e might be more than one onsets occurring in the recording
+				# audio = audio[onsetidx:(onsetidx+plus60idx)] # adding this line because ther5e might be more than one onsets occurring in the recording
+				audio = audio[onsetidx:(onsetidx+plus60idx)] # restricted to 60ms
 				# except ValueError:
 				# 	print('Error:',path_to_onsettime)
 				# 	break
@@ -116,7 +117,7 @@ def testHjerrildChristensen(constants : Constants, StrBetaObj):
 				# Compute Confusion Matrix
 				InhConfusionMatrixObj.matrix[string][note_instance.string] += 1
 			count+=1
-			# print(InhConfusionMatrixObj.get_accuracy())			
+	# print(InhConfusionMatrixObj.get_accuracy())			
 	InhConfusionMatrixObj.plot_confusion_matrix(constants, normalize= True, 
 													title = str(constants.guitar) + str(constants.no_of_partials) +
 														'Inharmonic Confusion Matrix' +

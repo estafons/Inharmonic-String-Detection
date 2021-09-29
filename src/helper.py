@@ -70,8 +70,13 @@ class ConfusionMatrix():
             plt.xlabel('Predicted label')
             plt.tight_layout()
             #plt.show()
-         
-            plt.savefig(Path(constants.result_path + title.replace(" ", "") +'_'+constants.dataset+'_'+constants.train_mode+'_'+constants.polyfit+'.png'))
+            # if constants.dataset and constants.train_mode and constants.polyfit: # i.e. if GuitarSet
+            #     plt.savefig(Path(constants.result_path + title.replace(" ", "") +'_'+constants.dataset+'_'+constants.train_mode+'_'+constants.polyfit+'.png'))
+            # elif constants.train_mode and constants.polyfit:
+            plt.savefig(Path(constants.result_path + title.replace(" ", "") +'_'+constants.train_mode+'_'+constants.polyfit+'.png'))
+            # else:
+            #     plt.savefig(Path(constants.result_path + title.replace(" ", "")+'.png'))
+
             return plt
 
 
