@@ -8,7 +8,7 @@ and extract the content of dir ```hjerrild_ICASSP2019_guitar_dataset``` to ```./
 Configure the model by tweekinig values of ```constants.ini``` accordingly and then run:
 
 ```
-python HjerrildTest.py constants.ini . {-plot}
+python HjerrildTest.py constants.ini . {-plot} --guitar {martin, firebrand} --train_mode {1Fret, 2FretA, 2FretB, 3Fret}
 ```
 
 The results will be stored to dir ```./results```.
