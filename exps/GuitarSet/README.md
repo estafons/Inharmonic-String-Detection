@@ -24,7 +24,7 @@ The track names from the subset from GuitarSet that was considered monophonic (m
 
 Then run:
 ```
-python GuitarSetTest.py constants.ini . {-plot} {-run_genetic_alg}
+python GuitarSetTest.py constants.ini . {-plot} {-verbose} {-run_genetic_alg} --dataset {mix, mic} --train_mode {1Fret,2FretA,2FretB,3Fret}
 ```
 
 <!-- Then run the function ```TestGuitarSet``` from script ```GuitarSetTest.py``` and a confusion matrix will be saved at the location as specified in the ```constants.ini``` file. -->
