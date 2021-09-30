@@ -35,7 +35,8 @@ class StringBetas():
         for string, s in enumerate(constants.tuning):
             if self.betas_array[string][0] > max_beta:
                 max_beta = self.betas_array[string][0]
-        constants.upper_limit =  10**(math.log(max_beta*2**(constants.no_of_frets/6), 10)) # didnt ceil up to the nearest, because sometimes 10**-3 appear ceiling up to 10**-2 making a huge difference
+
+        constants.upper_limit =  max_beta*2**((constants.no_of_frets+2)/6) # +2 fret margin. didnt ceil up to the nearest, because sometimes 10**-3 appear ceiling up to 10**-2 making a huge difference
         constants.lower_limit = 10**(math.floor(math.log(np.nanmin(self.betas_array), 10)))
 
 class InharmonicDetector():
