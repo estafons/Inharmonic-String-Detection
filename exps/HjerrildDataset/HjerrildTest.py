@@ -20,6 +20,10 @@ from inharmonic_Analysis import (compute_partials, compute_inharmonicity, NoteIn
 										compute_partials_with_order_strict)
 import Inharmonic_Detector
 
+
+import warnings
+warnings.filterwarnings("ignore")
+
 parser = argparse.ArgumentParser()
 parser.add_argument('config_path', type=str)
 parser.add_argument('workspace_folder', type=str)
@@ -27,6 +31,13 @@ parser.add_argument('-plot', action='store_true')
 parser.add_argument('--guitar', type=str, default= '')
 parser.add_argument('--train_mode', type=str, default= '')
 args = parser.parse_args()
+
+
+
+try:
+	os.mkdir('./results')
+except Exception as e:
+	print('GootToKnow:', e)
 
 try:
 	constants = Constants(args.config_path, args.workspace_folder)
@@ -67,7 +78,6 @@ def testHjerrildChristensen(constants : Constants, StrBetaObj):
 				path_to_onsettime = Path(constants.workspace_folder + '/data/onsets/' +
 									 constants.guitar + str(dataset_no) + 
 											'/string' +str(string + 1) +'/' + str(fret) +'.txt')
-				# try:
 
 				with open(path_to_onsettime, 'r') as f:
 					onsetsec = float(f.read())
@@ -76,9 +86,7 @@ def testHjerrildChristensen(constants : Constants, StrBetaObj):
 					# print(onsetidx, plus60idx)
 				# audio = audio[onsetidx:(onsetidx+plus60idx)] # adding this line because ther5e might be more than one onsets occurring in the recording
 				audio = audio[onsetidx:(onsetidx+plus60idx)] # restricted to 60ms
-				# except ValueError:
-				# 	print('Error:',path_to_onsettime)
-				# 	break
+
 
 			
 				# Better fundamental estimation (TODO: use librosa.pyin instead, delete next line and se midi_flag=False to avoid f0 re-compute)
@@ -109,7 +117,7 @@ def testHjerrildChristensen(constants : Constants, StrBetaObj):
 				elif constants.f0again == 'no': 
 					note_instance = NoteInstance(fundamental_init, 0, audio, ToolBoxObj, constants.sampling_rate, constants)
 				else:
-					printS("Wrong arguments given for f0again. Add a valid value in the corresponding field of constants.ini: 'interanal' or 'external' or 'no'")
+					print("Wrong arguments given for f0again. Add a valid value in the corresponding field of constants.ini: 'interanal' or 'external' or 'no'")
 					exit(1)
 				# Detect plucked string (i.e. assigns value to note_instance.string)
 				Inharmonic_Detector.DetectString(note_instance, StrBetaObj, constants.betafunc, constants)
@@ -118,11 +126,12 @@ def testHjerrildChristensen(constants : Constants, StrBetaObj):
 				InhConfusionMatrixObj.matrix[string][note_instance.string] += 1
 			count+=1
 	# print(InhConfusionMatrixObj.get_accuracy())			
+	print('Accuracy:', round(InhConfusionMatrixObj.get_accuracy(),3))
 	InhConfusionMatrixObj.plot_confusion_matrix(constants, normalize= True, 
 													title = str(constants.guitar) + str(constants.no_of_partials) +
 														'Inharmonic Confusion Matrix' +
-														str(round(InhConfusionMatrixObj.get_accuracy()[0],3)))
-														# str(round(InhConfusionMatrixObj.get_accuracy()[1],3))
+														str(round(InhConfusionMatrixObj.get_accuracy(),3)))
+														# str(round(InhConfusionMatrixObj.get_current_accuracy(),3))
 
 if __name__ == '__main__':
 	print('Check if you are OK with certain important configuration constants:')

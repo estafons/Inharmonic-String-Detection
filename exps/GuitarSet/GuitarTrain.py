@@ -52,8 +52,12 @@ def GuitarSetTrainWrapper(constants):
     train_GuitarSet(strBetaObj, constants, train_frets = constants.train_frets)
     strBetaObj.list_to_medians()
     strBetaObj.set_limits(constants)
-    print(strBetaObj.betas_array)
-    print(constants.upper_limit, constants.lower_limit)
+    if constants.verbose:
+        print('Beta estimations:')
+        print(strBetaObj.betas_array)
+        print()
+    print('Acceptable range of beta values:', constants.upper_limit, '_', constants.lower_limit)
+    print()
     #print(" Median beta values for nFret methods:")
 
     return strBetaObj

@@ -43,9 +43,10 @@ def TrainWrapper(constants : Constants):
     strBetaObj = StringBetas(np.zeros((len(constants.tuning), constants.no_of_frets)), constants)
     HjerrildChristensenTrain(strBetaObj, constants, train_frets = constants.train_frets)
     strBetaObj.list_to_medians()
-    print(strBetaObj.betas_array)
+    # print(strBetaObj.betas_array)
     strBetaObj.set_limits(constants)
-    print(constants.upper_limit, constants.lower_limit)
+    print('Acceptable range of beta values:', constants.upper_limit, '_', constants.lower_limit)
+    print()
     return strBetaObj
 
 #TrainWrapper(constants)
