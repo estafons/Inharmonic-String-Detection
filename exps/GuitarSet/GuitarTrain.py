@@ -56,7 +56,7 @@ def GuitarSetTrainWrapper(constants):
         print('Beta estimations:')
         print(strBetaObj.betas_array)
         print()
-    print('Acceptable range of beta values:', constants.upper_limit, '_', constants.lower_limit)
+    print('Acceptable range of beta values:', constants.upper_limit, '-', constants.lower_limit)
     print()
     #print(" Median beta values for nFret methods:")
 

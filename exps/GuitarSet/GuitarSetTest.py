@@ -152,14 +152,14 @@ def testGuitarSet(constants : Constants, StrBetaObj):
         track_instance, annotations = load_data(track_name, name, constants)
         predictTabThesis(track_instance, annotations, constants, StrBetaObj, name)
         InhConfusionMatrixObj.add_to_track_predictions_to_matrix(track_instance.tablature.tablature, annotations)
-        current_acc = InhConfusionMatrixObj.get_current_accuracy()
+        current_acc = InhConfusionMatrixObj.get_current_accuracy(constants)
         if constants.verbose:
             print('audio_based accuracy: ', current_acc)
         InhConfusionMatrixObj.current_matrix = np.zeros((6,7)) # NOTE: IMPORTANT
         if constants.run_genetic_alg:
             tab, g = genetic.genetic(track_instance.tablature, constants)
             GenConfusionMatrixObj.add_to_track_predictions_to_matrix(tab, annotations)
-            current_acc = GenConfusionMatrixObj.get_current_accuracy()
+            current_acc = GenConfusionMatrixObj.get_current_accuracy(constants)
             if constants.verbose:
                 print('GA accuracy: ', current_acc)
             GenConfusionMatrixObj.current_matrix = np.zeros((6,6))

@@ -25,10 +25,11 @@ class ConfusionMatrix():
     # def reinit_current_matrix():
     #     self.current_matrix = np.zeros(size)
     
-    def get_current_accuracy(self):
+    def get_current_accuracy(self, constants):
         current_acc = np.trace(self.current_matrix)/np.sum(self.current_matrix)
         inconclusive_rate = np.sum(self.current_matrix, axis = 0)[6]/np.sum(self.current_matrix)
-        print("inconclusive rate is {} and pure accuracy {}".format(inconclusive_rate, 
+        if constants.verbose:
+            print("inconclusive rate is {} and pure accuracy {}".format(inconclusive_rate, 
                                                     np.trace(self.current_matrix)/(np.sum(self.current_matrix)-np.sum(self.current_matrix, axis = 0)[6])))
         return current_acc
 
