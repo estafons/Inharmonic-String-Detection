@@ -142,12 +142,14 @@ def testGuitarSet(constants : Constants, StrBetaObj):
     for count, name in enumerate(lines):
         # if 'solo' not in name:
         #     pass
-        # printProgressBar(count,len(lines),decimals=0, length=50)
+        # 
         name = name.replace('\n', '')
         if constants.verbose:
             print()
             print('Audio-based detection running...')
             print(name, count,'/',len(lines))
+        else:
+            printProgressBar(count,len(lines),decimals=0, length=50)
         track_name = name[:-5] + '_' + constants.dataset +'.wav'
         track_instance, annotations = load_data(track_name, name, constants)
         predictTabThesis(track_instance, annotations, constants, StrBetaObj, name)
@@ -163,15 +165,15 @@ def testGuitarSet(constants : Constants, StrBetaObj):
             if constants.verbose:
                 print('GA accuracy: ', current_acc)
             GenConfusionMatrixObj.current_matrix = np.zeros((6,6))
-        # if count==0:
-        #     break
 
     InhConfusionMatrixObj.plot_confusion_matrix(constants, normalize= True, 
                                 title = str(constants.no_of_partials) + 'Inharmonic Confusion Matrix' +str(round(InhConfusionMatrixObj.get_accuracy(),3)))
     print('Audio-based mean accuracy:', round(InhConfusionMatrixObj.get_accuracy()))
-    GenConfusionMatrixObj.plot_confusion_matrix(constants, normalize= True, 
-                             title = 'Genetic Confusion Matrix'+str(round(GenConfusionMatrixObj.get_accuracy(),3)))
-    print('GA context-based mean accuracy:', round(GenConfusionMatrixObj.get_accuracy()))
+
+    if constants.run_genetic_alg:
+        GenConfusionMatrixObj.plot_confusion_matrix(constants, normalize= True, 
+                                title = 'Genetic Confusion Matrix'+str(round(GenConfusionMatrixObj.get_accuracy(),3)))
+        print('GA context-based mean accuracy:', round(GenConfusionMatrixObj.get_accuracy()))
 
 
 
