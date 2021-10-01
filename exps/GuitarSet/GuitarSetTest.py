@@ -168,12 +168,12 @@ def testGuitarSet(constants : Constants, StrBetaObj):
 
     InhConfusionMatrixObj.plot_confusion_matrix(constants, normalize= True, 
                                 title = str(constants.no_of_partials) + 'Inharmonic Confusion Matrix' +str(round(InhConfusionMatrixObj.get_accuracy(),3)))
-    print('Audio-based mean accuracy:', round(InhConfusionMatrixObj.get_accuracy()))
+    print('Audio-based mean accuracy:', round(InhConfusionMatrixObj.get_accuracy(),3))
 
     if constants.run_genetic_alg:
         GenConfusionMatrixObj.plot_confusion_matrix(constants, normalize= True, 
                                 title = 'Genetic Confusion Matrix'+str(round(GenConfusionMatrixObj.get_accuracy(),3)))
-        print('GA context-based mean accuracy:', round(GenConfusionMatrixObj.get_accuracy()))
+        print('GA context-based mean accuracy:', round(GenConfusionMatrixObj.get_accuracy(),3))
 
 
 
