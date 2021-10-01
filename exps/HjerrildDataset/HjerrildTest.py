@@ -69,7 +69,7 @@ def testHjerrildChristensen(constants : Constants, StrBetaObj):
 				path_to_track = Path(constants.workspace_folder + '/'+ constants.path_to_hjerrild_christensen +
 									 constants.guitar + str(dataset_no) + 
 											'/string' +str(string + 1) +'/' + str(fret) +'.wav')
-				audio, _ = librosa.load(path_to_track, constants.sampling_rate)
+				rec_audio, _ = librosa.load(path_to_track, constants.sampling_rate)
 
 				# Onset detection (instances not always occur at the beginning of the recording)
 				# y = librosa.onset.onset_detect(audio, constants.sampling_rate)
@@ -85,7 +85,8 @@ def testHjerrildChristensen(constants : Constants, StrBetaObj):
 					plus60idx = int(0.06*constants.sampling_rate)
 					# print(onsetidx, plus60idx)
 				# audio = audio[onsetidx:(onsetidx+plus60idx)] # adding this line because ther5e might be more than one onsets occurring in the recording
-				audio = audio[onsetidx:(onsetidx+plus60idx)] # restricted to 60ms
+				audio60ms = rec_audio[onsetidx:(onsetidx+plus60idx)] # restricted to 60ms
+				longaudio = rec_audio[onsetidx:] # not restricted to 60ms
 
 
 			
@@ -93,7 +94,7 @@ def testHjerrildChristensen(constants : Constants, StrBetaObj):
 				fundamental_init = librosa.midi_to_hz(constants.tuning[string] + fret)
 				if constants.f0again == 'external': 
 					# librosa pyin fundamental estimation
-					f0s, _, _ = librosa.pyin(audio, fmin=80, fmax=1500, sr=constants.sampling_rate)
+					f0s, _, _ = librosa.pyin(audio60ms, fmin=80, fmax=1500, sr=constants.sampling_rate)
 					f0s = f0s[~np.isnan(f0s)]
 
 					# ### simple method #### __gb__
@@ -111,16 +112,21 @@ def testHjerrildChristensen(constants : Constants, StrBetaObj):
 				ToolBoxObj = ToolBox(partial_tracking_func=compute_partials, inharmonicity_compute_func=compute_inharmonicity, 
 								partial_func_args=[constants.no_of_partials, fundamental_init/2, constants, StrBetaObj], inharmonic_func_args=[])
 				if constants.f0again == 'internal':
-					note_instance = NoteInstance(fundamental_init, 0, audio, ToolBoxObj, constants.sampling_rate, constants, midi_flag=True)
+					note_instance = NoteInstance(fundamental_init, 0, audio60ms, ToolBoxObj, constants.sampling_rate, constants, longaudio=longaudio, midi_flag=True)
 				elif constants.f0again == 'external': 
-					note_instance = NoteInstance(f0, 0, audio, ToolBoxObj, constants.sampling_rate, constants)
+					note_instance = NoteInstance(f0, 0, audio60ms, ToolBoxObj, constants.sampling_rate, constants)
 				elif constants.f0again == 'no': 
-					note_instance = NoteInstance(fundamental_init, 0, audio, ToolBoxObj, constants.sampling_rate, constants)
+					note_instance = NoteInstance(fundamental_init, 0, audio60ms, ToolBoxObj, constants.sampling_rate, constants)
 				else:
 					print("Wrong arguments given for f0again. Add a valid value in the corresponding field of constants.ini: 'interanal' or 'external' or 'no'")
 					exit(1)
 				# Detect plucked string (i.e. assigns value to note_instance.string)
+				# try:
 				Inharmonic_Detector.DetectString(note_instance, StrBetaObj, constants.betafunc, constants)
+				# except ValueError:
+				# 	note_instance = NoteInstance(fundamental_init, 0, audio60ms, ToolBoxObj, constants.sampling_rate, constants)
+				# 	Inharmonic_Detector.DetectString(note_instance, StrBetaObj, constants.betafunc, constants)
+				# 	print('Problem with fundamental estimation')
 
 				# Compute Confusion Matrix
 				InhConfusionMatrixObj.matrix[string][note_instance.string] += 1

@@ -49,7 +49,7 @@ def DetectString(NoteObj : NoteInstance, StringBetasObj : StringBetas, betafunc,
     combs = determine_combinations(NoteObj.fundamental, constants)
     if (constants.lower_limit < NoteObj.beta < constants.upper_limit):
         betas = [(abs(betafunc(comb, StringBetasObj, constants) - NoteObj.beta), comb) for comb in combs]
-        NoteObj.string = min(betas, key = lambda a: a[0])[1][0] # returns comb where 0 arguement is string
+        NoteObj.string = min(betas, key = lambda a: a[0])[1][0] # returns comb where 0 argument is string
     else:
         NoteObj.string = 6
 

@@ -37,10 +37,11 @@ class ToolBox():
     
 class NoteInstance():
     """move to other level of package"""
-    def __init__(self, fundamental, onset, audio ,ToolBoxObj:ToolBox ,sampling_rate, constants : Constants, midi_flag = False):
+    def __init__(self, fundamental, onset, audio, ToolBoxObj:ToolBox ,sampling_rate, constants : Constants, longaudio=np.array([]), midi_flag = False):
         self.fundamental = fundamental
         self.onset = onset
         self.audio = audio
+        self.longaudio = longaudio # may be used for ("internal") f0 computation
         self.sampling_rate = constants.sampling_rate
         self.polyfit = constants.polyfit
         self.fft=np.fft.fft(self.audio,n = constants.size_of_fft)
@@ -126,12 +127,27 @@ class NoteInstance():
 
         return ax
 
-    def recompute_fundamental(self, constants : Constants, window = 10): # delete if not needed
-        filtered = zero_out(self.fft, self.fundamental, window, constants)
+    def weighted_argmean(self, peak_idx, w=6):
+        min_idx = max(peak_idx - w//2, 0)
+        max_idx = min(peak_idx + w//2, len(self.frequencies)-1)
+        window = range(min_idx, max_idx+1)
+        amp_sum = sum([self.fft.real[i] for i in window])
+        res = sum( [self.fft.real[i]/amp_sum * self.frequencies[i] for i in window] )
+        return res
+
+    def recompute_fundamental(self, constants : Constants, window = 10): 
+        
+        if not self.longaudio.any(): # if we want to work on given self.audio (and not on self.longaudio)
+            filtered = zero_out(self.fft, self.fundamental, window, constants)
+        else:
+            longaudio_fft = np.fft.fft(self.longaudio,n = constants.size_of_fft)
+            filtered = zero_out(longaudio_fft, self.fundamental, window, constants)
         peaks, _  =scipy.signal.find_peaks(np.abs(filtered),distance=100000) # better way to write this?
-        max_peak = self.frequencies[peaks[0]]
-        self.fundamental = max_peak
-        return max_peak
+        
+        max_peak_freq = self.weighted_argmean(peak_idx=peaks[0], w=0) # w=0 means that no weighted argmean is employed, Note: equivalent to # max_peak_freq = self.frequencies[peaks[0]]
+
+        self.fundamental = max_peak_freq
+        return max_peak_freq
 
 
 def window_centering_func(k,f0=None,a=None,b=None,c=None, b_est=None):
