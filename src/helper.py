@@ -27,20 +27,28 @@ class ConfusionMatrix():
     
     def get_current_accuracy(self, constants):
         current_acc = np.trace(self.current_matrix)/np.sum(self.current_matrix)
-        inconclusive_rate = np.sum(self.current_matrix, axis = 0)[6]/np.sum(self.current_matrix)
-        if constants.verbose:
-            print("inconclusive rate is {} and pure accuracy {}".format(inconclusive_rate, 
-                                                    np.trace(self.current_matrix)/(np.sum(self.current_matrix)-np.sum(self.current_matrix, axis = 0)[6])))
+
+        if not constants.run_genetic_alg:
+            inconclusive_rate = np.sum(self.current_matrix, axis = 0)[6]/np.sum(self.current_matrix)
+            if constants.verbose:
+                print("inconclusive rate is {} and pure accuracy {}".format(inconclusive_rate, 
+                                                        np.trace(self.current_matrix)/(np.sum(self.current_matrix)-np.sum(self.current_matrix, axis = 0)[6])))
         return current_acc
+
+    def get_accuracy(self):
+        total_acc = np.trace(self.matrix)/np.sum(self.matrix)
+        if hasattr(constants, 'run_genetic_alg') and not constants.run_genetic_alg:
+            inconclusive_rate = np.sum(self.current_matrix, axis = 0)[6]/np.sum(self.current_matrix)
+            if constants.verbose:
+                print("inconclusive rate is {} and pure accuracy {}".format(inconclusive_rate, 
+                                                        np.trace(self.current_matrix)/(np.sum(self.current_matrix)-np.sum(self.current_matrix, axis = 0)[6])))
+
+        return total_acc
 
     def add_to_track_predictions_to_matrix(self, tab_as_list, annotations : Annotations):
         for tab_instance, annos_instance in zip(tab_as_list, annotations.tablature.tablature):
             self.matrix[annos_instance.string][tab_instance.string] += 1
             self.current_matrix[annos_instance.string][tab_instance.string] += 1
-    
-    def get_accuracy(self):
-        total_acc = np.trace(self.matrix)/np.sum(self.matrix)
-        return total_acc
         
     def plot_confusion_matrix(self, constants,
                             normalize=False,

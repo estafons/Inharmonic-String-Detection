@@ -166,6 +166,9 @@ def testGuitarSet(constants : Constants, StrBetaObj):
                 print('GA accuracy: ', current_acc)
             GenConfusionMatrixObj.current_matrix = np.zeros((6,6))
 
+        # if count==0:
+        #     break
+
     InhConfusionMatrixObj.plot_confusion_matrix(constants, normalize= True, 
                                 title = str(constants.no_of_partials) + 'Inharmonic Confusion Matrix' +str(round(InhConfusionMatrixObj.get_accuracy(),3)))
     print('Audio-based mean accuracy:', round(InhConfusionMatrixObj.get_accuracy(),3))
