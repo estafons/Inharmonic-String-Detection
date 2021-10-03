@@ -37,11 +37,11 @@ class ConfusionMatrix():
 
     def get_accuracy(self):
         total_acc = np.trace(self.matrix)/np.sum(self.matrix)
-        if hasattr(constants, 'run_genetic_alg') and not constants.run_genetic_alg:
-            inconclusive_rate = np.sum(self.current_matrix, axis = 0)[6]/np.sum(self.current_matrix)
-            if constants.verbose:
-                print("inconclusive rate is {} and pure accuracy {}".format(inconclusive_rate, 
-                                                        np.trace(self.current_matrix)/(np.sum(self.current_matrix)-np.sum(self.current_matrix, axis = 0)[6])))
+        # if hasattr(constants, 'run_genetic_alg') and not constants.run_genetic_alg:
+        #     inconclusive_rate = np.sum(self.current_matrix, axis = 0)[6]/np.sum(self.current_matrix)
+        #     if constants.verbose:
+        #         print("inconclusive rate is {} and pure accuracy {}".format(inconclusive_rate, 
+        #                                                 np.trace(self.current_matrix)/(np.sum(self.current_matrix)-np.sum(self.current_matrix, axis = 0)[6])))
 
         return total_acc
 
