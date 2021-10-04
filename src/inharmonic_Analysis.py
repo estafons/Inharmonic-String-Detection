@@ -178,7 +178,8 @@ def compute_partials(note_instance, partial_func_args):
                 filtered = zero_out(note_instance.fft, center_freq=center_freq , window_length=diviate, constants=constants)
                
                 peaks, _  = scipy.signal.find_peaks(np.abs(filtered),distance=100000) # better way to write this?
-                max_peak = note_instance.frequencies[peaks[0]]
+                # max_peak = note_instance.frequencies[peaks[0]]
+                max_peak = note_instance.weighted_argmean(peak_idx=peaks[0], w=6)
                 note_instance.partials.append(Partial(frequency=max_peak, order=k, peak_idx=peaks[0]))
           
             except Exception as e:
