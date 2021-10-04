@@ -30,22 +30,7 @@ import pickle
 
 
 
-parser = argparse.ArgumentParser()
-parser.add_argument('config_path', type=str)
-parser.add_argument('workspace_folder', type=str)
-parser.add_argument('-plot', action='store_true') 
-parser.add_argument('-compute', action='store_true') 
 
-args = parser.parse_args()
-
-try:
-    constants = Constants(args.config_path, args.workspace_folder)
-except Exception as e:
-    print(e)
- 
-
-# HARDWIRE CONSTANTS
-constants.plot = args.plot
 
 
 def get_annos_for_separate_strings(data, annotation_name, constants : Constants):
@@ -104,8 +89,8 @@ def compute_all_betas(constants : Constants, StrBetaObj):
             continue    
         # if '_hex.' not in name:
         #     continue        
-        # if '_solo' not in name:
-        #     continue
+        if '_solo' not in name:
+            continue
         print(name)
         track_name = name
         name = name.split('.')[0]
@@ -128,6 +113,26 @@ def compute_all_betas(constants : Constants, StrBetaObj):
 
 
 if __name__ == '__main__':
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument('config_path', type=str)
+    parser.add_argument('workspace_folder', type=str)
+    parser.add_argument('-plot', action='store_true') 
+    parser.add_argument('-compute', action='store_true') 
+    parser.add_argument('-train', action='store_true') 
+
+    args = parser.parse_args()
+
+    try:
+        constants = Constants(args.config_path, args.workspace_folder)
+    except Exception as e:
+        print(e)
+    
+
+    # HARDWIRE CONSTANTS
+    constants.plot = args.plot
+    # constants.compute = args.compute
+
     print('Check if you are OK with certain important configuration constants:')
     print('****************************')
     print('train_mode:', constants.train_mode)
@@ -137,6 +142,8 @@ if __name__ == '__main__':
     print('****************************')
     print()
 
+    StringNames = ['E', 'A', 'D', 'G', 'B', 'e']
+
     betas = np.array([[None]*20]*6)
     for s in range(6):
         for n in range(20):
@@ -144,44 +151,50 @@ if __name__ == '__main__':
 
     median_betas = np.array([[None]*20]*6)
 
-    # StrBetaObj = GuitarSetTrainWrapper(constants)
-    # with open('data/train/StrBetaObj.pickle', 'wb') as file:
-    #     pickle.dump(StrBetaObj, file)
-    # aaa
-
-    with open('data/train/StrBetaObj.pickle', 'rb') as file:
-        StrBetaObj = pickle.load(file)
+    if args.train:
+        StrBetaObj = GuitarSetTrainWrapper(constants)
+        # with open('data/train/StrBetaObj.pickle', 'wb') as file:
+        #     pickle.dump(StrBetaObj, file)
+    else:
+        with open('data/train/StrBetaObj.pickle', 'rb') as file:
+            StrBetaObj = pickle.load(file)
 
 
     # compute_partial_orders(StrBetaObj, constants)
-    # if args.compute:
-    compute_all_betas(constants, StrBetaObj)
-    for s in range(6):
-        for n in range(20):
-            if betas[s,n]: # not None
-                median_betas[s,n] = statistics.median(betas[s,n])
-    np.savez("./results/n_tonos.npz", median_betas=median_betas)
+    if args.compute:
+        compute_all_betas(constants, StrBetaObj)
+        for s in range(6):
+            for n in range(20):
+                if betas[s,n]: # not None
+                    median_betas[s,n] = statistics.median(betas[s,n])
+        np.savez("./results/n_tonos.npz", median_betas=median_betas)
 
     # for s in range(6):
     #     plt.plot(range(15), median_betas[s,:], label=str(s))
 
     npzfile = np.load('./results/n_tonos.npz', allow_pickle=True) # allow_pickle is needed because dtype=object, since None elements exist.
+    # npzfile = np.load('./results/n_tonos_hex_cln_solos.npz', allow_pickle=True) # allow_pickle is needed because dtype=object, since None elements exist.
 
     median_betas = npzfile['median_betas']
 
 
-    nf=13
+    nf=17
     # for s in range(6):
     #     plt.plot(range(nf), median_betas[s,:], label=str(s))
 
     for s in range(6):
-        # print(median_betas[s,:12])
         diff = np.log2(median_betas[s,:nf].astype(np.float64))-np.log2(median_betas[s,0].astype(np.float64))
-        plt.plot(range(nf), 6*diff, label=str(s))
+        plt.plot(range(nf), 6*diff, label=StringNames[s], linewidth=1.75, alpha=0.85)
+    plt.plot(range(nf+1), range(nf+1), label='y=x', linestyle='dashed', color='black')
 
 
-    plt.xticks(range(1,13))
+    plt.xticks(range(1,20))
+    plt.yticks(range(1,14))
+    plt.xlim(-0.1,20)
+    plt.ylim(-0.1,20)
     plt.grid()
+    plt.xlabel('n')
+    plt.ylabel(r'$6 \cdot \log_2(\hat{\beta}_{s,med}(n)/\hat{\beta}_{s,med}(0))$')
     plt.legend()
-    plt.savefig('./results/n_tonos.png')
+    plt.savefig('./results/n_tonos.png', bbox_inches='tight')
     plt.show()

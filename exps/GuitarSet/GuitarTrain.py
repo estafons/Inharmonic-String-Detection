@@ -52,7 +52,7 @@ def GuitarSetTrainWrapper(constants):
     train_GuitarSet(strBetaObj, constants, train_frets = constants.train_frets)
     strBetaObj.list_to_medians()
     strBetaObj.set_limits(constants)
-    if constants.verbose:
+    if hasattr(constants, 'verbose') and constants.verbose:
         print()
         print('Beta estimations:')
         print(strBetaObj.betas_array)

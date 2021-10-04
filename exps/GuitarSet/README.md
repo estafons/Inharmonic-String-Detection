@@ -27,6 +27,12 @@ Then run:
 python GuitarSetTest.py constants.ini . {-plot} {-verbose} {-run_genetic_alg} --dataset {mix, mic} --train_mode {1Fret,2FretA,2FretB,3Fret}
 ```
 
+Run:
+```
+python n_tonos.py constants.ini . {-compute} {-train}
+```
+in order to plot guitar irregularity.
+
 <!-- Then run the function ```TestGuitarSet``` from script ```GuitarSetTest.py``` and a confusion matrix will be saved at the location as specified in the ```constants.ini``` file. -->
 
 ### Training for GuitarSet
