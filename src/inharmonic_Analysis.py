@@ -178,8 +178,8 @@ def compute_partials(note_instance, partial_func_args):
                 filtered = zero_out(note_instance.fft, center_freq=center_freq , window_length=diviate, constants=constants)
                
                 peaks, _  = scipy.signal.find_peaks(np.abs(filtered),distance=100000) # better way to write this?
-                # max_peak = note_instance.frequencies[peaks[0]]
-                max_peak = note_instance.weighted_argmean(peak_idx=peaks[0], w=6)
+                max_peak = note_instance.frequencies[peaks[0]]
+                # max_peak = note_instance.weighted_argmean(peak_idx=peaks[0], w=6)
                 note_instance.partials.append(Partial(frequency=max_peak, order=k, peak_idx=peaks[0]))
           
             except Exception as e:
@@ -191,19 +191,50 @@ def compute_partials(note_instance, partial_func_args):
         note_instance.abc = [a,b,c]
         # compute differences/deviations
         note_instance.differences, orders = zip(*compute_differences(note_instance))
-        if i != N-1:
+        if i != N-1: # i.e. if not the final iteration
             note_instance.partials=[]
 
+
+    # # NOTE: failed better precision!
+    # diviate = round(10*note_instance.fft.size/note_instance.sampling_rate)
+    # note_instance.partials=[]
+    # b_est = note_instance.beta
+    # for k in range(2,lim): # NOTE: 2 stands for the 2nd partial! TODO: use 3 instead if we wan t to start processing from the 2nd partial and further
+    #     # center_freq = k*f0 * np.sqrt(1+b_est*k**2)
+    #     center_freq = window_centering_func(k,f0, a=a,b=b,c=c)
+    #     try:
+    #         filtered = zero_out(note_instance.fft, center_freq=center_freq , window_length=diviate, constants=constants)
+            
+    #         peaks, _  = scipy.signal.find_peaks(np.abs(filtered),distance=100000) # better way to write this?
+    #         max_peak = note_instance.frequencies[peaks[0]]
+    #         # max_peak = note_instance.weighted_argmean(peak_idx=peaks[0], w=6)
+    #         note_instance.partials.append(Partial(frequency=max_peak, order=k, peak_idx=peaks[0]))
+        
+    #     except Exception as e:
+    #         print(e)
+    #         print('MyExplanation: Certain windows where peaks are to be located surpassed the length of the DFT.')
+    #         break
+
+    #     # iterative beta estimates
+    #     _, [a,b,c] = compute_inharmonicity(note_instance, [])
+        # note_instance.abc = [a,b,c]
+        # # compute differences/deviations
+        # note_instance.differences, orders = zip(*compute_differences(note_instance))
+
+
+    if constants.plot: 
         peak_freqs = [partial.frequency for partial in note_instance.partials]
         peaks_idx = [partial.peak_idx for partial in note_instance.partials]
+        fig = plt.figure(figsize=(15, 10))
+        # timer = fig.canvas.new_timer(interval = 3000) #creating a timer object and setting an interval of 3000 milliseconds
+        # timer.add_callback(close_event)
+        ax1 = fig.add_subplot(2, 1, 1)
+        ax2 = fig.add_subplot(2, 1, 2)
+        note_instance.plot_partial_deviations(lim=30, res=note_instance.abc, ax=ax1, note_instance=note_instance) #, peaks_idx=Peaks_Idx)
+        note_instance.plot_DFT(peak_freqs, peaks_idx, lim=30, ax=ax2)   
 
-    # if constants.plot: 
-    #     fig = plt.figure(figsize=(15, 10))
-    #     note_instance.plot_partial_deviations(lim=lim, res=note_instance.abc, fig=fig)#, peaks_idx=Peaks_Idx)
-    #     note_instance.plot_DFT(Peaks, Peaks_Idx, lim, fig=fig)   
-    #     # fig.savefig()
-    #     plt.show()
-    #     plt.clf()
+        # fig.savefig()
+        plt.show()
     
     # del Peaks, Peaks_Idx
 
