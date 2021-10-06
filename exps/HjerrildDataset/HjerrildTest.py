@@ -139,13 +139,13 @@ def testHjerrildChristensen(constants : Constants, StrBetaObj):
 			# if count > 1:
 			# 	break
 	# print(InhConfusionMatrixObj.get_accuracy(constants)[0])			
-	print('Accuracy:', round(InhConfusionMatrixObj.get_accuracy(constants)[0],3))
+	print('Accuracy:', round(InhConfusionMatrixObj.get_accuracy()[0],3))
 	InhConfusionMatrixObj.plot_confusion_matrix(constants, normalize= True, 
-													title = str(constants.no_of_partials) +
-														'Inharmonic Confusion Matrix: ' +
-														str(round(InhConfusionMatrixObj.get_accuracy(constants)[0],3)) +
-														'Inconclusive rate: ' +
-														str(round(InhConfusionMatrixObj.get_accuracy(constants)[1],3)) )
+													title = str(constants.guitar) + '_' +
+														'Acc_' +
+														str(round(InhConfusionMatrixObj.get_accuracy()[0],3)) +
+														'__Inc rate_' +
+														str(round(InhConfusionMatrixObj.get_accuracy()[1],3)) )
 														# str(round(InhConfusionMatrixObj.get_current_accuracy(),3))
 
 if __name__ == '__main__':
