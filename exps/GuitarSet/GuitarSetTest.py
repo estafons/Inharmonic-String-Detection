@@ -140,8 +140,8 @@ def testGuitarSet(constants : Constants, StrBetaObj):
                 print('GA accuracy: ', current_acc)
             GenConfusionMatrixObj.current_matrix = np.zeros((6,6))
 
-        if count==0:
-            break
+        # if count==0:
+        #     break
 
     InhConfusionMatrixObj.plot_confusion_matrix(constants, normalize= True, 
                                                 title = 'Acc_' +
@@ -149,7 +149,7 @@ def testGuitarSet(constants : Constants, StrBetaObj):
 														'__Inc rate_' +
 														str(round(InhConfusionMatrixObj.get_accuracy()[1],3)) 
                                                 )
-    print('Audio-based mean accuracy:', round(InhConfusionMatrixObj.get_accuracy()[0],3))
+    # print('Audio-based mean accuracy:', str(round(InhConfusionMatrixObj.get_accuracy()[0],3)))
 
     if constants.run_genetic_alg:
         GenConfusionMatrixObj.plot_confusion_matrix(constants, normalize= True, 
