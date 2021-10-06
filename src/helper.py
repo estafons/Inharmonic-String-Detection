@@ -35,15 +35,16 @@ class ConfusionMatrix():
                                                         np.trace(self.current_matrix)/(np.sum(self.current_matrix)-np.sum(self.current_matrix, axis = 0)[6])))
         return current_acc
 
-    def get_accuracy(self):
+    def get_accuracy(self,constants):
         total_acc = np.trace(self.matrix)/np.sum(self.matrix)
-        # if hasattr(constants, 'run_genetic_alg') and not constants.run_genetic_alg:
-        #     inconclusive_rate = np.sum(self.current_matrix, axis = 0)[6]/np.sum(self.current_matrix)
-        #     if constants.verbose:
-        #         print("inconclusive rate is {} and pure accuracy {}".format(inconclusive_rate, 
-        #                                                 np.trace(self.current_matrix)/(np.sum(self.current_matrix)-np.sum(self.current_matrix, axis = 0)[6])))
+        if not hasattr(constants, 'run_genetic_alg') or not constants.run_genetic_alg:
+            inconclusive_rate = np.sum(self.matrix, axis = 0)[6]/np.sum(self.matrix)
+            # print("inconclusive rate is {} and pure accuracy {}".format(inconclusive_rate, 
+                                                        # np.trace(self.matrix)/(np.sum(self.matrix)-np.sum(self.matrix, axis = 0)[6])))
+        else:
+            inconclusive_rate = None
 
-        return total_acc
+        return total_acc, inconclusive_rate
 
     def add_to_track_predictions_to_matrix(self, tab_as_list, annotations : Annotations):
         for tab_instance, annos_instance in zip(tab_as_list, annotations.tablature.tablature):

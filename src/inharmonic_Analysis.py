@@ -88,7 +88,7 @@ class NoteInstance():
         return ax
 
 
-    def plot_partial_deviations(self, lim=None, res=None, peaks_idx=None, ax=None, note_instance=None, annos_instance=None, tab_instance=None):
+    def plot_partial_deviations(self, lim=None, res=None, peaks_idx=None, ax=None, note_instance=None, annos_string=None, tab_instance=None):
 
         differences = self.differences
         w = self.large_window
@@ -115,15 +115,18 @@ class NoteInstance():
         ax.grid()
         ax.legend()
 
-        if annos_instance:
-            if note_instance.string == annos_instance.string:
+        if annos_string:
+            if note_instance.string == annos_string:
                 c = 'green'
             else:
                 c = 'red'
         else:
             c = 'black'
         
-        plt.title("pred: "+ str(note_instance.string) + ", annotation: " + str(annos_instance.string) + ', fret: ' + str(tab_instance.fret) + ' || f0: ' + str(round(self.fundamental,2)) + ', beta_estimate: '+ str(round(self.beta,6)) + '\n a = ' + str(round(a,5)), color=c)
+        if tab_instance:
+            plt.title("pred: "+ str(note_instance.string) + ", annotation: " + str(annos_instance.string) + ', fret: ' + str(tab_instance.fret) + ' || f0: ' + str(round(self.fundamental,2)) + ', beta_estimate: '+ str(round(self.beta,6)), color=c) # + '\n a = ' + str(round(a,5)), color=c)
+        else:
+            plt.title("pred: "+ str(note_instance.string) + ", annotation: " + str(annos_instance.string) + ' || f0: ' + str(round(self.fundamental,2)) + ', beta_estimate: '+ str(round(self.beta,6)), color=c)# + '\n a = ' + str(round(a,5)), color=c)
 
         return ax
 
@@ -168,9 +171,12 @@ def compute_partials(note_instance, partial_func_args):
     f0 = note_instance.fundamental
 
     a, b, c = 0, 0, 0
-    N=6 # n_iterations # TODO: connect iterations with the value constants.no_of_partials
-    for i in range(N):
-        lim = 5*(i+1)+1 # NOTE: till 30th/50th partial
+    # N=6 # n_iterations # TODO: connect iterations with the value constants.no_of_partials
+    # for i in range(N):
+    #     lim = 5*(i+1)+1 # NOTE: till 30th/50th partial
+    step=2
+    bound = constants.no_of_partials + constants.no_of_partials % step
+    for lim in range(6,31,step):
         for k in range(2,lim): # NOTE: 2 stands for the 2nd partial! TODO: use 3 instead if we wan t to start processing from the 2nd partial and further
             # center_freq = k*f0 * np.sqrt(1+b_est*k**2)
             center_freq = window_centering_func(k,f0, a=a,b=b,c=c) # centering window in which to look for peak/partial
@@ -191,7 +197,8 @@ def compute_partials(note_instance, partial_func_args):
         note_instance.abc = [a,b,c]
         # compute differences/deviations
         note_instance.differences, orders = zip(*compute_differences(note_instance))
-        if i != N-1: # i.e. if not the final iteration
+        # if i != N-1: # i.e. if not the final iteration
+        if lim<30:
             note_instance.partials=[]
 
 
@@ -226,18 +233,12 @@ def compute_partials(note_instance, partial_func_args):
         peak_freqs = [partial.frequency for partial in note_instance.partials]
         peaks_idx = [partial.peak_idx for partial in note_instance.partials]
         fig = plt.figure(figsize=(15, 10))
-        # timer = fig.canvas.new_timer(interval = 3000) #creating a timer object and setting an interval of 3000 milliseconds
-        # timer.add_callback(close_event)
         ax1 = fig.add_subplot(2, 1, 1)
         ax2 = fig.add_subplot(2, 1, 2)
         note_instance.plot_partial_deviations(lim=30, res=note_instance.abc, ax=ax1, note_instance=note_instance) #, peaks_idx=Peaks_Idx)
         note_instance.plot_DFT(peak_freqs, peaks_idx, lim=30, ax=ax2)   
-
-        # fig.savefig()
         plt.show()
     
-    # del Peaks, Peaks_Idx
-
 
 def compute_differences(note_instance):
     differences = []
