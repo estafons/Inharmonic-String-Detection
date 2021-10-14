@@ -201,6 +201,7 @@ def compute_partials(note_instance, partial_func_args):
         if lim<30:
             note_instance.partials=[]
 
+    # TODO:
     if False: # constants.barbancho:
         # NOTE: failed better precision!
         R=10
@@ -228,7 +229,7 @@ def compute_partials(note_instance, partial_func_args):
  
         F_hat = [partial.frequency for partial in note_instance.partials]
         F_star= [k*f0 * np.sqrt(1+b_est*k**2) for k in range(2,lim)] # NOTE: "for each partial found". 2 to lim or 10 to lim ??
-
+        Diff = (F_star - F_hat) / # TODO:
 
     if constants.plot: 
         peak_freqs = [partial.frequency for partial in note_instance.partials]
