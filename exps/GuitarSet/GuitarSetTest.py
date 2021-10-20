@@ -164,6 +164,7 @@ if __name__ == '__main__':
     parser.add_argument('config_path', type=str)
     parser.add_argument('workspace_folder', type=str)
     parser.add_argument('-plot', action='store_true') 
+    parser.add_argument('-plot_train', action='store_true') 
     parser.add_argument('-verbose', action='store_true') 
     parser.add_argument('-run_genetic_alg', action='store_true') 
     parser.add_argument('--dataset', type=str, default= '')
@@ -178,6 +179,7 @@ if __name__ == '__main__':
 
     # HARDWIRE CONSTANTS
     constants.plot = args.plot
+    constants.plot_train = args.plot_train
     constants.verbose = args.verbose
     constants.run_genetic_alg = args.run_genetic_alg
     if args.dataset:
