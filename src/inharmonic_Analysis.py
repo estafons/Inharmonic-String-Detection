@@ -88,7 +88,8 @@ class NoteInstance():
 
         return ax
 
-    def find_partials(self, lim, window_length, k0, window_centering_func='polyfit', a=None,b=None,c=None, beta_est=None):
+    def find_partials(self, lim, window_length, k0, window_centering_func='polyfit', a=None,b=None,c=None, beta_est=None, D=0):
+        print(D)
         f0 = self.fundamental
         for k in range(k0,lim): # NOTE: k0(=2) stands for the 2nd partial!         
             if window_centering_func == 'beta_based':

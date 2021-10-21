@@ -76,7 +76,9 @@ def predictTabThesis(track_instance : TrackInstance, annotations : Annotations, 
         ToolBoxObj = ToolBox(partial_tracking_func=compute_partials, inharmonicity_compute_func=compute_inharmonicity, 
                             partial_func_args=[constants.no_of_partials, tab_instance.fundamental/2, constants, StrBetaObj], inharmonic_func_args=[])
         note_instance = NoteInstance(tab_instance.fundamental, tab_instance.onset, tab_instance.note_audio, ToolBoxObj, track_instance.sampling_rate, constants)
-        Inharmonic_Detector.DetectString(note_instance, StrBetaObj, constants.betafunc, constants)
+
+        Inharmonic_Detector.DetectStringBarbancho(note_instance, StrBetaObj, constants.betafunc, constants)
+        # Inharmonic_Detector.DetectString(note_instance, StrBetaObj, constants.betafunc, constants)
         tab_instance.string = note_instance.string
         if tab_instance.string != 6: # 6 marks inconclusive
             tab_instance.fret = Inharmonic_Detector.hz_to_midi(note_instance.fundamental) - constants.tuning[note_instance.string]
@@ -199,9 +201,9 @@ if __name__ == '__main__':
     print('****************************')
     print()
 
-    StrBetaObj = GuitarSetTrainWrapper(constants)
+    # StrBetaObj = GuitarSetTrainWrapper(constants)
     # compute_partial_orders(StrBetaObj, constants)
-    # with open('data/train/StrBetaObj.pickle', 'rb') as file:
-    #     StrBetaObj = pickle.load(file)
+    with open('data/train/StrBetaObj.pickle', 'rb') as file:
+        StrBetaObj = pickle.load(file)
 
     testGuitarSet(constants, StrBetaObj)

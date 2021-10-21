@@ -5,6 +5,7 @@ from constants_parser import Constants
 from inharmonic_Analysis import NoteInstance, ToolBox, compute_partials, compute_inharmonicity
 import numpy as np
 import threading
+import matplotlib.pyplot as plt
 
 
 class StringBetas():
@@ -58,78 +59,77 @@ def DetectString(NoteObj : NoteInstance, StringBetasObj : StringBetas, betafunc,
 
 def DetectStringBarbancho(NoteObj : NoteInstance, StringBetasObj : StringBetas, betafunc, constants : Constants):
     combs = determine_combinations(NoteObj.fundamental, constants)
-    
     betas_star = [betafunc(comb, StringBetasObj, constants) for comb in combs]
-    e0_star = Err0EstimateBarbancho(constants, NoteObj, beta_est=betas_star)
+    # for beta_star in betas_star:
+    
+    _, e0_star = voting_scheme(constants, NoteObj, combs, betas_est=betas_star, R=10, Wcont=2)
+    D=-e0_star
+    # aaa
+    for beta_star in betas_star:
+        voting_scheme(constants, NoteObj, combs, betas_est=[beta_star], R=2.3, Wcont=0.5, D=D)
 
-
-
-
-def Err0EstimateBarbancho(constants : Constants, NoteObj : NoteInstance, betas_est):
+def voting_scheme(constants : Constants, NoteObj : NoteInstance, combs, betas_est, R, Wcont, D=0):
     # Initialize
-    Wcont=2
-    step=0.333 # sliding step (not mentioned in Barbancho et al.
+    k0=2
+    lim=30 # TODO: fix this
+    Eks = []
+    step=(R)/30 # sliding step (not mentioned in Barbancho et al.)
     Hist= np.array( [0]*len(np.arange(-R, R-2, step)) )
     Hbins = np.array( [l+Wcont/2 for l in np.arange(-R, R-2, step)] )
-    R=10 # Hz
     window_length = round(2*R*NoteObj.fft.size/NoteObj.sampling_rate) # bins
-    lim =30 # TODO: fix this
 
-    # Build container-hits histogram for all string-fret combinations
-    Eks = []
+    # Build container-hits histogram for all string-fret combinations  
     for beta_est in betas_est:
-        NoteObj.partials=[]
-        NoteObj.find_partials(lim, window_length=window_length, window_centering_func='beta_based', beta_est=beta_est) # result in note_instance.partials
-
-        F_hat = [partial.frequency for partial in NoteObj.partials]
-        F_star= [k*f0 * np.sqrt(1+NoteObj.beta*k**2) for k in range(k0,lim)] # NOTE: "for each partial found". 2 to lim or 10 to lim ??
-        Ek = [(F_star[k-k0] - F_hat[k-k0]) / k*np.sqrt(1+beta_est*k**2) for k in range(k0,lim)]
-        Eks += [Ek]
-
-        # Create histogram
-        for ek in Ek:
-            argmin = np.argmin(np.abs(Hbins-ek)) 
-            Hist[argmin] +=1
+        Hist, Eks = create_histogram(NoteObj, Hist, Hbins, Eks, k0, lim, window_length, beta_est=beta_est, D=D) # Hist accumulates counts for each (s,n) comb
 
     pos = np.arange(len(Hist))
 
-
-    # NOTE
     if constants.plot:
-        x = threading.Thread(target=listen_to_the_intance, args=(tab_instance.note_audio,))
-        x.start()
-        fig = plt.figure(figsize=(15, 10))
-        timer = fig.canvas.new_timer(interval = 3000) #creating a timer object and setting an interval of 3000 milliseconds
-        timer.add_callback(close_event)
-        ax1 = fig.add_subplot(1, 2, 1)
-        ax2 = fig.add_subplot(1, 2, 2)
-        peak_freqs = [partial.frequency for partial in note_instance.partials]
-        peaks_idx = [partial.peak_idx for partial in note_instance.partials]
-        
-        for Ek in Eks:
-            ax1.plot(Ek)
-        ax1.set_ylim(-11,11)
-        ax1.grid()
-
-        ax2.barh(pos, Hist)
-        ax2.grid()
-        ax2.set_yticks(pos[::3])
-        ax2.set_yticklabels(np.round_(Hbins[::3],1), rotation='0')
-        # ax.legend()
-
-        # fig.savefig('imgs/auto_img_test_examples/'+str(note_instance.string)+'_'+str(filename)+'.png')
-        # timer.start()
-        plt.show()
-
-
-    # plt.bar(pos, Hist)
-    # plt.xticks(pos[::3], np.round_(Hbins[::3],1), rotation='vertical')
-    # plt.ylim(0,60)
-    # plt.show()
+        plot_voting_scheme(k0, lim, Eks, combs, pos, Hist, Hbins, R)
 
     hist_max_idx = np.argmax(Hist)
     e0_star = round(Hbins[hist_max_idx],2)
-    return e0_star
+    return hist_max_idx, e0_star
+
+
+def create_histogram(NoteObj : NoteInstance, Hist, Hbins, Eks, k0, lim, window_length, beta_est=None, D=0):
+    NoteObj.partials=[]
+    NoteObj.find_partials(lim, window_length, k0, window_centering_func='beta_based', beta_est=beta_est, D=D) # result in note_instance.partials
+
+    F_hat = [partial.frequency for partial in NoteObj.partials]
+    F_star= [k*NoteObj.fundamental * np.sqrt(1+beta_est*k**2) for k in range(k0,lim)] # NOTE: "for each partial found". 2 to lim or 10 to lim ??
+    Ek = [(F_star[k-k0] - F_hat[k-k0]) / k*np.sqrt(1+beta_est*k**2) for k in range(k0,lim)]
+    Eks += [Ek]
+
+    # Create histogram
+    for ek in Ek:
+        argmin = np.argmin(np.abs(Hbins-ek)) 
+        Hist[argmin] +=1
+
+    return Hist, Eks
+
+
+def plot_voting_scheme(k0, lim, Eks, combs, pos, Hist, Hbins, R):
+    fig = plt.figure(figsize=(15, 10))
+    # timer = fig.canvas.new_timer(interval = 3000) #creating a timer object and setting an interval of 3000 milliseconds
+    # timer.add_callback(close_event)
+    ax1 = fig.add_subplot(1, 2, 1)
+    ax2 = fig.add_subplot(1, 2, 2)
+    
+    for Ek, comb in zip(Eks, combs):
+        ax1.plot(range(k0,lim), Ek, label = str(comb))
+    ax1.set_ylim(-R-1,R+1)
+    ax1.grid()
+    ax1.legend()
+
+    ax2.barh(pos, Hist)
+    ax2.grid()
+    ax2.set_yticks(pos[::3])
+    ax2.set_yticklabels(np.round_(Hbins[::3],1), rotation='0')
+    plt.show()
+
+def close_event(): # just for plotting
+    plt.close() #timer calls this function after 3 seconds and closes the window 
 
 
 def hz_to_midi(fundamental):
