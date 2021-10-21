@@ -52,6 +52,7 @@ class NoteInstance():
         self.large_window = None
         # self.train = False
         self.string = None
+        self.constants = constants
         if midi_flag:
             self.recompute_fundamental(constants, fundamental/2)
 
@@ -73,8 +74,8 @@ class NoteInstance():
         if w: # draw windows as little boxes
             f0 = self.fundamental
             for k in range(1,lim+1):
-                # f = k*f0 * np.sqrt(1+b_est*k**2)
-                f = window_centering_func(k,f0, a=a,b=b,c=c)
+                # f = k*f0 * np.sqrt(1+beta_est*k**2)
+                f = ployfit_centering_func(k,f0, a=a,b=b,c=c)
                 rect=mpatches.Rectangle((f-w//2,-80),w,160, fill=False, color="purple", linewidth=2)
                 # plt.gca().add_patch(rect)
                 ax.add_patch(rect)
@@ -82,10 +83,32 @@ class NoteInstance():
         if peaks and peaks_idx: # draw peaks
             ax.plot(peaks, self.fft.real[peaks_idx], "x", alpha=0.7)
 
-        ax.set_xlim(0, window_centering_func(lim+1,f0, a=a,b=b,c=c))
+        ax.set_xlim(0, ployfit_centering_func(lim+1,f0, a=a,b=b,c=c))
         ax.set_ylim(-100, 100)
 
         return ax
+
+    def find_partials(self, lim, window_length, k0, window_centering_func='polyfit', a=None,b=None,c=None, beta_est=None):
+        f0 = self.fundamental
+        for k in range(k0,lim): # NOTE: k0(=2) stands for the 2nd partial!         
+            if window_centering_func == 'beta_based':
+                center_freq = k*f0 * np.sqrt(1+beta_est*k**2)
+            elif window_centering_func == 'polyfit':
+                center_freq = ployfit_centering_func(k,f0, a=a,b=b,c=c) # centering window in which to look for peak/partial
+            
+            try:
+                filtered = zero_out(self.fft, center_freq=center_freq , window_length=window_length, constants=self.constants)
+                peaks, _  = scipy.signal.find_peaks(np.abs(filtered),distance=100000) # better way to write this?
+                max_peak = self.frequencies[peaks[0]]
+                # max_peak = self.weighted_argmean(peak_idx=peaks[0], w=6)
+                ###### RESULT ###### 
+                self.partials.append(Partial(frequency=max_peak, order=k, peak_idx=peaks[0]))
+                ####################
+            
+            except Exception as e:
+                print(e)
+                print('MyExplanation: Certain windows where peaks are to be located surpassed the length of the DFT.')
+                break
 
 
     def plot_partial_deviations(self, lim=None, res=None, peaks_idx=None, ax=None, note_instance=None, annos_string=None, tab_instance=None):
@@ -105,13 +128,13 @@ class NoteInstance():
         f0 = self.fundamental
         # plot litte boxes
         for k in range(2, len(differences)+2):
-            pos = window_centering_func(k, f0, a, b, c) - k*f0
+            pos = ployfit_centering_func(k, f0, a, b, c) - k*f0
 
             rect=mpatches.Rectangle((k-0.25, pos-w//2), 0.5, w, fill=False, color="purple", linewidth=2)
             # plt.gca().add_patch(rect)
             ax.add_patch(rect)
 
-        ax.plot(kapa,y, label = 'new_estimate')
+        ax.plot(kapa, y, label = 'new_estimate')
         ax.grid()
         ax.legend()
 
@@ -124,9 +147,9 @@ class NoteInstance():
             c = 'black'
         
         if tab_instance:
-            plt.title("pred: "+ str(note_instance.string) + ", annotation: " + str(annos_instance.string) + ', fret: ' + str(tab_instance.fret) + ' || f0: ' + str(round(self.fundamental,2)) + ', beta_estimate: '+ str(round(self.beta,6)), color=c) # + '\n a = ' + str(round(a,5)), color=c)
+            plt.title("pred: "+ str(note_instance.string) + ", annotation: " + str(annos_string) + ', fret: ' + str(tab_instance.fret) + ' || f0: ' + str(round(self.fundamental,2)) + ', beta_estimate: '+ str(round(self.beta,6)), color=c) # + '\n a = ' + str(round(a,5)), color=c)
         else:
-            plt.title("pred: "+ str(note_instance.string) + ", annotation: " + str(annos_instance.string) + ' || f0: ' + str(round(self.fundamental,2)) + ', beta_estimate: '+ str(round(self.beta,6)), color=c)# + '\n a = ' + str(round(a,5)), color=c)
+            plt.title("pred: "+ str(note_instance.string) + ", annotation: " + str(annos_string) + ' || f0: ' + str(round(self.fundamental,2)) + ', beta_estimate: '+ str(round(self.beta,6)), color=c)# + '\n a = ' + str(round(a,5)), color=c)
 
         return ax
 
@@ -153,12 +176,14 @@ class NoteInstance():
         return max_peak_freq
 
 
-def window_centering_func(k,f0=None,a=None,b=None,c=None, b_est=None):
-    if b_est: # standard inharmonicity equation indicating partials position
-        center_freq = k*f0 * np.sqrt(1+b_est*k**2)
+def ployfit_centering_func(k,f0=None,a=None,b=None,c=None, beta_est=None):
+    if beta_est: # standard inharmonicity equation indicating partials position
+        center_freq = k*f0 * np.sqrt(1+beta_est*k**2)
     else: # polynomial approximation of partials
         center_freq = a*k**3+b*k+c + (k*f0)
     return center_freq        
+
+
 
 
 def compute_partials(note_instance, partial_func_args):
@@ -167,31 +192,17 @@ def compute_partials(note_instance, partial_func_args):
     # no_of_partials = partial_func_args[0] NOTE: deal with it somehow
     note_instance.large_window = partial_func_args[1]
     constants = partial_func_args[2]
-    diviate = round(note_instance.large_window*note_instance.fft.size/note_instance.sampling_rate)
+    window_length = round(note_instance.large_window*note_instance.fft.size/note_instance.sampling_rate)
     f0 = note_instance.fundamental
 
+    # Beta Computation/Measuement
     a, b, c = 0, 0, 0
-    # N=6 # n_iterations # TODO: connect iterations with the value constants.no_of_partials
-    # for i in range(N):
-    #     lim = 5*(i+1)+1 # NOTE: till 30th/50th partial
     step=2
+    k0=2 # first partial to consider
     bound = constants.no_of_partials + constants.no_of_partials % step
     for lim in range(6,31,step):
-        for k in range(2,lim): # NOTE: 2 stands for the 2nd partial! TODO: use 3 instead if we wan t to start processing from the 2nd partial and further
-            # center_freq = k*f0 * np.sqrt(1+b_est*k**2)
-            center_freq = window_centering_func(k,f0, a=a,b=b,c=c) # centering window in which to look for peak/partial
-            try:
-                filtered = zero_out(note_instance.fft, center_freq=center_freq , window_length=diviate, constants=constants)
-               
-                peaks, _  = scipy.signal.find_peaks(np.abs(filtered),distance=100000) # better way to write this?
-                max_peak = note_instance.frequencies[peaks[0]]
-                # max_peak = note_instance.weighted_argmean(peak_idx=peaks[0], w=6)
-                note_instance.partials.append(Partial(frequency=max_peak, order=k, peak_idx=peaks[0]))
-          
-            except Exception as e:
-                print(e)
-                print('MyExplanation: Certain windows where peaks are to be located surpassed the length of the DFT.')
-                break
+        note_instance.find_partials(lim, window_length, k0, window_centering_func='polyfit', a=a,b=b,c=c) # result in note_instance.partials
+        # print(note_instance.partials)
         # iterative beta estimates
         _, [a,b,c] = compute_inharmonicity(note_instance, [])
         note_instance.abc = [a,b,c]
@@ -201,37 +212,58 @@ def compute_partials(note_instance, partial_func_args):
         if lim<30:
             note_instance.partials=[]
 
-    # TODO:
-    if False: # constants.barbancho:
-        # NOTE: failed better precision!
-        R=10
-        w_idx = round(R*note_instance.fft.size/note_instance.sampling_rate)
-        note_instance.partials=[]
-        b_est = note_instance.beta
-        for k in range(2,lim): # NOTE: 2 stands for the 2nd partial! TODO: use 3 instead if we wan t to start processing from the 2nd partial and further
-            center_freq = k*f0 * np.sqrt(1+b_est*k**2)
-            # center_freq = window_centering_func(k,f0, a=a,b=b,c=c)
-            try:
-                filtered = zero_out(note_instance.fft, center_freq=center_freq , window_length=w_idx, constants=constants)
-                
-                peaks, _  = scipy.signal.find_peaks(np.abs(filtered),distance=100000) # better way to write this?
-                max_peak = note_instance.frequencies[peaks[0]]
-                # max_peak = note_instance.weighted_argmean(peak_idx=peaks[0], w=6)
-                note_instance.partials.append(Partial(frequency=max_peak, order=k, peak_idx=peaks[0]))
-            
-            except Exception as e:
-                print(e)
-                print('MyExplanation: Certain windows where peaks are to be located surpassed the length of the DFT.')
-                break
+    # NOTE: Just for quick visualization
+    # if False:
+    R=10
+    window_length = round(2*R*note_instance.fft.size/note_instance.sampling_rate)
 
-            # iterative beta estimates
-            # _, [a,b,c] = compute_inharmonicity(note_instance, [])
- 
-        F_hat = [partial.frequency for partial in note_instance.partials]
-        F_star= [k*f0 * np.sqrt(1+b_est*k**2) for k in range(2,lim)] # NOTE: "for each partial found". 2 to lim or 10 to lim ??
-        Diff = (F_star - F_hat) / # TODO:
+    Wcont=2
+    step=0.333 # sliding step (not mentioned in Barbancho et al.
+    Hist= np.array( [0]*len(np.arange(-R, R-2, step)) )
+    Hbins = np.array( [l+Wcont/2 for l in np.arange(-R, R-2, step)] )
 
-    if constants.plot: 
+    # for beta_est in betas_est: # NOTE: remember, toy example
+    note_instance.partials=[]
+    note_instance.find_partials(lim, window_length, k0, window_centering_func='beta_based', beta_est=note_instance.beta) # result in note_instance.partials
+
+    F_hat = [partial.frequency for partial in note_instance.partials]
+    F_star= [k*f0 * np.sqrt(1+note_instance.beta*k**2) for k in range(k0,lim)] # NOTE: "for each partial found". 2 to lim or 10 to lim ??
+    Ek = [(F_star[k-k0] - F_hat[k-k0]) / k*np.sqrt(1+note_instance.beta*k**2) for k in range(k0,lim)]
+
+    # Create histogram
+    for ek in Ek:
+        argmin = np.argmin(np.abs(Hbins-ek)) 
+        Hist[argmin] +=1
+
+    pos = np.arange(len(Hist))
+
+    # plt.bar(pos, Hist)
+    # plt.xticks(pos[::3], np.round_(Hbins[::3],1), rotation='vertical')
+    # plt.ylim(0,60)
+    # plt.show()
+    hist_max_idx = np.argmax(Hist)
+    e0_star = round(Hbins[hist_max_idx],2)
+
+    if constants.plot_train:
+        fig = plt.figure(figsize=(15, 10))
+        ax1 = fig.add_subplot(1, 2, 1)
+        ax2 = fig.add_subplot(1, 2, 2)
+        peak_freqs = [partial.frequency for partial in note_instance.partials]
+        peaks_idx = [partial.peak_idx for partial in note_instance.partials]
+        
+        # for Ek in Eks:
+        ax1.plot(Ek)
+        ax1.set_ylim(-11,11)
+        ax1.grid()
+
+        ax2.barh(pos, Hist)
+        ax2.grid()
+        ax2.set_yticks(pos[::3])
+        ax2.set_yticklabels(np.round_(Hbins[::3],1), rotation='0')
+        plt.show()
+    
+
+    if constants.plot_train: 
         peak_freqs = [partial.frequency for partial in note_instance.partials]
         peaks_idx = [partial.peak_idx for partial in note_instance.partials]
         fig = plt.figure(figsize=(15, 10))

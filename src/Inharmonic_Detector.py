@@ -4,6 +4,8 @@ import librosa
 from constants_parser import Constants
 from inharmonic_Analysis import NoteInstance, ToolBox, compute_partials, compute_inharmonicity
 import numpy as np
+import threading
+
 
 class StringBetas():
     def __init__(self, barray, constants : Constants):
@@ -49,10 +51,86 @@ def DetectString(NoteObj : NoteInstance, StringBetasObj : StringBetas, betafunc,
     """ betafunc is the function to simulate beta. As input takes the combination and the beta array."""
     combs = determine_combinations(NoteObj.fundamental, constants)
     if (constants.lower_limit < NoteObj.beta < constants.upper_limit):
-        betas = [(abs(betafunc(comb, StringBetasObj, constants) - NoteObj.beta), comb) for comb in combs]
-        NoteObj.string = min(betas, key = lambda a: a[0])[1][0] # returns comb where 0 argument is string
+        betas_diff = [(abs( betafunc(comb, StringBetasObj, constants) - NoteObj.beta ), comb) for comb in combs]
+        NoteObj.string = min(betas_diff, key = lambda a: a[0])[1][0] # returns comb where 0 argument is string
     else:
         NoteObj.string = 6
+
+def DetectStringBarbancho(NoteObj : NoteInstance, StringBetasObj : StringBetas, betafunc, constants : Constants):
+    combs = determine_combinations(NoteObj.fundamental, constants)
+    
+    betas_star = [betafunc(comb, StringBetasObj, constants) for comb in combs]
+    e0_star = Err0EstimateBarbancho(constants, NoteObj, beta_est=betas_star)
+
+
+
+
+def Err0EstimateBarbancho(constants : Constants, NoteObj : NoteInstance, betas_est):
+    # Initialize
+    Wcont=2
+    step=0.333 # sliding step (not mentioned in Barbancho et al.
+    Hist= np.array( [0]*len(np.arange(-R, R-2, step)) )
+    Hbins = np.array( [l+Wcont/2 for l in np.arange(-R, R-2, step)] )
+    R=10 # Hz
+    window_length = round(2*R*NoteObj.fft.size/NoteObj.sampling_rate) # bins
+    lim =30 # TODO: fix this
+
+    # Build container-hits histogram for all string-fret combinations
+    Eks = []
+    for beta_est in betas_est:
+        NoteObj.partials=[]
+        NoteObj.find_partials(lim, window_length=window_length, window_centering_func='beta_based', beta_est=beta_est) # result in note_instance.partials
+
+        F_hat = [partial.frequency for partial in NoteObj.partials]
+        F_star= [k*f0 * np.sqrt(1+NoteObj.beta*k**2) for k in range(k0,lim)] # NOTE: "for each partial found". 2 to lim or 10 to lim ??
+        Ek = [(F_star[k-k0] - F_hat[k-k0]) / k*np.sqrt(1+beta_est*k**2) for k in range(k0,lim)]
+        Eks += [Ek]
+
+        # Create histogram
+        for ek in Ek:
+            argmin = np.argmin(np.abs(Hbins-ek)) 
+            Hist[argmin] +=1
+
+    pos = np.arange(len(Hist))
+
+
+    # NOTE
+    if constants.plot:
+        x = threading.Thread(target=listen_to_the_intance, args=(tab_instance.note_audio,))
+        x.start()
+        fig = plt.figure(figsize=(15, 10))
+        timer = fig.canvas.new_timer(interval = 3000) #creating a timer object and setting an interval of 3000 milliseconds
+        timer.add_callback(close_event)
+        ax1 = fig.add_subplot(1, 2, 1)
+        ax2 = fig.add_subplot(1, 2, 2)
+        peak_freqs = [partial.frequency for partial in note_instance.partials]
+        peaks_idx = [partial.peak_idx for partial in note_instance.partials]
+        
+        for Ek in Eks:
+            ax1.plot(Ek)
+        ax1.set_ylim(-11,11)
+        ax1.grid()
+
+        ax2.barh(pos, Hist)
+        ax2.grid()
+        ax2.set_yticks(pos[::3])
+        ax2.set_yticklabels(np.round_(Hbins[::3],1), rotation='0')
+        # ax.legend()
+
+        # fig.savefig('imgs/auto_img_test_examples/'+str(note_instance.string)+'_'+str(filename)+'.png')
+        # timer.start()
+        plt.show()
+
+
+    # plt.bar(pos, Hist)
+    # plt.xticks(pos[::3], np.round_(Hbins[::3],1), rotation='vertical')
+    # plt.ylim(0,60)
+    # plt.show()
+
+    hist_max_idx = np.argmax(Hist)
+    e0_star = round(Hbins[hist_max_idx],2)
+    return e0_star
+
 
 def hz_to_midi(fundamental):
     return round(12*math.log(fundamental/440,2)+69)
