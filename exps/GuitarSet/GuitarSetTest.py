@@ -86,7 +86,7 @@ def predictTabThesis(track_instance : TrackInstance, annotations : Annotations, 
             InharmonicDetectorObj.DetectString( constants.betafunc, constants)
         else:
             exit(1)
-        print('predicted instance:', note_instance.string)
+
         tab_instance.string = note_instance.string
         if tab_instance.string != 6: # 6 marks inconclusive
             tab_instance.fret = utils.hz_to_midi(note_instance.fundamental) - constants.tuning[note_instance.string]
@@ -106,9 +106,9 @@ def predictTabThesis(track_instance : TrackInstance, annotations : Annotations, 
             peak_freqs = [partial.frequency for partial in note_instance.partials]
             peaks_idx = [partial.peak_idx for partial in note_instance.partials]
             
-            note_instance.plot_partial_deviations(lim=30, res=note_instance.abc, ax=ax1, note_instance=note_instance, annos_instance=annos_instance.string, tab_instance=tab_instance) #, peaks_idx=Peaks_Idx)
+            note_instance.plot_partial_deviations(lim=30, res=note_instance.abc, ax=ax1, note_instance=note_instance, annos_string=annos_instance.string, tab_instance=tab_instance) #, peaks_idx=Peaks_Idx)
             note_instance.plot_DFT(peak_freqs, peaks_idx, lim=30, ax=ax2)   
-            fig.savefig('imgs/auto_img_test_examples/'+str(note_instance.string)+'_'+str(filename)+'.png')
+            # fig.savefig('imgs/auto_img_test_examples/'+str(note_instance.string)+'_'+str(filename)+'.png')
             # timer.start()
             plt.show()
 
@@ -211,9 +211,9 @@ if __name__ == '__main__':
     print('****************************')
     print()
 
-    # StrBetaObj = GuitarSetTrainWrapper(constants)
+    StrBetaObj = GuitarSetTrainWrapper(constants)
     # # compute_partial_orders(StrBetaObj, constants)
-    with open('data/train/StrBetaObj.pickle', 'rb') as file:
-        StrBetaObj = pickle.load(file)
+    # with open('data/train/StrBetaObj.pickle', 'rb') as file:
+    #     StrBetaObj = pickle.load(file)
 
     testGuitarSet(constants, StrBetaObj)

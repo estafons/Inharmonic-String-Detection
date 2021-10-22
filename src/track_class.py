@@ -1,5 +1,6 @@
 from constants_parser import Constants
-import Inharmonic_Detector
+# import Inharmonic_Detector
+import utils
 
 class Tablature():
     def __init__(self, tups, audio, constants : Constants, annotation = False):
@@ -34,7 +35,7 @@ class TabInstance():
     def __init__(self, tup, note_audio, constants : Constants):
         self.onset, self.fundamental, self.string = tup
         if self.string in list(range(0,5)):
-            self.fret = Inharmonic_Detector.hz_to_midi(self.fundamental) - constants.tuning[self.string]
+            self.fret = utils.hz_to_midi(self.fundamental) - constants.tuning[self.string]
         self.note_audio = note_audio
 
 class Annotations():

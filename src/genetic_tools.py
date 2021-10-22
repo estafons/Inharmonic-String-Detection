@@ -5,7 +5,7 @@ import random
 from itertools import tee, islice
 import math
 
-from Inharmonic_Detector import determine_combinations
+import utils
 from track_class import *
 import constants_parser
 
@@ -32,7 +32,7 @@ def get_random_tablature(tablature : Tablature, constants : Constants):
     new_tab = deepcopy(tablature)
     for tab_instance, new_tab_instance in zip(tablature.tablature, new_tab.tablature):
         if tab_instance.string == 6:
-            string, fret = random.choice(determine_combinations(tab_instance.fundamental, constants))
+            string, fret = random.choice(utils.determine_combinations(tab_instance.fundamental, constants))
             new_tab_instance.string, new_tab_instance.fret = string, fret
         elif constants.init_mutation_rate > random.random():
             string, fret = get_random_position(tab_instance.string, tab_instance.fret, constants)
