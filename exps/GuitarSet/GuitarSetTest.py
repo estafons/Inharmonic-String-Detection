@@ -142,8 +142,8 @@ def testGuitarSet(constants : Constants, StrBetaObj):
                 print('GA accuracy: ', current_acc)
             GenConfusionMatrixObj.current_matrix = np.zeros((6,6))
 
-        # if count==0:
-        #     break
+        if count==1:
+            break
 
     InhConfusionMatrixObj.plot_confusion_matrix(constants, normalize= True, 
                                                 title = 'Acc_' +
@@ -189,8 +189,6 @@ if __name__ == '__main__':
     if args.train_mode:
         constants.train_mode = args.train_mode
         constants.update_betafunc()
-
-
 
     print('Check if you are OK with certain important configuration constants:')
     print('****************************')
