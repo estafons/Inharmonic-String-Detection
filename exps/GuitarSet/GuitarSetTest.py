@@ -15,7 +15,8 @@ cur_path = Path(BASE_PATH + '/src/')
 sys.path.append(str(cur_path))
 
 from track_class import *
-from Inharmonic_Detector import *
+import utils
+from Inharmonic_Detector import InharmonicDetector
 from inharmonic_Analysis import *
 from constants_parser import Constants
 import genetic
@@ -45,7 +46,7 @@ def read_tablature_from_GuitarSet(jam_name, constants):
         for note in string_tran:
             onset = note[0]
             midi_note = note[2]
-            fundamental = Inharmonic_Detector.midi_to_hz(midi_note)
+            fundamental = utils.midi_to_hz(midi_note)
             # fret = int(round(midi_note - constants.tuning[string]))
             tups.append((onset, fundamental, string))
         string += 1
@@ -77,11 +78,18 @@ def predictTabThesis(track_instance : TrackInstance, annotations : Annotations, 
                             partial_func_args=[constants.no_of_partials, tab_instance.fundamental/2, constants, StrBetaObj], inharmonic_func_args=[])
         note_instance = NoteInstance(tab_instance.fundamental, tab_instance.onset, tab_instance.note_audio, ToolBoxObj, track_instance.sampling_rate, constants)
 
-        Inharmonic_Detector.DetectStringBarbancho(note_instance, StrBetaObj, constants.betafunc, constants)
-        # Inharmonic_Detector.DetectString(note_instance, StrBetaObj, constants.betafunc, constants)
+        InharmonicDetectorObj = InharmonicDetector(note_instance, StrBetaObj)
+
+        if constants.detector == 'barbancho':
+            InharmonicDetectorObj.DetectStringBarbancho(constants.betafunc, constants)
+        elif constants.detector == 'custom':
+            InharmonicDetectorObj.DetectString( constants.betafunc, constants)
+        else:
+            exit(1)
+        print('predicted instance:', note_instance.string)
         tab_instance.string = note_instance.string
         if tab_instance.string != 6: # 6 marks inconclusive
-            tab_instance.fret = Inharmonic_Detector.hz_to_midi(note_instance.fundamental) - constants.tuning[note_instance.string]
+            tab_instance.fret = utils.hz_to_midi(note_instance.fundamental) - constants.tuning[note_instance.string]
         else:
             tab_instance.fret = None
 
@@ -142,7 +150,7 @@ def testGuitarSet(constants : Constants, StrBetaObj):
                 print('GA accuracy: ', current_acc)
             GenConfusionMatrixObj.current_matrix = np.zeros((6,6))
 
-        if count==1:
+        if count==constants.maxNfiles:
             break
 
     InhConfusionMatrixObj.plot_confusion_matrix(constants, normalize= True, 
@@ -171,6 +179,8 @@ if __name__ == '__main__':
     parser.add_argument('-run_genetic_alg', action='store_true') 
     parser.add_argument('--dataset', type=str, default= '')
     parser.add_argument('--train_mode', type=str, default= '')
+    parser.add_argument('-m', '--maxNfiles', type=int, default= sys.maxsize)
+    parser.add_argument('--detector', type=str, default= 'custom', help="'custom' or 'barbancho'")
 
     args = parser.parse_args()
 
@@ -180,6 +190,8 @@ if __name__ == '__main__':
         print(e)
 
     # HARDWIRE CONSTANTS
+    constants.detector = args.detector
+    constants.maxNfiles = args.maxNfiles
     constants.plot = args.plot
     constants.plot_train = args.plot_train
     constants.verbose = args.verbose
@@ -200,7 +212,7 @@ if __name__ == '__main__':
     print()
 
     # StrBetaObj = GuitarSetTrainWrapper(constants)
-    # compute_partial_orders(StrBetaObj, constants)
+    # # compute_partial_orders(StrBetaObj, constants)
     with open('data/train/StrBetaObj.pickle', 'rb') as file:
         StrBetaObj = pickle.load(file)
 

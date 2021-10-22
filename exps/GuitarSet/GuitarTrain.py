@@ -11,7 +11,8 @@ sys.path.append(str(cur_path))
 
 from helper import printProgressBar
 from inharmonic_Analysis import *
-from Inharmonic_Detector import StringBetas
+# from Inharmonic_Detector import StringBetas
+from string_betas import StringBetas
 from constants_parser import Constants
 from playsound import playsound
 

@@ -10,6 +10,9 @@ This directory tree is expected in order to store your data and results:
 └── results
 ```
 
+```
+Ex. python GuitarSetTest.py constants.ini . -verbose -plot --detector barbancho
+```
 
 ## Performing Tests on GuitarSet dataset
 
