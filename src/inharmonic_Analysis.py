@@ -30,14 +30,14 @@ class ToolBox():
     or computing beta coefficient etc. For example usage/alterations see bellow"""
 
     def __init__(self, partial_tracking_func, inharmonicity_compute_func, partial_func_args, inharmonic_func_args):
-        self.partial_tracking_func = partial_tracking_func
-        self.inharmonic_func = inharmonicity_compute_func
-        self.partial_func_args = partial_func_args
-        self.inharmonic_func_args = inharmonic_func_args
+        self.partial_tracking_func = partial_tracking_func  # e.g. iterative_compute_of_partials_and_betas
+        self.inharmonic_func = inharmonicity_compute_func # e.g. compute_beta_with_regression
+        self.partial_func_args = partial_func_args  # e.g. [constants.no_of_partials, tab_instance.fundamental/2, constants, StrBetaObj]
+        self.inharmonic_func_args = inharmonic_func_args # e.g. []
     
 class NoteInstance():
     """move to other level of package"""
-    def __init__(self, fundamental, onset, audio, ToolBoxObj:ToolBox ,sampling_rate, constants : Constants, longaudio=np.array([]), midi_flag = False):
+    def __init__(self, fundamental, onset, audio, ToolBoxObj:ToolBox ,sampling_rate, constants : Constants, longaudio=np.array([]), midi_flag = False, Training=False):
         self.fundamental = fundamental
         self.onset = onset
         self.audio = audio
@@ -56,7 +56,8 @@ class NoteInstance():
         if midi_flag:
             self.recompute_fundamental(constants, fundamental/2)
 
-        ToolBoxObj.partial_tracking_func(self, ToolBoxObj.partial_func_args) # if a different partial tracking is incorporated keep second function arguement, else return beta from second function and change entirely
+        if constants.detector == 'custom' or Training:
+            ToolBoxObj.partial_tracking_func(self, ToolBoxObj.partial_func_args) # if a different partial tracking is incorporated keep second function arguement, else return beta from second function and change entirely
 
     def find_partials(self, lim, window_length, k0, window_centering_func='polyfit', a=None,b=None,c=None, beta_est=None, D=0):
         f0 = self.fundamental
@@ -69,7 +70,7 @@ class NoteInstance():
             try:
                 filtered = zero_out(self.fft, center_freq=center_freq , window_length=window_length, constants=self.constants)
                 peaks, _  = scipy.signal.find_peaks(np.abs(filtered),distance=100000) # better way to write this?
-                # peaks, _  = scipy.signal.find_peaks(np.abs(filtered),distance=None) # better way to write this?
+                # peaks, _  = scipy.signal.find_peaks(np.abs(filtered),distance=None) 
                 max_peak = self.frequencies[peaks[0]]
                 # max_peak = self.weighted_argmean(peak_idx=peaks[0], w=6)
                 ###### RESULT ###### 
@@ -82,7 +83,8 @@ class NoteInstance():
                 break
 
     def plot_DFT(self, peaks=None, peaks_idx=None, lim=None, ax=None, save_path=None, w=None, D=0, beta_est=None, window_centering_func='polyfit'):
-        [a,b,c] = self.abc
+        if window_centering_func=='polyfit':
+            [a,b,c] = self.abc
         if not w:
             w = self.large_window     
         # main function
@@ -98,10 +100,12 @@ class NoteInstance():
                     f = ployfit_centering_func(k,f0, a=a,b=b,c=c)
                 elif window_centering_func=='beta_based':
                     # f = k*f0 * np.sqrt(1+beta_est*k**2)
-                    if beta_est:
+                    if beta_est: # for 'barbancho' detector we want b_est (i.e. β*)
                         f = k*(f0+D) * np.sqrt(1+beta_est*k**2)
+                        # f = beta_centering_func(k, beta_est, f0, D)
                     else:
                         f = k*(f0+D) * np.sqrt(1+self.beta*k**2)
+                        # f = beta_centering_func(k, self.beta, f0, D)
 
                 rect=mpatches.Rectangle((f-w//2,-80),w,160, fill=False, color="purple", linewidth=2)
                 # plt.gca().add_patch(rect)
@@ -110,7 +114,11 @@ class NoteInstance():
         if peaks and peaks_idx: # draw peaks
             ax.plot(peaks, self.fft.real[peaks_idx], "x", alpha=0.7)
 
-        ax.set_xlim(0, ployfit_centering_func(lim+1,f0, a=a,b=b,c=c))
+        if window_centering_func=='polyfit':
+            ax.set_xlim(0, ployfit_centering_func(lim+1,f0, a=a,b=b,c=c))
+        elif window_centering_func=='beta_based':
+            ax.set_xlim(0, beta_centering_func(lim+1, beta_est, f0, D))
+
         ax.set_ylim(-100, 100)
 
         return ax
@@ -135,7 +143,7 @@ class NoteInstance():
         for k in range(2, len(differences)+2):
             pos = ployfit_centering_func(k, f0, a, b, c) - k*f0
 
-            rect=mpatches.Rectangle((k-0.25, pos-w//2), 0.5, w, fill=False, color="purple", linewidth=2)
+            rect=mpatches.Rectangle((k-0.25, pos-w//2), 0.5, w, fill=False, color="purple", linewidth=2, alpha=0.8)
             # plt.gca().add_patch(rect)
             ax.add_patch(rect)
 
@@ -181,18 +189,19 @@ class NoteInstance():
         return max_peak_freq
 
 
-def ployfit_centering_func(k,f0=None,a=None,b=None,c=None, beta_est=None):
-    if beta_est: # standard inharmonicity equation indicating partials position
-        center_freq = k*f0 * np.sqrt(1+beta_est*k**2)
-    else: # polynomial approximation of partials
-        center_freq = a*k**3+b*k+c + (k*f0)
+def beta_centering_func(k, beta, f0, D=0):
+    center_freq = k*(f0+D) * np.sqrt(1+beta*k**2)
+    return center_freq
+        
+def ployfit_centering_func(k,f0=None,a=None,b=None,c=None):
+    center_freq = a*k**3+b*k+c + (k*f0)
     return center_freq        
 
 
 
 
-def compute_partials(note_instance, partial_func_args):
-    """compute up to no_of_partials partials for note instance. 
+def iterative_compute_of_partials_and_betas(note_instance, partial_func_args):
+    """compute partials for note instance. 
     large_window is the length of window arround k*f0 that the partials are tracked with highest peak."""
     # no_of_partials = partial_func_args[0] NOTE: deal with it somehow
     note_instance.large_window = partial_func_args[1]
@@ -206,9 +215,10 @@ def compute_partials(note_instance, partial_func_args):
     k0=2 # first partial to consider
     bound = constants.no_of_partials + constants.no_of_partials % step
     for lim in range(6,31,step):
+        ##### CORE COMPUTATION ###
         note_instance.find_partials(lim, window_length, k0, window_centering_func='polyfit', a=a,b=b,c=c) # result in note_instance.partials
         # iterative beta estimates
-        _, [a,b,c] = compute_inharmonicity(note_instance, [])
+        _, [a,b,c] = compute_beta_with_regression(note_instance, [])
         note_instance.abc = [a,b,c]
         # compute differences/deviations
         note_instance.differences, orders = zip(*compute_differences(note_instance))
@@ -232,14 +242,14 @@ def compute_differences(note_instance):
         differences.append((abs(partial.frequency-(i+2)*note_instance.fundamental), i)) # i+2 since we start at first partial of order k=2
     return differences
 
-def compute_inharmonicity(note_instance, inharmonic_func_args):
+def compute_beta_with_regression(note_instance, inharmonic_func_args):
     differences, orders = zip(*compute_differences(note_instance))
   
     u=np.array(orders)+2
     if note_instance.polyfit == 'lsq':
         res=compute_least(u,differences) # least_squares
     if note_instance.polyfit == 'Thei':
-        res=compute_least_TheilSen(u,differences) # least_squares
+        res=compute_least_TheilSen(u,differences) 
     
     [a,b,c]=res
     beta=2*a/(note_instance.fundamental+b) # Barbancho et al. (17)
@@ -299,109 +309,3 @@ def zero_out(fft, center_freq, window_length, constants : Constants):
 
     return x
 
-
-"""here on tests"""
-
-#-----------ToolBox Example--------------------
-
-#when changing only partial computing function
-def example_compute_partial(note_instance, partial_func_args):
-    arg0 = partial_func_args[0]
-    arg1 = partial_func_args[1]
-    arg2 = partial_func_args[2]
-    for i in range(0, arg0):
-        x = random.choice([arg1, arg2])
-        note_instance.partials.append(Partial(x, i))
-# example changing beta computation and probably bypassing previous partial computation
-def example_inharmonicity_computation(note_instance, inharmonic_func_args):
-    arg0 = inharmonic_func_args[0]
-    arg1 = inharmonic_func_args[1]
-    # do more stuff...
-    note_instance.beta = arg0
-
-#-----------end of ToolBox Example---------------
-
-def wrapper_func(fundamental, audio, sampling_rate, constants : Constants):
-    
-    ToolBoxObj = ToolBox(compute_partials, compute_inharmonicity, [14, fundamental/2, constants], [])
-    note_instance = NoteInstance(fundamental, 0, audio, ToolBoxObj, sampling_rate, constants)
-    print(note_instance.beta, [x.frequency for x in note_instance.partials])
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-def compute_partials_old(note_instance, partial_func_args):
-    """compute up to no_of_partials partials for note instance. 
-    Freq_deviate is the length of window arround k*f0 that the partials are tracked with highest peak."""
-    no_of_partials = partial_func_args[0]
-    freq_diviate = partial_func_args[1]
-    constants = partial_func_args[2]
-    diviate = round(freq_diviate/(note_instance.sampling_rate/note_instance.fft.size))
-
-    for i in range(2,no_of_partials):
-        filtered = zero_out(note_instance.fft, center_freq=i*note_instance.fundamental, window_length=diviate, constants=constants)
-        peaks, _  =scipy.signal.find_peaks(np.abs(filtered),distance=100000) # better way to write this?
-        # print(peaks)
-        max_peak = note_instance.frequencies[peaks[0]]
-        note_instance.partials.append(Partial(max_peak, i))
-
-
-def compute_partials_with_order(note_instance, partial_func_args):
-    freq_diviate = partial_func_args[0]
-    constants = partial_func_args[1]
-    StrBetaObj = partial_func_args[2]
-    b = []
-    midi_note = round(librosa.hz_to_midi(note_instance.fundamental))
-    t =  len(StrBetaObj.beta_lim[midi_note - 40])
-    for n in range(0, t):
-        note_instance.partials = []
-        StrBetaObj.beta_lim[midi_note - 40].sort(reverse = True)
-        k_max = StrBetaObj.beta_lim[midi_note - 40][n]
-        #if k_max > constants.k_max:
-        #    k_max = constants.k_max
-        compute_partials(note_instance, [k_max, freq_diviate, constants])
-        compute_inharmonicity(note_instance, [])
-        #print(k_max, note_instance.beta) #uncoment if you want to check variation of betas in relation with k_max. Indicates why bellow code was added
-
-        # NOTE: check for new threshold
-        if note_instance.beta > 10**(-7):
-            b.append(note_instance.beta)
-    # print()
-    # print(b, StrBetaObj.beta_lim[midi_note - 40])        
-    if std(b)/np.mean(b) < 0.5: #coefficient of variation. If small then low variance of betas so get median, else mark as inconclusive
-        note_instance.beta = median(b)
-    else:
-        note_instance.beta = 10**(-10)
-        #    continue
-        #else:
-        #    return
-    return
-
-def compute_partials_with_order_strict(note_instance, partial_func_args):
-    freq_diviate = partial_func_args[0]
-    constants = partial_func_args[1]
-    StrBetaObj = partial_func_args[2]
-    midi_note = round(librosa.hz_to_midi(note_instance.fundamental))
-    t =  len(StrBetaObj.beta_lim[midi_note - 40])
-    for n in range(0, t):
-        note_instance.partials = []
-        k = min(StrBetaObj.beta_lim[midi_note - 40])
-        
-        compute_partials(note_instance, [k, freq_diviate, constants])
-        compute_inharmonicity(note_instance, [])
-        if note_instance.beta < 10**(-7):
-            continue
-        else:
-            return
-    return

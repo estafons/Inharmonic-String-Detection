@@ -74,7 +74,7 @@ def predictTabThesis(track_instance : TrackInstance, annotations : Annotations, 
     for tab_instance, annos_instance in zip(track_instance.tablature.tablature, annotations.tablature.tablature):
         # ToolBoxObj = ToolBox(compute_partials_with_order, compute_inharmonicity, [tab_instance.fundamental/2, constants, StrBetaObj], [])
         # TODO: make inharmonicity_compute_func have a meaning, also 1st arg of partial_func_args
-        ToolBoxObj = ToolBox(partial_tracking_func=compute_partials, inharmonicity_compute_func=compute_inharmonicity, 
+        ToolBoxObj = ToolBox(partial_tracking_func=iterative_compute_of_partials_and_betas, inharmonicity_compute_func=compute_beta_with_regression, 
                             partial_func_args=[constants.no_of_partials, tab_instance.fundamental/2, constants, StrBetaObj], inharmonic_func_args=[])
         note_instance = NoteInstance(tab_instance.fundamental, tab_instance.onset, tab_instance.note_audio, ToolBoxObj, track_instance.sampling_rate, constants)
 

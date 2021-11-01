@@ -15,7 +15,7 @@ from track_class import *
 from helper import ConfusionMatrix, compute_partial_orders, printProgressBar
 
 from HjerrildTrain import TrainWrapper
-from inharmonic_Analysis import (compute_partials, compute_inharmonicity, NoteInstance, 
+from inharmonic_Analysis import (iterative_compute_of_partials_and_betas, compute_inharmonicity, NoteInstance, 
 									ToolBox, compute_partials_with_order, 
 										compute_partials_with_order_strict)
 import Inharmonic_Detector
@@ -109,7 +109,7 @@ def testHjerrildChristensen(constants : Constants, StrBetaObj):
 				# ToolBoxObj = ToolBox(partial_tracking_func=compute_partials_with_order_strict, inharmonicity_compute_func=compute_inharmonicity, 
 				#                 partial_func_args=[fundamental_init/2, constants, StrBetaObj], inharmonic_func_args=[])
 				# TODO: make inharmonicity_compute_func have a meaning, also 1st arg of partial_func_args
-				ToolBoxObj = ToolBox(partial_tracking_func=compute_partials, inharmonicity_compute_func=compute_inharmonicity, 
+				ToolBoxObj = ToolBox(partial_tracking_func=iterative_compute_of_partials_and_betas, inharmonicity_compute_func=compute_beta_with_regression, 
 								partial_func_args=[constants.no_of_partials, fundamental_init/2, constants, StrBetaObj], inharmonic_func_args=[])
 				if constants.f0again == 'internal':
 					note_instance = NoteInstance(fundamental_init, 0, audio60ms, ToolBoxObj, constants.sampling_rate, constants, longaudio=longaudio, midi_flag=True)

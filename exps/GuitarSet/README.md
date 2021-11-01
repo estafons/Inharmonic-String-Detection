@@ -48,3 +48,9 @@ containing training data, annotations and audio files as displayed above.
 
 # Specifiying the mode for computing partials
 For now 3 methods are available for computing partials. ```compute_partials, compute_partials_with_order, and compute_partials_with_order_strict```. The first one is currently the stable and mostly tested. To choose compute_partials function user specifies it at the ToolBox object instantiation before the inharmonic analysis processes, in which cases user inputs arguements as list [no_of_partials,fundamental_init/2, constants]. In the later two cases, the user specifies at the same place the function to employ with arguements as [fundamental_init/2, constants, StringBetaObj]. Keep in mind for the compute_partials_with_order and compute_partials_with_order_strict user must first call the method ```compute_partial_orders(StrBetaObj, constants)```to initialize the max partial orders that can be used. More will be uploaded soon on each function's purpose. Currently lines 55-56 on hjerrildTest and line 74 on GuitarSetTest
+
+# Useful commands
+
+```
+python GuitarSetTest.py constants.ini . -verbose -m 0 --detector barbancho -plot (1st November 2021)
+```

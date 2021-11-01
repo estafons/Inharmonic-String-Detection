@@ -52,7 +52,7 @@ def compute_track_betas(track_instance : TrackInstance, annotations : Annotation
     for tab_instance, annos_instance in zip(track_instance.tablature.tablature, annotations.tablature.tablature):
         if annos_instance.string!=channel:
             continue
-        ToolBoxObj = ToolBox(partial_tracking_func=compute_partials, inharmonicity_compute_func=compute_inharmonicity, partial_func_args=[constants.no_of_partials, tab_instance.fundamental/2, constants, StrBetaObj], inharmonic_func_args=[])
+        ToolBoxObj = ToolBox(partial_tracking_func=compute_partials, inharmonicity_compute_func=compute_beta_with_regression, partial_func_args=[constants.no_of_partials, tab_instance.fundamental/2, constants, StrBetaObj], inharmonic_func_args=[])
         note_instance = NoteInstance(tab_instance.fundamental, tab_instance.onset, tab_instance.note_audio, ToolBoxObj, track_instance.sampling_rate, constants)
         Inharmonic_Detector.DetectString(note_instance, StrBetaObj, constants.betafunc, constants)
         tab_instance.string = note_instance.string # predicted string

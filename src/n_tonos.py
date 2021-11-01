@@ -91,7 +91,7 @@ def predictTabThesis(track_instance : TrackInstance, annotations : Annotations, 
 	global median_betas
 	"""Inharmonic prediction of tablature as implemented for thesis """
 	for tab_instance, annos_instance in zip(track_instance.tablature.tablature, annotations.tablature.tablature):
-		ToolBoxObj = ToolBox(partial_tracking_func=compute_partials, inharmonicity_compute_func=compute_inharmonicity, partial_func_args=[constants.no_of_partials, tab_instance.fundamental/2, constants, StrBetaObj], inharmonic_func_args=[])
+		ToolBoxObj = ToolBox(partial_tracking_func=compute_partials, inharmonicity_compute_func=compute_beta_with_regression, partial_func_args=[constants.no_of_partials, tab_instance.fundamental/2, constants, StrBetaObj], inharmonic_func_args=[])
 		print()
 		# note_instance = NoteInstance(tab_instance.fundamental, tab_instance.onset, tab_instance.note_audio, ToolBoxObj, track_instance.sampling_rate, constants)b
 		# print()

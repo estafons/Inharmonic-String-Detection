@@ -1,6 +1,6 @@
 from constants_parser import Constants
 import librosa
-from inharmonic_Analysis import NoteInstance, ToolBox, compute_partials, compute_inharmonicity
+from inharmonic_Analysis import NoteInstance, ToolBox, iterative_compute_of_partials_and_betas, compute_beta_with_regression
 import numpy as np
 
 class StringBetas():
@@ -15,12 +15,12 @@ class StringBetas():
     # TODO: maybe, need to move function aeay from this place
     def input_instance(self, instance_audio, midi_note, string, constants : Constants):
         fundamental = librosa.midi_to_hz(midi_note)
-        ToolBoxObj = ToolBox(compute_partials, compute_inharmonicity, [constants.no_of_partials, fundamental/2, constants], [])
-        note_instance = NoteInstance(fundamental, 0, instance_audio, ToolBoxObj, constants.sampling_rate, constants, midi_flag = True)
+        ToolBoxObj = ToolBox(iterative_compute_of_partials_and_betas, compute_beta_with_regression, [constants.no_of_partials, fundamental/2, constants], [])
+        note_instance = NoteInstance(fundamental, 0, instance_audio, ToolBoxObj, constants.sampling_rate, constants, midi_flag = True, Training = True)
         # TODO: What is the purpose of the 3 lines below. Deal with it!
         fundamental = note_instance.recompute_fundamental(constants)
-        note_instance = NoteInstance(fundamental, 0, instance_audio, ToolBoxObj, constants.sampling_rate, constants) # compute again with recomputed fundamental
-        ToolBoxObj = ToolBox(compute_partials, compute_inharmonicity, [constants.no_of_partials, fundamental/2, constants], [])
+        note_instance = NoteInstance(fundamental, 0, instance_audio, ToolBoxObj, constants.sampling_rate, constants, Training = True) # compute again with recomputed fundamental
+        ToolBoxObj = ToolBox(iterative_compute_of_partials_and_betas, compute_beta_with_regression, [constants.no_of_partials, fundamental/2, constants], [])
         
         note_instance.string = string
         note_instance.fret = midi_note - constants.tuning[note_instance.string]

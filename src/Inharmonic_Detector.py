@@ -1,8 +1,19 @@
+'''
+This is a class that implements two types of inhamonicity-based detection, our custom one and that of Barbancho et a;. (2013).
+Detection comes after training/adapting, which means after estimating β* values. This is done using inharmonicity_Analysis.iterative_compute_of_partials_and_betas().
+
+The 'custom' one is pretty straight forward (check DetectString() function) since it uses beta measurements as the only feature for string detection, 
+taking as the true combination (s,n) the one whose β*(s,n) estimate is closer to the current note instance's measurement. 
+
+One the other hand, 'barbancho' detector is a lot more complicated. Check function DetectStringBarbancho().
+Two phases of partial tracking are required, the second being more precise thean the first.
+'''
+
 
 import math
 import librosa
 from constants_parser import Constants
-from inharmonic_Analysis import NoteInstance, ToolBox, compute_partials, compute_inharmonicity
+from inharmonic_Analysis import NoteInstance, ToolBox#, iterative_compute_of_partials_and_betas, compute_inharmonicity
 import numpy as np
 import threading
 import matplotlib.pyplot as plt
@@ -15,8 +26,6 @@ class InharmonicDetector():
         self.StringBetasObj = StringBetasObj
         self.NoteObj = NoteObj
         self.Eks=[]
-
-
 
     def DetectString(self, betafunc, constants : Constants):
         """ betafunc is the function to simulate beta. As input takes the combination and the beta array."""
@@ -33,9 +42,12 @@ class InharmonicDetector():
         combs = utils.determine_combinations(self.NoteObj.fundamental, constants)
         betas_star = [betafunc(comb, self.StringBetasObj, constants) for comb in combs]
 
+        # First phase of voting scheme, just to compute e0* and use it for the next phase of partial localization.
+        R=10
         _, _, e0_star = self.__voting_scheme(constants, k0, lim, combs, betas_est=betas_star, R=10, Wcont=2)
         D=-e0_star
 
+        # Second phase of voting scheme with smaller windows.
         R=2.3
         Wcont=0.5
         max=0
@@ -61,6 +73,7 @@ class InharmonicDetector():
         # Build container-hits histogram for all string-fret combinations  
         for beta_est in betas_est:
             Hist, self.Eks = self.__create_histogram(Hist, Hbins, k0, lim, window_length, beta_est=beta_est, D=D) # Hist accumulates counts for each (s,n) comb
+
        
         if not multi and constants.plot:
             self.plot_voting_scheme(k0, lim, combs, [Hist], Hbins, R)
@@ -92,25 +105,32 @@ class InharmonicDetector():
     def plot_voting_scheme(self, k0, lim, combs, Hists, Hbins, R, D=0, betas_est=None, multi=False):
         # TODO:
         pos = np.arange(len(Hists[0]))
-
+        colors=['b', 'g', 'r', 'c', 'm', 'y', 'k', 'w']
         N = len(Hists)
         fig5 = plt.figure(constrained_layout=True, figsize=(15, 10))
         widths = [7] + [2] * N
         heights = [10]
         spec5 = fig5.add_gridspec(ncols=N+1, nrows=1, width_ratios=widths, height_ratios=heights)
         axs=[]
+        '''
+        Create plot columns. A large one to depict the error ek between the measurement of kth partial's position 
+        and its estimated position based on the β*(s,n) estimations acquired during the training phase for each (s,n) combination.
+        The next (tighter) columns illustrate the voting scheme histograms.
+        '''
         for col in range(N+1):
             ax = fig5.add_subplot(spec5[0, col])
             axs.append(ax)
 
+        # First column.
         for Ek, comb in zip(self.Eks, combs):
             axs[0].plot(range(k0,lim), Ek, label = str(comb))
         axs[0].set_ylim(-R-0.1,R+0.1)
         axs[0].grid()
         axs[0].legend()
 
+
         for i, Hist in enumerate(Hists):
-            axs[i+1].barh(pos, Hist)
+            axs[i+1].barh(pos, Hist, color=colors[i])
             axs[i+1].grid()
             axs[i+1].set_yticks(pos[::3])
             axs[i+1].set_yticklabels(np.round_(Hbins[::3],1), rotation='0')
@@ -118,7 +138,7 @@ class InharmonicDetector():
         plt.show()
 
 
-        #Another fig
+        #Extra fig to plot (i.e. DFT)
         if multi:
             fig = plt.figure(figsize=(15, 10))
             timer = fig.canvas.new_timer(interval = 3000) # creating a timer object and setting an interval of 3000 milliseconds
