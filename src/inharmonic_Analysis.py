@@ -69,14 +69,16 @@ class NoteInstance():
             
             try:
                 filtered = zero_out(self.fft, center_freq=center_freq , window_length=window_length, constants=self.constants)
-                # peaks, _  = scipy.signal.find_peaks(np.abs(filtered),distance=100000, prominence=0.0001) # better way to write this?
-                peaks, _  = scipy.signal.find_peaks(np.abs(filtered),distance=100000) # better way to write this?
+                # # peaks, _  = scipy.signal.find_peaks(np.abs(filtered),distance=100000, prominence=0.0001) # better way to write this?
+                # peaks_idx, _  = scipy.signal.find_peaks(np.abs(filtered),distance=100000) # better way to write this?
+                peaks_idx = [np.argmax(np.abs(filtered))]
                 # peaks = scipy.signal.find_peaks_cwt(np.abs(filtered),widths=np.arange(1,10))
                 # peaks, _  = scipy.signal.find_peaks(np.abs(filtered),distance=None) 
-                max_peak = self.frequencies[peaks[0]]
+                max_peak = self.frequencies[peaks_idx[0]]
+                np.argmax(np.abs(filtered))
                 # max_peak = self.weighted_argmean(peak_idx=peaks[0], w=6)
                 ###### RESULT ###### 
-                self.partials.append(Partial(frequency=max_peak, order=k, peak_idx=peaks[0]))
+                self.partials.append(Partial(frequency=max_peak, order=k, peak_idx=peaks_idx[0]))
                 ####################
             
             except Exception as e:
@@ -110,11 +112,11 @@ class NoteInstance():
                         # f = beta_centering_func(k, self.beta, f0, D)
 
                 rect=mpatches.Rectangle((f-w//2,-80),w,160, fill=False, color="purple", linewidth=2)
-                # plt.gca().add_patch(rect)
                 ax.add_patch(rect)
 
         if peaks and peaks_idx: # draw peaks
-            ax.plot(peaks, self.fft.real[peaks_idx], "x", alpha=0.7)
+            # ax.plot(peaks, self.fft.real[peaks_idx], "x", alpha=0.7)
+            ax.plot(peaks, self.frequencies[peaks_idx], "x", alpha=0.7)
 
         if window_centering_func=='polyfit':
             ax.set_xlim(0, ployfit_centering_func(lim+1,f0, a=a,b=b,c=c))
@@ -302,6 +304,7 @@ def zero_out(fft, center_freq, window_length, constants : Constants):
     sz = fft.size
     x = np.zeros(sz,dtype=np.complex64)
     temp = fft
+    # temp = fft.real # NOTE: could this be a good idea
     dom_freq_bin = int(round(center_freq*sz/constants.sampling_rate))
     window_length = int(window_length)
 
