@@ -69,7 +69,9 @@ class NoteInstance():
             
             try:
                 filtered = zero_out(self.fft, center_freq=center_freq , window_length=window_length, constants=self.constants)
+                # peaks, _  = scipy.signal.find_peaks(np.abs(filtered),distance=100000, prominence=0.0001) # better way to write this?
                 peaks, _  = scipy.signal.find_peaks(np.abs(filtered),distance=100000) # better way to write this?
+                # peaks = scipy.signal.find_peaks_cwt(np.abs(filtered),widths=np.arange(1,10))
                 # peaks, _  = scipy.signal.find_peaks(np.abs(filtered),distance=None) 
                 max_peak = self.frequencies[peaks[0]]
                 # max_peak = self.weighted_argmean(peak_idx=peaks[0], w=6)
@@ -93,8 +95,8 @@ class NoteInstance():
         for k in range(50): # draw vertical red dotted lines indicating harmonics
             ax.axvline(x=self.fundamental*k, color='r', ls='--', alpha=0.85, lw=0.5)     
 
+        f0 = self.fundamental
         if w: # draw windows as little boxes
-            f0 = self.fundamental
             for k in range(1,lim+1):
                 if window_centering_func=='polyfit':
                     f = ployfit_centering_func(k,f0, a=a,b=b,c=c)
@@ -102,7 +104,7 @@ class NoteInstance():
                     # f = k*f0 * np.sqrt(1+beta_est*k**2)
                     if beta_est: # for 'barbancho' detector we want b_est (i.e. β*)
                         f = k*(f0+D) * np.sqrt(1+beta_est*k**2)
-                        # f = beta_centering_func(k, beta_est, f0, D)
+                        # f = beta_centering_func(k, beta_est, f0, D) # 
                     else:
                         f = k*(f0+D) * np.sqrt(1+self.beta*k**2)
                         # f = beta_centering_func(k, self.beta, f0, D)

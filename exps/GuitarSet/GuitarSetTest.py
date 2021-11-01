@@ -93,8 +93,8 @@ def predictTabThesis(track_instance : TrackInstance, annotations : Annotations, 
         else:
             tab_instance.fret = None
 
-        # NOTE
-        if constants.plot:
+        # Plotting DFT and partial deviation
+        if constants.plot and constants.detector == 'custom':
             x = threading.Thread(target=listen_to_the_intance, args=(tab_instance.note_audio,))
             x.start()
             fig = plt.figure(figsize=(15, 10))

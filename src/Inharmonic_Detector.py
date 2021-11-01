@@ -26,6 +26,9 @@ class InharmonicDetector():
         self.StringBetasObj = StringBetasObj
         self.NoteObj = NoteObj
         self.Eks=[]
+        self.CombsOfPartialIdx=[]
+        self.CombsOfPartials=[]
+
 
     def DetectString(self, betafunc, constants : Constants):
         """ betafunc is the function to simulate beta. As input takes the combination and the beta array."""
@@ -39,6 +42,8 @@ class InharmonicDetector():
     def DetectStringBarbancho(self, betafunc, constants : Constants):
         k0=2
         lim=30 # TODO: fix this
+        self.CombsOfPartialIdx=[]
+        self.CombsOfPartials=[]
         combs = utils.determine_combinations(self.NoteObj.fundamental, constants)
         betas_star = [betafunc(comb, self.StringBetasObj, constants) for comb in combs]
 
@@ -49,6 +54,7 @@ class InharmonicDetector():
 
         # Second phase of voting scheme with smaller windows.
         R=2.3
+        # R=10
         Wcont=0.5
         max=0
         Hists=[]
@@ -60,7 +66,7 @@ class InharmonicDetector():
             Hists.append(Hist)
 
         if constants.plot:
-            self.plot_voting_scheme(k0, lim, combs, Hists, Hbins= np.array( [l+Wcont/2 for l in np.arange(-R, R-Wcont+(R)/30, (R)/30)] ), R=R, D=D, betas_est=betas_star, multi=True)
+            self.__plot_voting_scheme(k0, lim, combs, Hists, Hbins= np.array( [l+Wcont/2 for l in np.arange(-R, R-Wcont+(R)/30, (R)/30)] ), R=R, D=D, betas_est=betas_star, multi=True)
 
     def __voting_scheme(self, constants : Constants, k0, lim, combs, betas_est, R, Wcont, D=0, multi=False):
         # Initialize
@@ -70,13 +76,22 @@ class InharmonicDetector():
         Hbins = np.array( [l+Wcont/2 for l in np.arange(-R, R-Wcont+step, step)] )
         window_length = round(2*R*self.NoteObj.fft.size/self.NoteObj.sampling_rate) # bins
 
+        # if constants.plot and constants.multi:
+        #     fig = plt.figure(figsize=(15, 10))
+        #     axs=[]
+        #     for row in range(N):
+        #         ax = fig.add_subplot(N, 1, row+1)
+        #         axs.append(ax)
+        # else:
+        #     axs=None
+
         # Build container-hits histogram for all string-fret combinations  
         for beta_est in betas_est:
             Hist, self.Eks = self.__create_histogram(Hist, Hbins, k0, lim, window_length, beta_est=beta_est, D=D) # Hist accumulates counts for each (s,n) comb
 
        
         if not multi and constants.plot:
-            self.plot_voting_scheme(k0, lim, combs, [Hist], Hbins, R)
+            self.__plot_voting_scheme(k0, lim, combs, [Hist], Hbins, R)
 
         hist_max = np.max(Hist)
         hist_max_idx = np.argmax(Hist)
@@ -89,6 +104,7 @@ class InharmonicDetector():
         self.NoteObj.partials=[]
         self.NoteObj.find_partials(lim, window_length, k0, window_centering_func='beta_based', beta_est=beta_est, D=D) # result in note_instance.partials
 
+
         F_hat = [partial.frequency for partial in self.NoteObj.partials]
         F_star= [k*self.NoteObj.fundamental * np.sqrt(1+beta_est*k**2) for k in range(k0,lim)] # NOTE: "for each partial found". 2 to lim or 10 to lim ??
         Ek = [(F_star[k-k0] - F_hat[k-k0]) / k*np.sqrt(1+beta_est*k**2) for k in range(k0,lim)]
@@ -99,10 +115,15 @@ class InharmonicDetector():
             argmin = np.argmin(np.abs(Hbins-ek)) 
             Hist[argmin] +=1
 
+        # for printing purposes only
+        peaks_idx = [partial.peak_idx for partial in self.NoteObj.partials]
+        self.CombsOfPartialIdx.append(peaks_idx)
+        self.CombsOfPartials.append(F_hat)
+
         return Hist, self.Eks
 
 
-    def plot_voting_scheme(self, k0, lim, combs, Hists, Hbins, R, D=0, betas_est=None, multi=False):
+    def __plot_voting_scheme(self, k0, lim, combs, Hists, Hbins, R, D=0, betas_est=None, multi=False):
         # TODO:
         pos = np.arange(len(Hists[0]))
         colors=['b', 'g', 'r', 'c', 'm', 'y', 'k', 'w']
@@ -148,16 +169,11 @@ class InharmonicDetector():
             for row in range(N):
                 ax = fig.add_subplot(N, 1, row+1)
                 axs.append(ax)
-
-            # ax1 = fig.add_subplot(2, 1, 1)
-            # ax2 = fig.add_subplot(2, 1, 2)
-            #  TODO: fix lim
-            peak_freqs = [partial.frequency for partial in self.NoteObj.partials]
-            peaks_idx = [partial.peak_idx for partial in self.NoteObj.partials]
-            
+           
             # note_instance.plot_partial_deviations(lim=30, res=self.N.abc, ax=ax1, note_instance=note_instance, annos_string=-1, tab_instance=None) #, peaks_idx=Peaks_Idx)
             for i, beta_est in enumerate(betas_est):
-                self.NoteObj.plot_DFT(peak_freqs, peaks_idx, lim=30, ax=axs[i], w=2*R, D=D, beta_est=beta_est, window_centering_func='beta_based') 
+                self.NoteObj.plot_DFT(self.CombsOfPartials[i], self.CombsOfPartialIdx[i], lim=30, ax=axs[i], w=2*R, D=D, beta_est=beta_est, window_centering_func='beta_based') 
+                # self.NoteObj.plot_DFT(self.CombsOfPartials[i], self.CombsOfPartialIdx[i], lim=30, ax=axs[i], w=None, D=D, beta_est=beta_est, window_centering_func='beta_based') 
             plt.show()
 
 
