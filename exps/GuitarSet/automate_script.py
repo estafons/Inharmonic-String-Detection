@@ -4,7 +4,9 @@ from pathlib import Path
 
 if __name__ == '__main__':
 
-  
+    detector='barbancho'
+    # detector='custom'
+
     script_path = Path(Path.cwd(), 'GuitarSetTest.py')
     constants_path = Path(Path.cwd(), 'constants.ini')
     workspace_path = Path(Path.cwd() )
@@ -15,7 +17,8 @@ if __name__ == '__main__':
             #                         '--train_mode', train_mode])
             # log = open('./results/'+dataset+'_'+train_mode+'.txt', 'a')
             # log.flush()
-            cmd_list = ['python', script_path, constants_path, workspace_path, '--dataset', dataset,'--train_mode', train_mode, '-run_genetic_alg']
+            # cmd_list = ['python', script_path, constants_path, workspace_path, '--dataset', dataset,'--train_mode', train_mode, '-run_genetic_alg']
+            cmd_list = ['python', script_path, constants_path, workspace_path, '--dataset', dataset,'--train_mode', train_mode, '--detector', detector, '-run_genetic_alg']
             # cmd_str = ' '.join(['python', str(script_path), str(constants_path), str(workspace_path), '--dataset', dataset,'--train_mode', train_mode])
             proc = subprocess.Popen(cmd_list, stdin=None, stdout=None, stderr=None)#, shell=True)    
             # break   
