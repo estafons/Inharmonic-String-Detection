@@ -14,6 +14,7 @@ from constants_parser import Constants
 
 import matplotlib.pyplot as plt
 
+from scipy.signal import get_window
 # from ransac import RansacModel
 # from linearleastsquare import LinearLeastSqaureModel
 
@@ -44,7 +45,13 @@ class NoteInstance():
         self.longaudio = longaudio # may be used for ("internal") f0 computation
         self.sampling_rate = constants.sampling_rate
         self.polyfit = constants.polyfit
-        self.fft=np.fft.fft(self.audio,n = constants.size_of_fft)
+        self.fft=np.fft.fft(self.audio, n = constants.size_of_fft) # normally zero padding is applied with n = 2^18
+        if constants.detector == 'exact_barbancho': # Not used, not good results actually
+            # m=int(constants.crop_win*self.sampling_rate)
+            # self.fft=np.fft.fft(self.audio * get_window('hanning', m), n = constants.size_of_fft) # (NEW!!) normally zero padding is applied with n = 2^18
+            m=int(constants.crop_win*self.sampling_rate/3)
+            signal = np.concatenate( (self.audio[0:m] * get_window('hanning', m), self.audio[m:2*m] * get_window('hanning', m), self.audio[2*m:] * get_window('hanning', m) ), axis=0)
+            self.fft=np.fft.fft(signal, n = constants.size_of_fft) # (NEW!!) normally zero padding is applied with n = 2^18
         self.frequencies=np.fft.fftfreq(constants.size_of_fft,1/self.sampling_rate)
         self.partials = []
         self.differences = []
@@ -71,7 +78,7 @@ class NoteInstance():
                 filtered = zero_out(self.fft, center_freq=center_freq , window_length=window_length, constants=self.constants)
                 # # peaks, _  = scipy.signal.find_peaks(np.abs(filtered),distance=100000, prominence=0.0001) # better way to write this?
                 # peaks_idx, _  = scipy.signal.find_peaks(np.abs(filtered),distance=100000) # better way to write this?
-                peaks_idx = [np.argmax(np.abs(filtered))]
+                peaks_idx = [np.argmax(np.abs(filtered))] # NOTE: changed after paper
                 # peaks = scipy.signal.find_peaks_cwt(np.abs(filtered),widths=np.arange(1,10))
                 # peaks, _  = scipy.signal.find_peaks(np.abs(filtered),distance=None) 
                 max_peak = self.frequencies[peaks_idx[0]]
@@ -86,13 +93,14 @@ class NoteInstance():
                 print('MyExplanation: Certain windows where peaks are to be located surpassed the length of the DFT.')
                 break
 
-    def plot_DFT(self, peaks=None, peaks_idx=None, lim=None, ax=None, save_path=None, w=None, D=0, beta_est=None, window_centering_func='polyfit'):
+    def plot_DFT(self, peaks=None, peaks_idx=None, lim=None, ax=None, save_path=None, w=None, D=0, beta_est=None, window_centering_func='polyfit', color='#1f77b4'):
         if window_centering_func=='polyfit':
             [a,b,c] = self.abc
         if not w:
             w = self.large_window     
         # main function
-        ax.plot(self.frequencies, self.fft.real)
+        # ax.plot(self.frequencies, self.fft.real)
+        ax.plot(self.frequencies, np.abs(self.fft), color=color) # NOTE: changed after paper
 
         for k in range(50): # draw vertical red dotted lines indicating harmonics
             ax.axvline(x=self.fundamental*k, color='r', ls='--', alpha=0.85, lw=0.5)     
@@ -116,14 +124,15 @@ class NoteInstance():
 
         if peaks and peaks_idx: # draw peaks
             # ax.plot(peaks, self.fft.real[peaks_idx], "x", alpha=0.7)
-            ax.plot(peaks, self.frequencies[peaks_idx], "x", alpha=0.7)
+            ax.plot(peaks, np.abs(self.fft[peaks_idx]), "x", alpha=0.7) # NOTE:
+            # ax.plot(peaks, self.frequencies[peaks_idx], "x", alpha=0.7)
 
         if window_centering_func=='polyfit':
             ax.set_xlim(0, ployfit_centering_func(lim+1,f0, a=a,b=b,c=c))
         elif window_centering_func=='beta_based':
             ax.set_xlim(0, beta_centering_func(lim+1, beta_est, f0, D))
 
-        ax.set_ylim(-100, 100)
+        ax.set_ylim(-1, 150)
 
         return ax
 
@@ -174,7 +183,7 @@ class NoteInstance():
         min_idx = max(peak_idx - w//2, 0)
         max_idx = min(peak_idx + w//2, len(self.frequencies)-1)
         window = range(min_idx, max_idx+1)
-        amp_sum = sum([self.fft.real[i] for i in window])
+        amp_sum = sum([self.fft.real[i] for i in window]) # NOTE: maybe .real is depreicated
         res = sum( [self.fft.real[i]/amp_sum * self.frequencies[i] for i in window] )
         return res
 
@@ -310,7 +319,8 @@ def zero_out(fft, center_freq, window_length, constants : Constants):
 
     # for i in range(dom_freq_bin-window_length,dom_freq_bin+window_length): #NOTE: possible error
     for i in range(dom_freq_bin-window_length//2, dom_freq_bin+window_length//2): # __gb_
-        x[i] = temp[i]**2
+        # x[i] = temp[i]**2
+        x[i] = np.abs(temp[i]) # NOTE: changed after paper
 
     return x
 

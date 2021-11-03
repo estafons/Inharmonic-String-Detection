@@ -1,4 +1,11 @@
-
+'''
+Methods for training on the guitarset dataset on isolated note instances can be found in ```GuitarTrain.py```
+script. A folder structure as <#midi_note>──<#string> is expected where cropped note instances are stored for 
+the specified midi_note and string number (strings are numbered 0,1,2,3,4,5 as E,A,G,D,B,e). 
+Running the ```GuitarSetTrainWrapper``` method will print the betas computed and return a ```StringBetas``` 
+object where they are stored. Also the user can specify the frets she wishes to train on the ```constants.ini``` 
+file at constant ***train_frets***.
+'''
 import numpy as np
 from pathlib import Path
 import glob

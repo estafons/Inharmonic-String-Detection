@@ -17,7 +17,7 @@ class StringBetas():
         fundamental = librosa.midi_to_hz(midi_note)
         ToolBoxObj = ToolBox(iterative_compute_of_partials_and_betas, compute_beta_with_regression, [constants.no_of_partials, fundamental/2, constants], [])
         note_instance = NoteInstance(fundamental, 0, instance_audio, ToolBoxObj, constants.sampling_rate, constants, midi_flag = True, Training = True)
-        # TODO: What is the purpose of the 3 lines below. Deal with it!
+        # NOTE: changed after paper (maybe I souldn't)
         fundamental = note_instance.recompute_fundamental(constants)
         note_instance = NoteInstance(fundamental, 0, instance_audio, ToolBoxObj, constants.sampling_rate, constants, Training = True) # compute again with recomputed fundamental
         ToolBoxObj = ToolBox(iterative_compute_of_partials_and_betas, compute_beta_with_regression, [constants.no_of_partials, fundamental/2, constants], [])

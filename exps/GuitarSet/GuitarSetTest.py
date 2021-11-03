@@ -72,7 +72,6 @@ def predictTabThesis(track_instance : TrackInstance, annotations : Annotations, 
 
     """Inharmonic prediction of tablature as implemented for thesis """
     for tab_instance, annos_instance in zip(track_instance.tablature.tablature, annotations.tablature.tablature):
-        # ToolBoxObj = ToolBox(compute_partials_with_order, compute_inharmonicity, [tab_instance.fundamental/2, constants, StrBetaObj], [])
         # TODO: make inharmonicity_compute_func have a meaning, also 1st arg of partial_func_args
         ToolBoxObj = ToolBox(partial_tracking_func=iterative_compute_of_partials_and_betas, inharmonicity_compute_func=compute_beta_with_regression, 
                             partial_func_args=[constants.no_of_partials, tab_instance.fundamental/2, constants, StrBetaObj], inharmonic_func_args=[])
@@ -93,7 +92,7 @@ def predictTabThesis(track_instance : TrackInstance, annotations : Annotations, 
         else:
             tab_instance.fret = None
 
-        # Plotting DFT and partial deviation
+        # Plot DFT and partial deviation
         if constants.plot and constants.detector == 'custom':
             x = threading.Thread(target=listen_to_the_intance, args=(tab_instance.note_audio,))
             x.start()
@@ -115,8 +114,6 @@ def predictTabThesis(track_instance : TrackInstance, annotations : Annotations, 
 def testGuitarSet(constants : Constants, StrBetaObj):
     """ function that runs tests on the jams files mentioned in the given file 
     and plots the confusion matrixes for both the genetic and inharmonic results."""
-
-    # TODO: check multipitch instances, that is
 
     InhConfusionMatrixObj = ConfusionMatrix((6,7), inconclusive = True)
     GenConfusionMatrixObj = ConfusionMatrix((6,6), inconclusive = False)
@@ -211,9 +208,9 @@ if __name__ == '__main__':
     print('****************************')
     print()
 
-    StrBetaObj = GuitarSetTrainWrapper(constants)
+    # StrBetaObj = GuitarSetTrainWrapper(constants)
     # # compute_partial_orders(StrBetaObj, constants)
-    # with open('data/train/StrBetaObj.pickle', 'rb') as file:
-    #     StrBetaObj = pickle.load(file)
+    with open('data/train/StrBetaObj.pickle', 'rb') as file:
+        StrBetaObj = pickle.load(file)
 
     testGuitarSet(constants, StrBetaObj)
